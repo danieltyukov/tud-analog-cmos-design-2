@@ -1,0 +1,31 @@
+% Shared preamble for all CircuiTikZ schematics in this project.
+% Each circuit file should be a self-contained `standalone` document that
+% \input{}s this file.  Compile with:  pdflatex foo.tex
+\documentclass[border=6pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{amsmath}
+\usetikzlibrary{calc,positioning}
+
+% Project style — tuned for analog CMOS schematics
+\ctikzset{
+    bipoles/length=1.1cm,
+    transistors/arrow pos=end,
+    nodes width=0.06,
+    logic ports=ieee,
+}
+
+% Default tikz options applied inside circuitikz environments
+\tikzset{
+    every picture/.style={
+        line cap=round,
+        line join=round,
+        line width=0.6pt,
+        font=\small,
+    },
+    every node/.style={font=\small},
+}
+
+% Convenience macros
+\newcommand{\Vdd}{\ensuremath{V_{dd}}}
+\newcommand{\Vddb}{\ensuremath{V_{ddb}}}
+\newcommand{\Vss}{\ensuremath{V_{ss}}}

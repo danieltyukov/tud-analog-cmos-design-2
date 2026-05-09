@@ -1,0 +1,64 @@
+% Fig. 1 of EE4525 project PDF: closed-loop SC residue amplifier.
+% Fully-differential opamp in capacitive feedback with bias resistors.
+\input{header.tex}
+\begin{document}
+\begin{circuitikz}[american, scale=1.0]
+
+  %% --- Op-amp (fully-differential) --------------------------------------
+  \node[fd op amp] (OA) at (6,0) {};
+
+  %% --- Top branch (Vin+ -> minus input) ---------------------------------
+  \draw (0,1.5) node[left]{$V_{in,+}$} to[short,o-] (0.6,1.5) coordinate (i1);
+  % Cin (top) and Rin (bottom) in parallel between i1 and i2
+  \draw (i1) -- ++(0,0.5) coordinate (i1u)
+        to[C, l=$C_{in}$] ++(2.4,0) coordinate (i2u);
+  \draw (i1) -- ++(0,-0.5) coordinate (i1d)
+        to[R, l_=$R_{in}$] ++(2.4,0) coordinate (i2d);
+  \draw (i2u) -- ++(0,-0.5) coordinate (i2);
+  \draw (i2d) -- (i2);
+  \draw (i2) -- (OA.-);
+
+  %% --- Bottom branch (Vin- -> plus input) -------------------------------
+  \draw (0,-1.5) node[left]{$V_{in,-}$} to[short,o-] (0.6,-1.5) coordinate (j1);
+  \draw (j1) -- ++(0,0.5)  coordinate (j1u)
+        to[R, l=$R_{in}$]  ++(2.4,0) coordinate (j2u);
+  \draw (j1) -- ++(0,-0.5) coordinate (j1d)
+        to[C, l_=$C_{in}$] ++(2.4,0) coordinate (j2d);
+  \draw (j2u) -- ++(0,-0.5) coordinate (j2);
+  \draw (j2d) -- (j2);
+  \draw (j2) -- (OA.+);
+
+  %% --- Output nodes (fd op amp uses anchors out+ and out-) --------------
+  \coordinate (vop) at ($(OA.out +) + (1.2,0)$);
+  \coordinate (von) at ($(OA.out -) + (1.2,0)$);
+  \draw (OA.out +) -- (vop);
+  \draw (OA.out -) -- (von);
+
+  %% --- Feedback paths ---------------------------------------------------
+  % Top feedback: between OA.- input and OA.out+ output
+  \draw (OA.-) -- ++(-0.4,0) coordinate (fb_top_in);
+  \draw (fb_top_in) -- ++(0,1.7) coordinate (fb_top_a)
+        to[C, l=$C_{fb}$] (fb_top_a -| vop) coordinate (fb_top_b);
+  \draw (fb_top_in) -- ++(0,1.0) coordinate (fb_top_a2)
+        to[R, l_=$R_{fb}$] (fb_top_a2 -| vop) coordinate (fb_top_b2);
+  \draw (fb_top_b)  -- (vop);
+  \draw (fb_top_b2) -- (fb_top_b2 -| vop);
+
+  % Bottom feedback: between OA.+ input and OA.out- output
+  \draw (OA.+) -- ++(-0.4,0) coordinate (fb_bot_in);
+  \draw (fb_bot_in) -- ++(0,-1.0) coordinate (fb_bot_a)
+        to[R, l=$R_{fb}$] (fb_bot_a -| von) coordinate (fb_bot_b);
+  \draw (fb_bot_in) -- ++(0,-1.7) coordinate (fb_bot_a2)
+        to[C, l_=$C_{fb}$] (fb_bot_a2 -| von) coordinate (fb_bot_b2);
+  \draw (fb_bot_b)  -- (fb_bot_b -| von);
+  \draw (fb_bot_b2) -- (von);
+
+  %% --- Load capacitors and output terminals ----------------------------
+  \draw (vop) to[C, l=$C_{load}$] ++(0,-1.4) node[ground]{};
+  \draw (vop) to[short,-o] ++(0.7,0) node[right]{$V_{out,-}$};
+
+  \draw (von) to[C, l_=$C_{load}$] ++(0,1.4) node[ground]{};
+  \draw (von) to[short,-o] ++(0.7,0) node[right]{$V_{out,+}$};
+
+\end{circuitikz}
+\end{document}

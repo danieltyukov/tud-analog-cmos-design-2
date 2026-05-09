@@ -1,0 +1,23 @@
+# LTSpice large binary outputs (regenerable)
+*.raw
+!*.op.raw
+
+# LTSpice scratch / autosave / netlist outputs
+*.net
+*.bak
+*.rev
+*~
+*.fft
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python (if SLiCAP added later)
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/

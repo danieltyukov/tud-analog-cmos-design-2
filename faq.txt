@@ -1,0 +1,83 @@
+The following list of questions will be continuously updated. Last update: May 21st, 2025.
+
+Can we use ideal switches for the CMFB?
+
+Yes, for the CMFB, you are allowed to use a switched-capacitor CMFB using capacitors and ideal switches. Yet, you are allowed to use any other CMFB circuit. Note that when using switched-capacitor CMFB, you should run the circuit for a number of clock cycles before settling is achieved. For AC simulations, you need an extra circuit working at DC to ensure the CMFB, e.g., an ideal CMFB with large resistors.
+
+Can we use Cadence instead? Or are we forced to use LTSpice?
+
+Everyone should use LTSpice for several reasons: 1) access to the same technology (0.18-um CMOS); 2) possibility to submit simulator files for checking; 3) have the same platform for all students; 4) simulations can be run locally on student's PC. Since the focus is on circuit design, the specific simulator is not relevant, and LTSpice offers all required simulator functionalities.
+
+Is the power dissipated in the biasing circuit to be included in the reported power?
+
+No, the power of the biasing circuit must not be included in the reported power.
+
+Is there a limit for the capacitance that can be used in the circuit?
+
+The capacitance used to stabilize the biasing circuit (Cbig int he project description) can be be very large (~nF). When using additional capacitance in the main circuit, the total sum of the capacitors should be below 1000 pF. This limitation come form real-life constraints: a larger capacitance would require a too large chip area considering that typical capacitance density are in the order of 1-10 fF/µm².
+
+Are there constraints on the choice of capacitance values?
+
+No, the values of the capacitors can be freely chosen, since they are implemented in an integrated circuit. In principle, any value of capacitance from 1 fF to 1000 pF, with a 1 fF step, can be chosen (although there will be no advantage for the project to choose capacitance with such fine resolution).
+
+Are BJT or JFET devices allowed?
+
+No, only PMOS, NMOS, resistors and capacitors are allowed.
+
+Can high-ohmic resistors be used?
+
+Resistors can be used with a value up to a few MOhms. Large (~GOhm) resistors can only be used for Rin and Rfb to help out with the operating point simulation as stated in the project description.
+
+Shall a sine input be assumed for the SNR calculation?
+
+Yes, the signal in the SNR calculation must be assumed to be a sinusoid, i.e., the signal power should be computed as the power of a sinusoid using the maximum peak amplitude. (Note that the RMS value of the sinusoid must then be used in the SNR calculation.)
+
+Are there any restrictions on input, output common-mode range? And about CMRR?
+
+You are free to choose the common-mode, although it may be advantageous to choose the output common-mode to be in the middle of the rail to maximize the output voltage swing, i.e. 0.9 V for a 1.8-V supply.
+
+Are there any bonus if a real biasing network is implemented, i.e., not using any ideal current sources?
+
+No, no bonus is given for that.
+
+Can the biasing circuit from CMOS I be resued?
+
+Yes.
+
+Can the simulator account for sampling noise on the capacitors (kT/C noise)?
+
+No, LTSpice cannot simulate kT/C noise. The effect of kT/C noise must be computed separately and added manually to the output integrated noise simulated by LTSpice. The resulting total noise (opamp noise simulated by LTSPice and hand-calculated kT/C noise) must be used for SNR calculation.
+
+Should all the transistors work in saturation? Is operation in triode allowed?
+
+Any operation region is allowed. There is full freedom in choosing the amplifier topology, hence different operating regions may be required. Notice, however, that in the majority of the amplifier topologies almost all transistors operate in saturation to provide high gain.
+
+Are there any constraints on the bulk connection of PMOS and NMOS?
+
+Since we are emulating the design of an analog circuit in a typical CMOS process, the following applies:
+
+All NMOS are sharing the same substrate, hence the bulk of all NMOS should be connected to ground (to be more precise, we are not considering a triple-well process).
+Each PMOS could be connected to a separate well, hence the bulk of the PMOS can be connected to any potential. Common choices include connecting all bulk to the supply (Vdd) or to the source of the respective PMOS to eliminate the body effect.
+Is there freedom to choose the load capacitance (CL)?
+
+CL should be chosen equal to Cin.
+
+Can we use an independent voltage source to set the output common mode?
+
+Yes, you can use an ideal voltage source as a reference for the common mode..
+
+Can we use non-integer, e.g., 1.56, values for the M (No. of parallel devices) in the transistor property in LTSpice?
+
+Although LTSpice allows for it, you should only use integer values for M, as it is done in real designs. The number M is the number of devices with width W and length L drawn in the layout next to each other and connected in parallel. The transistor equivalent to M parallel devices with width W and length L is a transistor with width Wequivalent=M*W and length Lequivalent=L (notice this is an approximation that does not take into account edge effects). If you need a finer control of the effective width of the equivalent parallel transistor (Wequivalent=W*M), you can use a smaller W of the unit device.
+
+Can we use high-ohmic resistor in the CMFB?
+
+Yes, but not exceeding a few MΩ's.
+
+Can we modify the feedback network (Cin, Cfb)?
+
+No, please keep the feedback network as shown in the project. Although inserting resistors in series with Cfb may help with the compensation, it would be difficult to fairly compare your designs (and additionally compensating a zero in that way may be prone to process spread in a real design).
+
+For properly biasing the amplifier, large resistors are used in parallel to Cin and Cfb. Shall I take into account the noise of those resistors?
+
+No, you can simulate the amplifier noise without including the noise from those resistors, and set them to be noiseless. Those resistors are only used to ease simulations, and they would not appear in a final circuit. That is why we can ignore their noise.
