@@ -47,6 +47,21 @@ Architecture is fully free per PDF. Three viable starting points; pick before si
 4. Else add gain-boosting (Option B).
 5. Switch to two-stage (Option C) only if B can't close power.
 
+## Literature support (`../reserach-papers/`)
+
+Two papers (annotated in `../reserach-papers/README.md`) back a **single-stage
+gain-boosted cascode** over two-stage for this fast-settle / low-power spec:
+
+- **Binkley 2010** — gain-boosted (telescopic) cascode beats multi-stage for
+  high-gain + wide-BW + low-power SC; gives booster sizing for min settling
+  (A: $0.8\,\omega_u$/70°, B: $0.4\,\omega_u$/60°, cascode pole $\ge 2.6\,\omega_u$).
+- **Ryu 2007** (same 0.18 µm / 1.8 V) — **current-reuse** complementary input
+  ($g_m = g_{mN}+g_{mP}$ at one tail current) → the low-power lever for the grade;
+  gain-boosted telescopic + SC-CMFB.
+
+→ Leaning **Option A/B (single-stage) + current-reuse input + real SC-CMFB**;
+two-stage (Option C) kept only as a fallback.
+
 ## Decision
 
 - [ ] Option A

@@ -6,6 +6,12 @@ $$V_{n,tot}^2 = V_{n,amp}^2 + V_{n,kT/C}^2 \leq \left(\frac{V_{sig,rms,diff}}{\m
 
 LTSpice **does not** simulate $kT/C$ — compute it by hand and add manually (per `faq.txt`).
 
+> The Bult SC-amplifier analysis (`08_power_prediction.md` §7) gives a **unified**
+> form $\overline{V_{n,out,tot}^2}=\frac{kT}{C_{fb}}(\text{Gain}+1)(1+\mathrm{NEF}/\text{Gain})$
+> that folds the term-10 sampling noise and the term-11 amplifier noise into one
+> expression — a structural cross-check on the split below (prefactors stay
+> topology-specific; derive your own).
+
 ## $kT/C$ contribution (sampled-and-held capacitive feedback)
 
 For the discrete-time SC residue amplifier with feedback factor $\beta = C_{fb}/(C_{in}+C_{fb})$:
@@ -98,6 +104,39 @@ $$V_{n,amp,target} = \frac{V_{n,tot,max}}{\sqrt{2}}$$
 
 Solve $V_{n,kT/C,target} \to C_{in}$.
 Solve $V_{n,amp,target} \to g_{m,in}$ (couples to GBW from §03).
+
+## Deliverable-1 terms 10 / 11 / 12 — what each number is
+
+> **Peer-sourced clarification (course group chat — not an official TA
+> announcement; verify against your own topology).** These three table rows are
+> the most-confused in the course; they are **distinct**:
+
+- **Term 11 — total integrated *amplifier* noise:** the LTSpice `.noise` result,
+  `integ V(onoise)` from $10\,\mathrm{kHz}$ to $100\,\mathrm{GHz}$ on the
+  **differential** output. This is $V_{n,amp,rms}$ (continuous thermal + $1/f$).
+- **Term 10 — total effective $kT/C$ noise at output:** hand-computed sampled
+  noise from $C_{in}$, $C_{fb}$, $C_{load}\,(=C_{in})$ only (LTSpice does not
+  simulate it). This is $V_{n,kT/C,rms}$.
+- **Term 12 — total integrated noise:** the **combination**,
+  $V_{n,tot} = \sqrt{V_{n,amp}^2 + V_{n,kT/C}^2}$ — because the residue amp is
+  **sampled**, the total handed to the next ADC stage includes *both* the
+  amplification noise *and* the switching ($kT/C$) noise.
+
+SNR uses the **total**, with $V_{sig,rms} = V_{out,max}/\sqrt{2}$ (e.g.
+$1.6/\sqrt 2 = 1.131\,\mathrm{V}$). A peer's working `.meas` folds $kT/C$ in
+directly:
+
+```spice
+.measure noise NOISERMS integ V(onoise) from 10k to 100G
+.meas NOISE SNRlin PARAM 1.13137/sqrt(NOISERMS**2 + 10*1.380649e-23*300/Cfb)
+.meas NOISE SNRdB  PARAM 20*log10(SNRlin)
+```
+
+The `10*1.380649e-23*300/Cfb` is **that design's** $kT/C$ accounting
+($10\,kT/C_{fb}$) — the factor is topology-specific; derive your own from the
+$kT/C$ section above (this repo's form is $2(1/\beta)^2\,kT/C_{in}$) rather than
+copying the `10`. Equivalently, add the hand-computed term-10 number to the
+term-11 number per the combination above.
 
 ## Acceptance checks (post-simulation)
 

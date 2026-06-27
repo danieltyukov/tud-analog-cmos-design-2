@@ -4,6 +4,10 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 
 > TA clarifications collected in `07_lecturer_clarifications.md` (1/f-noise model,
 > ringing/$\tau$ rule, Deliverable-4 plot, FoM, single supply, submission).
+>
+> Top-down power/FoM prediction (Bult efficiency method, $P_{system}$ floor,
+> $F_{circuit}$, the clean FoM identity) in `08_power_prediction.md` — use it to
+> sanity-check power and FoM before *and* after sizing.
 
 ## Phase 0 — Setup (done)
 
@@ -21,6 +25,7 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 - [ ] Solve C_in from kT/C share → freeze C_in, C_fb, C_load
 - [ ] Solve g_m,in from GBW → freeze first-cut bias current
 - [ ] Topology decision in `02_topology_choice.md`
+- [ ] Compute $P_{system}$ floor + first-cut $F_{circuit}$/FoM in `08_power_prediction.md` (target check before sizing)
 
 ## Phase 2 — Core amplifier sizing (weeks 2–3, by 2026-05-30)
 
@@ -48,7 +53,7 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 - [ ] Add kT/C analytically → check SNR ≥ 66 dB
 - [ ] Transient settling: τ from T₃₈.₆dB − T₃₀dB
 - [ ] Confirm 25 ns / 78 dB / 66 dB simultaneously
-- [ ] Power optimisation pass (current scale-down where slack exists)
+- [ ] Power optimisation pass (current scale-down where slack exists) — guide the pass with the four live FoM knobs ($\eta_{gm},\mathrm{NEF},\eta_{cur},\eta_{vol}$) in `08_power_prediction.md` §6
 
 ## Phase 6 — Report & submission (week 7, by 2026-06-28)
 

@@ -126,7 +126,9 @@ The leading minus sign turns $\log_{10}$ of a sub-unity (tiny, $<10^{-17}$ J)
 $\mathrm{FoM_{lin}}$ into a **positive** dB number. Report $\mathrm{FoM_{dB}}$ as a
 positive value.
 
-Related: `00_spec_table.md` (rows 10, 21, 22).
+Related: `00_spec_table.md` (rows 10, 21, 22). For a closed-form reading of this
+FoM — $\mathrm{FoM}_{lin}=16\pi\,kT\,A_{req}^2\,\mathrm{NEF}/(\eta_{gm}\eta_{cur}\eta_{vol}^2 F_{supply})$,
+i.e. which four knobs actually move it — see `08_power_prediction.md` §6.
 
 ---
 

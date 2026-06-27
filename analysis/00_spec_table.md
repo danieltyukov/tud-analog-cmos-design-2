@@ -36,6 +36,10 @@ Green = hard spec from the project PDF. Achieved column to be filled during desi
 - **Row 10 ($kT/C$ noise):** the total effective $kT/C$ noise at the output includes
   **only** $C_{in}$, $C_{fb}$, and $C_{load}\,(=C_{in})$. With a switched-capacitor
   CMFB, the CMFB caps' $kT/C$ is **not** reported in this term.
+- **Rows 11–12 (amplifier vs. total noise):** row 11 is the LTSpice `.noise`
+  integral (amplifier noise only); row 12 is the **total**,
+  $\sqrt{V_{n,amp}^2 + V_{n,kT/C}^2}$ (amplifier noise **plus** the row-10 $kT/C$),
+  since the residue amp is sampled. See `04_noise_budget.md` (terms 10/11/12).
 - **Row 21 ($\mathrm{FoM}_{lin}$):** "Power $\tau$" $=$ Power $\times\,\tau$. The
   announcement's $T_{8.6\,\mathrm{dB}}$ is shorthand for **one $e$-fold of settling**
   ($20\log_{10}e = 8.686\,\mathrm{dB}$), i.e. $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$
