@@ -8,6 +8,13 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 > Top-down power/FoM prediction (Bult efficiency method, $P_{system}$ floor,
 > $F_{circuit}$, the clean FoM identity) in `08_power_prediction.md` — use it to
 > sanity-check power and FoM before *and* after sizing.
+>
+> **Architecture settled:** single-stage gain-boosted cascode + current-reuse
+> input + real SC-CMFB — see `02_topology_choice.md` (decision + block-by-block
+> build plan EE4520 → EE4525).
+>
+> **Execution refs:** all sims + their `.meas` → `09_simulation_runbook.md`;
+> every deliverable figure + how to extract it → `../report/README.md`.
 
 ## Phase 0 — Setup (done)
 
@@ -36,16 +43,17 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 
 ## Phase 3 — CMFB (week 4, by 2026-06-06)
 
-- [ ] Build SC or CT CMFB per `05_cmfb_design.md`
+- [ ] Build **real SC-CMFB** (settled) per `05_cmfb_design.md` — replaces ideal `E1`
 - [ ] CM step response stable, GBW close to diff GBW
 - [ ] Verify nothing regressed in differential AC
 
-## Phase 4 — Gain-boosting if needed (week 5, by 2026-06-13)
+## Phase 4 — Gain-boosting (committed; week 5, by 2026-06-13)
 
-- [ ] Decide go/no-go based on Phase 2 A₀
-- [ ] If go: design NMOS booster first, keep PMOS ideal
-- [ ] Then PMOS booster
-- [ ] Watch for booster-induced doublets in settling
+Part of the settled architecture (need 78 dB single-stage) — see `02_topology_choice.md` build plan.
+
+- [ ] Design **real NMOS-cascode booster** first, keep PMOS ideal (Binkley: $0.8\,\omega_u$/70°)
+- [ ] Then **real PMOS-cascode booster** (off-path one $0.4\,\omega_u$/60°; cascode-source pole $\ge 2.6\,\omega_u$)
+- [ ] Watch booster-induced doublets in settling (keep the doublet beyond $\omega_u$)
 
 ## Phase 5 — Noise + settling closure (week 6, by 2026-06-20)
 
@@ -53,11 +61,12 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 - [ ] Add kT/C analytically → check SNR ≥ 66 dB
 - [ ] Transient settling: τ from T₃₈.₆dB − T₃₀dB
 - [ ] Confirm 25 ns / 78 dB / 66 dB simultaneously
+- [ ] **Migrate input to current-reuse** (complementary NMOS + PMOS) for ~2× $g_m/\mu$A — the main power lever (`02_topology_choice.md`, Ryu 2007)
 - [ ] Power optimisation pass (current scale-down where slack exists) — guide the pass with the four live FoM knobs ($\eta_{gm},\mathrm{NEF},\eta_{cur},\eta_{vol}$) in `08_power_prediction.md` §6
 
 ## Phase 6 — Report & submission (week 7, by 2026-06-28)
 
-Deliverables (per PDF):
+Deliverables (per PDF) — **how to extract each figure: `../report/README.md`**:
 1. Table of results (`00_spec_table.md` finalized)
 2. Schematic with all node voltages (`report/`)
 3. Schematic with all branch currents (`report/`)

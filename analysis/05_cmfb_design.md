@@ -2,6 +2,12 @@
 
 EE4520 used an **ideal** CMFB. EE4525 forbids ideal CMFB — you must build one from real components. Two acceptable styles per PDF + `faq.txt`:
 
+> **Decision (settled — `02_topology_choice.md`):** real **switched-capacitor
+> CMFB** (Option 1, Ryu 2007 style), replacing the ideal `E1` block in the core.
+> CT-CMFB (Option 2) kept as the alternative. The **AC testbench still uses an
+> ideal DC-CMFB-with-large-R helper** to set the operating point (allowed,
+> `faq.txt`) even though the working CMFB is switched-capacitor.
+
 ## Option 1 — Switched-capacitor CMFB (faq-allowed, ideal switches OK)
 
 ```

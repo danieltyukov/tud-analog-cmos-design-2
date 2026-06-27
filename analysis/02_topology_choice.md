@@ -62,11 +62,54 @@ gain-boosted cascode** over two-stage for this fast-settle / low-power spec:
 → Leaning **Option A/B (single-stage) + current-reuse input + real SC-CMFB**;
 two-stage (Option C) kept only as a fallback.
 
-## Decision
+## Decision (settled — 2026-06-27)
 
-- [ ] Option A
-- [ ] Option B
-- [ ] Option C
-- [ ] Other: _____________
+**Chosen: single-stage gain-boosted cascode (Option B) + current-reuse
+complementary input + real switched-capacitor CMFB.** Two-stage (Option C) is a
+documented fallback only.
 
-Reason: _________________________________
+- [ ] Option A — plain cascode (fallback if gain-boost proves unnecessary)
+- [x] **Option B — gain-boosted cascode** (committed), with:
+  - [x] **current-reuse (complementary NMOS + PMOS) input** — the low-power lever (Ryu 2007)
+  - [x] **real switched-capacitor CMFB** (replaces the ideal CMFB)
+- [ ] Option C — two-stage (fallback only, if single-stage can't make 78 dB at power)
+
+**Reason:** the spec is fast-settle ($25\,\mathrm{ns}$) / modest gain ($78\,\mathrm{dB}$) /
+relaxed SNR ($66\,\mathrm{dB}$) / **lowest power = the grade**. Single-stage = one
+output pole → cleanest fast settling per µA; gain-boosting reaches $78\,\mathrm{dB}$
+without adding a pole; current-reuse ~doubles $g_m/\mu\mathrm{A}$ for the power
+grade. Two-stage's strengths (huge gain, large swing) aren't needed here and its
+compensation hurts settling + power. Literature-backed (Binkley 2010, Ryu 2007)
+and reuses the EE4520 core → lowest risk.
+
+## Build plan — what we draw vs. reuse (EE4520 → EE4525)
+
+The EE4520 sheet already has the blocks we replace drawn as **behavioral
+placeholders** (`E`-source boxes: `Ideal CMFB`, `Ideal Gain-Boosting PMOS/NMOS`).
+So the architecture work is mostly **swapping those boxes for real transistor
+sub-circuits** — the cascode core, bias block and testbenches stay.
+
+### New transistor drawings (the circuit work)
+
+| EE4520 (have) | EE4525 (draw) | ~New devices | Required? |
+|---|---|---|---|
+| Ideal CMFB (`E1` VCVS) | **Real SC-CMFB** (sense caps + ideal switches → tail/load gate); CT-CMFB alt | ~4 sw + 2–4 caps, or ~6–8 FET | **Yes** |
+| Ideal gain-boost PMOS (`E2/E3`) | **Real PMOS-cascode booster** (NMOS-input diff-amp regulating `Mp2/Mp4`) | ~6–8 | **Yes** |
+| Ideal gain-boost NMOS (`E5/E6`) | **Real NMOS-cascode booster** (PMOS-input / level-shifted diff-amp regulating `Mn6/Mn8`) | ~6–8 | **Yes** |
+| NMOS-only input (`Mn3/Mn4`) | **+ complementary PMOS input, current-reuse** ($g_m=g_{mN}+g_{mP}$) — restructures the input/fold | ~+4–6 | **Power step (last)** |
+| Bias block (6 bias V) | **Extended bias** for the boosters + CMFB + P-input tail | a few branches | **Yes** |
+
+### Reused with retune only (no new topology)
+
+- The **cascode core** (`Mp1–Mp4`, `Mn1–Mn8`, mirrors) — same skeleton, resized for the new GBW / current.
+- The **3 testbenches** (loaded-AC, transient, noise) + **feedback net** (`Cin/Cfb/Rin/Rfb`) + `Cload` + the **replica** — same structure, retuned values, `.meas` $\beta$ updated.
+- The AC testbench keeps an **ideal DC-CMFB-with-large-R** helper (allowed, `faq.txt`) to set the OP point in AC even when the real CMFB is switched-capacitor.
+
+### Sequence (de-risk → optimise)
+
+1. Retune the **folded-cascode core with the ideal blocks** to the EE4525 spec (Phase 2) — find the current 25 ns actually demands.
+2. Drop in the **real SC-CMFB** (Phase 3).
+3. Drop in the **real gain-boosters**, NMOS first then PMOS, Binkley-sized ($0.8\,\omega_u$/70°, $0.4\,\omega_u$/60°, cascode-source pole $\ge 2.6\,\omega_u$) (Phase 4).
+4. **Restructure the input to current-reuse** and minimise power (Phase 5 power pass) — highest payoff, highest risk → last.
+
+Each block: draw as a netlist → simulate standalone → drop into the core → re-verify (render + AC / transient / noise). Cross-refs: `05_cmfb_design.md` (CMFB), `03_sizing_calcs.md` (core + boosters), `08_power_prediction.md` (FoM target), `../reserach-papers/README.md` (Binkley / Ryu design rules).
