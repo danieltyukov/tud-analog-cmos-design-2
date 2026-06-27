@@ -49,7 +49,7 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 
 ## Phase 4 — Gain-boosting (committed; week 5, by 2026-06-13)
 
-Part of the settled architecture (need 78 dB single-stage) — see `02_topology_choice.md` build plan.
+Part of the settled architecture (need 78 dB single-stage) — see `02_topology_choice.md` build plan and **`10_gain_booster_design.md`** (Binkley Fig. 7 template + Ryu improvement, with the figure).
 
 - [ ] Design **real NMOS-cascode booster** first, keep PMOS ideal (Binkley: $0.8\,\omega_u$/70°)
 - [ ] Then **real PMOS-cascode booster** (off-path one $0.4\,\omega_u$/60°; cascode-source pole $\ge 2.6\,\omega_u$)

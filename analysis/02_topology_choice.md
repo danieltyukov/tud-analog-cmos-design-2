@@ -65,8 +65,9 @@ two-stage (Option C) kept only as a fallback.
 ## Decision (settled — 2026-06-27)
 
 **Chosen: single-stage gain-boosted cascode (Option B) + current-reuse
-complementary input + real switched-capacitor CMFB.** Two-stage (Option C) is a
-documented fallback only.
+complementary input + real switched-capacitor CMFB** — **folded** baseline
+evolving to a **telescopic** stack when current-reuse is added (the two are
+coupled, see Build plan). Two-stage (Option C) is a documented fallback only.
 
 - [ ] Option A — plain cascode (fallback if gain-boost proves unnecessary)
 - [x] **Option B — gain-boosted cascode** (committed), with:
@@ -96,7 +97,7 @@ sub-circuits** — the cascode core, bias block and testbenches stay.
 | Ideal CMFB (`E1` VCVS) | **Real SC-CMFB** (sense caps + ideal switches → tail/load gate); CT-CMFB alt | ~4 sw + 2–4 caps, or ~6–8 FET | **Yes** |
 | Ideal gain-boost PMOS (`E2/E3`) | **Real PMOS-cascode booster** (NMOS-input diff-amp regulating `Mp2/Mp4`) | ~6–8 | **Yes** |
 | Ideal gain-boost NMOS (`E5/E6`) | **Real NMOS-cascode booster** (PMOS-input / level-shifted diff-amp regulating `Mn6/Mn8`) | ~6–8 | **Yes** |
-| NMOS-only input (`Mn3/Mn4`) | **+ complementary PMOS input, current-reuse** ($g_m=g_{mN}+g_{mP}$) — restructures the input/fold | ~+4–6 | **Power step (last)** |
+| NMOS-only input (`Mn3/Mn4`) | **+ complementary PMOS input, current-reuse** ($g_m=g_{mN}+g_{mP}$) — **restructures folded → telescopic stack** (see below) | ~+4–6 | **Power step (last)** |
 | Bias block (6 bias V) | **Extended bias** for the boosters + CMFB + P-input tail | a few branches | **Yes** |
 
 ### Reused with retune only (no new topology)
@@ -112,4 +113,33 @@ sub-circuits** — the cascode core, bias block and testbenches stay.
 3. Drop in the **real gain-boosters**, NMOS first then PMOS, Binkley-sized ($0.8\,\omega_u$/70°, $0.4\,\omega_u$/60°, cascode-source pole $\ge 2.6\,\omega_u$) (Phase 4).
 4. **Restructure the input to current-reuse** and minimise power (Phase 5 power pass) — highest payoff, highest risk → last.
 
-Each block: draw as a netlist → simulate standalone → drop into the core → re-verify (render + AC / transient / noise). Cross-refs: `05_cmfb_design.md` (CMFB), `03_sizing_calcs.md` (core + boosters), `08_power_prediction.md` (FoM target), `../reserach-papers/README.md` (Binkley / Ryu design rules).
+### Folded (start) → telescopic (endpoint) — why current-reuse decides this
+
+Folded-vs-telescopic is **not an independent choice** — the current-reuse decision forces it:
+
+- Current-reuse only works if the NMOS **and** PMOS input pairs are **stacked in
+  series** to *share* one bias current. A **folded** structure pushes the input
+  current out into a separate branch → no sharing → no current-reuse. So
+  **current-reuse ⟹ a telescopic (vertical) input stack** — exactly Ryu's
+  "gain-boosted **telescopic** with current reuse."
+- Telescopic is also the **more power-efficient** main amp (one current path →
+  more $g_m/\mu\mathrm{A}$, lower noise, fewer parasitic poles). Binkley and Ryu
+  both chose it for that reason.
+
+So the topology evolves *with* the sequence above:
+
+- **Steps 1–3 — folded:** keep the EE4520 **folded** cascode while de-risking
+  (easier to bias, more headroom, reuses the baseline).
+- **Step 4 — telescopic:** the current-reuse migration **restructures the core
+  into a telescopic stack**. Folded → telescopic happens *as part of* adding
+  current-reuse, **not** as a separate step.
+
+**Gate (the only real risk):** telescopic stacks more devices between the rails
+(+ the complementary pair + its tail) → **tighter output swing on 1.8 V**.
+Acceptable here because SNR is only $66\,\mathrm{dB}$ (swing slack) and the input
+CM is a *sampled* value we choose (telescopic ICMR limit doesn't bite). **Ryu is
+the existence proof** (0.18 µm / 1.8 V, current-reuse telescopic, 1 Vpp). If the
+$1.8\,\mathrm{V}$ headroom can't fit our swing during sizing, **stay folded** and
+pay the extra current.
+
+Each block: draw as a netlist → simulate standalone → drop into the core → re-verify (render + AC / transient / noise). Cross-refs: `05_cmfb_design.md` (CMFB), `10_gain_booster_design.md` (real boosters — Binkley Fig. 7 template + figure), `03_sizing_calcs.md` (core + boosters), `08_power_prediction.md` (FoM target), `../reserach-papers/README.md` (Binkley / Ryu design rules).
