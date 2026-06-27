@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:s="https://github.com/nturley/netlistsvg" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="full" height="100%" version="1.1" viewBox="478.4 -497.6 2323.2 1315.2" width="100%"><rect x="0" y="0" width="100%" height="100%" fill="white"/>
+  <title>Simulation_1.svg</title>
+  <defs/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="704" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1216" x2="976" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1216" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1472" x2="1408" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1728" x2="1472" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2032" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2176" x2="2080" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2176" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2320" y1="-272" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="976" y1="-224" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="880" y1="-224" y2="-224"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="976" y1="-208" y2="-224"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="-208" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="-208" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1120" x2="1024" y1="-192" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1296" x2="1120" y1="-192" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1360" x2="1328" y1="-192" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2176" x2="2176" y1="-192" y2="-208"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2176" x2="2032" y1="-192" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2272" x2="2176" y1="-192" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="880" x2="880" y1="-160" y2="-224"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="880" y1="-160" y2="-160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1472" x2="1472" y1="-160" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1472" x2="1408" y1="-160" y2="-160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2416" y1="-160" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2320" y1="-160" y2="-160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1328" x2="1328" y1="-128" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1728" x2="1328" y1="-128" y2="-128"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2080" y1="-96" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="-80" y2="-112"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1728" x2="1408" y1="-80" y2="-80"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="976" y1="-48" y2="-112"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1120" x2="1120" y1="-48" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1120" x2="976" y1="-48" y2="-48"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="-48" y2="-80"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1296" x2="1296" y1="-32" y2="-192"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1360" x2="1296" y1="-32" y2="-32"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1728" x2="1360" y1="-32" y2="-32"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="-32" y2="-112"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2080" y1="-16" y2="-32"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2032" y1="-16" y2="-16"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2272" x2="2080" y1="-16" y2="-16"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1472" x2="1472" y1="0" y2="-160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1472" x2="1408" y1="0" y2="0"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2416" y1="16" y2="-160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2320" y1="16" y2="16"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1328" x2="1328" y1="64" y2="-128"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="64" y2="48"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1328" y1="64" y2="64"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="704" x2="704" y1="80" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="976" y1="80" y2="-48"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1216" x2="1216" y1="80" y2="-272"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="80" y2="64"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="96" y2="64"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="112" y2="96"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2448" x2="2320" y1="112" y2="112"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2528" x2="2448" y1="112" y2="112"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="208" y2="160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1344" y1="208" y2="208"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1216" x2="1216" y1="240" y2="160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1312" x2="1216" y1="240" y2="240"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2448" x2="2320" y1="240" y2="240"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2528" x2="2448" y1="240" y2="240"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1216" x2="1216" y1="256" y2="240"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="256" y2="208"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="256" y2="240"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="272" y2="256"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1216" x2="1104" y1="304" y2="304"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1504" x2="1504" y1="304" y2="256"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1504" x2="1408" y1="304" y2="304"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2320" y1="320" y2="320"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1312" x2="1312" y1="336" y2="240"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1312" x2="1264" y1="336" y2="336"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1360" x2="1312" y1="336" y2="336"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1728" x2="1360" y1="336" y2="336"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1104" x2="1104" y1="352" y2="304"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2032" y1="352" y2="352"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2272" x2="2080" y1="352" y2="352"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1408" y1="368" y2="352"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1728" x2="1408" y1="368" y2="368"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1504" x2="1408" y1="416" y2="416"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1344" x2="1344" y1="448" y2="208"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1360" x2="1344" y1="448" y2="448"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1728" x2="1360" y1="448" y2="448"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="976" x2="976" y1="464" y2="160"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1216" x2="1216" y1="464" y2="352"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1216" x2="976" y1="464" y2="464"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1280" x2="1216" y1="464" y2="464"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1408" x2="1280" y1="464" y2="464"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="480" y2="368"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="1280" x2="1280" y1="496" y2="464"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2416" y1="528" y2="320"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2320" y1="528" y2="528"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2080" y1="560" y2="416"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2032" y1="560" y2="560"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2176" x2="2080" y1="560" y2="560"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2272" x2="2176" y1="560" y2="560"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2080" y1="624" y2="560"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2080" x2="2032" y1="624" y2="624"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2176" x2="2080" y1="624" y2="624"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2320" y1="624" y2="576"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2320" x2="2176" y1="624" y2="624"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2416" y1="624" y2="528"/>
+  <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="2416" x2="2320" y1="624" y2="624"/>
+  <circle cx="976" cy="-272" fill="black" r="3.0"/>
+  <circle cx="1216" cy="-272" fill="black" r="3.0"/>
+  <circle cx="1408" cy="-272" fill="black" r="3.0"/>
+  <circle cx="1472" cy="-272" fill="black" r="3.0"/>
+  <circle cx="2080" cy="-272" fill="black" r="3.0"/>
+  <circle cx="2320" cy="-272" fill="black" r="3.0"/>
+  <circle cx="976" cy="-224" fill="black" r="3.0"/>
+  <circle cx="1120" cy="-192" fill="black" r="3.0"/>
+  <circle cx="2176" cy="-192" fill="black" r="3.0"/>
+  <circle cx="1472" cy="-160" fill="black" r="3.0"/>
+  <circle cx="2416" cy="-160" fill="black" r="3.0"/>
+  <circle cx="1328" cy="-128" fill="black" r="3.0"/>
+  <circle cx="1408" cy="-80" fill="black" r="3.0"/>
+  <circle cx="976" cy="-48" fill="black" r="3.0"/>
+  <circle cx="2080" cy="-16" fill="black" r="3.0"/>
+  <circle cx="1408" cy="64" fill="black" r="3.0"/>
+  <circle cx="1408" cy="208" fill="black" r="3.0"/>
+  <circle cx="1216" cy="240" fill="black" r="3.0"/>
+  <circle cx="1312" cy="336" fill="black" r="3.0"/>
+  <circle cx="1216" cy="464" fill="black" r="3.0"/>
+  <circle cx="1280" cy="464" fill="black" r="3.0"/>
+  <circle cx="2416" cy="528" fill="black" r="3.0"/>
+  <circle cx="2080" cy="560" fill="black" r="3.0"/>
+  <circle cx="2080" cy="624" fill="black" r="3.0"/>
+  <circle cx="2320" cy="624" fill="black" r="3.0"/>
+  <g s:height="96" s:type="pmos4" s:width="48" transform="translate(1360,-112) scale(-1,1) rotate(180)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="24" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="24" x2="24" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g transform="rotate(180, 56, 32)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mp1</text>
+        </g>
+      </g>
+    </g>
+    <g transform="rotate(180, 56, 72)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">pch</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g s:height="96" s:type="pmos4" s:width="48" transform="translate(1360,48) scale(-1,1) rotate(180)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="24" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="24" x2="24" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g transform="rotate(180, 56, 32)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mp2</text>
+        </g>
+      </g>
+    </g>
+    <g transform="rotate(180, 56, 72)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">pch</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g s:height="96" s:type="pmos4" s:width="48" transform="translate(1024,-112) rotate(180)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="24" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="24" x2="24" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g transform="rotate(180, 56, 32)">
+      <g class="text-group">
+        <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="56" y="40.4">Mp3</text>
+      </g>
+    </g>
+    <g transform="rotate(180, 56, 72)">
+      <g class="text-group">
+        <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="56" y="80.4">pch</text>
+      </g>
+    </g>
+  </g>
+  <g s:height="96" s:type="nmos4" s:width="48" transform="translate(1360,368)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="48" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="40" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mn1</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">nch</text>
+    </g>
+  </g>
+  <g s:height="96" s:type="nmos4" s:width="48" transform="translate(1360,256)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="48" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="40" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mn2</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">nch</text>
+    </g>
+  </g>
+  <g s:height="96" s:type="nmos4" s:width="48" transform="translate(1264,256) scale(-1,1)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="48" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="40" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g transform="scale(-1,1) translate(-112,0)">
+      <g class="text-group">
+        <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="56" y="40.4">Mn3</text>
+      </g>
+    </g>
+    <g transform="scale(-1,1) translate(-112,0)">
+      <g class="text-group">
+        <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="56" y="80.4">nch</text>
+      </g>
+    </g>
+  </g>
+  <g s:height="80" s:type="voltage" s:width="64" transform="translate(704,64)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-8" x2="8" y1="36" y2="36"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-8" x2="8" y1="76" y2="76"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="28" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="96" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="16" y2="24"/>
+    <circle cx="0.0" cy="56.0" fill="none" r="32.0" stroke="black" stroke-width="2.0"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="24.4">Vdd</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="104.4">1.8</text>
+    </g>
+  </g>
+  <g s:height="80" s:type="current" s:width="64" transform="translate(1408,80)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="4" y1="56" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="-4" y1="56" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-4" x2="4" y1="44" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="24" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="80" y2="72"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="0" y2="8"/>
+    <circle cx="0.0" cy="40.0" fill="none" r="32.0" stroke="black" stroke-width="2.0"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="8.399999999999999">Ibm</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="88.4">{Ibm}</text>
+    </g>
+  </g>
+  <g s:height="80" s:type="current" s:width="64" transform="translate(1216,80)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="4" y1="56" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="-4" y1="56" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-4" x2="4" y1="44" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="24" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="80" y2="72"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="0" y2="8"/>
+    <circle cx="0.0" cy="40.0" fill="none" r="32.0" stroke="black" stroke-width="2.0"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="8.399999999999999">Ibn</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="88.4">{Ibm*Rn}</text>
+    </g>
+  </g>
+  <g s:height="80" s:type="current" s:width="64" transform="translate(976,80)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="4" y1="56" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="-4" y1="56" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-4" x2="4" y1="44" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="24" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="80" y2="72"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="0" y2="8"/>
+    <circle cx="0.0" cy="40.0" fill="none" r="32.0" stroke="black" stroke-width="2.0"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="8.399999999999999">Ibp</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="88.4">{Ibm*Rp}</text>
+    </g>
+  </g>
+  <g s:height="96" s:type="pmos4" s:width="48" transform="translate(2272,-112) scale(-1,1) rotate(180)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="24" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="24" x2="24" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g transform="rotate(180, 56, 32)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mp4</text>
+        </g>
+      </g>
+    </g>
+    <g transform="rotate(180, 56, 72)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">pch</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g s:height="96" s:type="pmos4" s:width="48" transform="translate(2272,64) scale(-1,1) rotate(180)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="24" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="24" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="24" x2="24" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g transform="rotate(180, 56, 32)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mp5</text>
+        </g>
+      </g>
+    </g>
+    <g transform="rotate(180, 56, 72)">
+      <g transform="scale(-1,1) translate(-112,0)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">pch</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g s:height="96" s:type="nmos4" s:width="48" transform="translate(2272,272)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="48" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="40" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mn4</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">nch</text>
+    </g>
+  </g>
+  <g s:height="96" s:type="nmos4" s:width="48" transform="translate(2272,480)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="80" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="48" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="48" y1="48" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="40" y1="48" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="40" x2="40" y1="44" y2="52"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="8" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="40" y2="56"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="72" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="8" y1="80" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="8" x2="8" y1="16" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="16" y1="16" y2="16"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="48" x2="48" y1="0" y2="16"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="40.4">Mn5</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="56" y="80.4">nch</text>
+    </g>
+  </g>
+  <g s:height="64" s:type="cap" s:width="32" transform="translate(2160,-272)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="36" y2="64"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="28" y2="0"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="28" y2="28"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="36" y2="36"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="16.4">C1</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="64.4">1</text>
+    </g>
+  </g>
+  <g s:height="64" s:type="cap" s:width="32" transform="translate(2064,-96)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="36" y2="64"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="28" y2="0"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="28" y2="28"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="36" y2="36"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="16.4">C2</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="64.4">1</text>
+    </g>
+  </g>
+  <g s:height="64" s:type="cap" s:width="32" transform="translate(2064,352)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="36" y2="64"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="28" y2="0"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="28" y2="28"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="36" y2="36"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="16.4">C3</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="64.4">1</text>
+    </g>
+  </g>
+  <g s:height="64" s:type="cap" s:width="32" transform="translate(2160,560)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="36" y2="64"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="28" y2="0"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="28" y2="28"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="36" y2="36"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="16.4">C4</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="24" y="64.4">1</text>
+    </g>
+  </g>
+  <g s:height="80" s:type="res" s:width="32" transform="translate(2512,96)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="88" y2="96"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="16" y1="80" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="32" x2="0" y1="64" y2="80"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="32" y1="48" y2="64"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="32" x2="0" y1="32" y2="48"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="16" y1="16" y2="24"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="32" y1="24" y2="32"/>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="36" y="48.4">RL</text>
+    </g>
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="36" y="84.4">3k</text>
+    </g>
+  </g>
+  <g s:height="80" s:type="voltage" s:width="64" transform="translate(2512,240) rotate(270)">
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-8" x2="8" y1="36" y2="36"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-8" x2="8" y1="76" y2="76"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="28" y2="44"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="96" y2="88"/>
+    <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="0" x2="0" y1="16" y2="24"/>
+    <circle cx="0.0" cy="56.0" fill="none" r="32.0" stroke="black" stroke-width="2.0"/>
+    <g transform="rotate(-90, 32, 56)">
+      <g transform="rotate(180, 32, 56)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="middle" x="32" y="51.2">Von</text>
+        </g>
+      </g>
+    </g>
+    <g transform="rotate(-90, -32, 56)">
+      <g transform="rotate(180, -32, 56)">
+        <g class="text-group">
+          <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="middle" x="-32" y="77.6">0</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1160" y="592.4">.param W=1u L=0.18u Mp=60 Mn=22 Ibm=400u Rn=5.8 Rp=7.5</text>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="840" y="560.4">;step param Mn list 5,10,15</text>
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="840" y="589.1999999999999">.dc Vdd 0 1.8 0.02</text>
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="840" y="618.0">;dc param Rn 3 9 0.1</text>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1160" y="560.4">.lib 'C:\\Program Files\\LTC\\LTspiceXVII\\lib\\cmp\\log018.l' TT</text>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="848" y="656.4">;dc param Rp 3 12 0.1</text>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1248" y="792.4">;dc Vop 0 1.8 0.01</text>
+  </g>
+  <g class="ground-flag">
+    <g transform="translate(704,160) rotate(0)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+  <g class="ground-flag">
+    <g transform="translate(1104,352) rotate(0)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+  <g class="ground-flag">
+    <g transform="translate(1280,496) rotate(0)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+  <g class="ground-flag">
+    <g transform="translate(1504,256) rotate(180)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+  <g class="ground-flag">
+    <g transform="translate(1504,416) rotate(270)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1728" y="-119.6">Vbp</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1728" y="-71.6">Vsp</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1728" y="-23.6">Vcp</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1728" y="344.4">Vcn</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1728" y="376.4">Vsn</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1728" y="456.4">Vbn</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="1728" y="-263.6">Vdd</text>
+  </g>
+  <g class="net-label"/>
+  <g class="ground-flag">
+    <g transform="translate(2032,624) rotate(90)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="2032" y="-263.6">Vdd</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="2032" y="-183.6">Vbp</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="2032" y="-7.600000000000001">Vcp</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="2032" y="360.4">Vcn</text>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="end" x="2032" y="568.4">Vbn</text>
+  </g>
+  <g class="net-label"/>
+  <g class="ground-flag">
+    <g transform="translate(2608,240) rotate(0)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="middle" x="2448" y="107.2">Vop</text>
+  </g>
+  <g class="net-label"/>
+  <g transform="rotate(-90, 2320, 96)">
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="middle" x="2320" y="91.2">Iop</text>
+    </g>
+  </g>
+  <g class="net-label"/>
+  <g class="text-group">
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="middle" x="2448" y="235.2">Von</text>
+  </g>
+  <g class="net-label"/>
+  <g transform="rotate(-90, 2320, 256)">
+    <g class="text-group">
+      <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="middle" x="2320" y="251.2">Ion</text>
+    </g>
+  </g>
+  <g class="net-label"/>
+  <g class="ground-flag">
+    <g transform="translate(2528,192) rotate(0)">
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="16" y1="0" y2="0"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="-16" x2="0" y1="0" y2="16"/>
+      <line stroke="black" stroke-linecap="round" stroke-width="2.0" x1="16" x2="0" y1="0" y2="16"/>
+    </g>
+  </g>
+</svg>
