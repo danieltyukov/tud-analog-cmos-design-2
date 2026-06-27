@@ -20,7 +20,7 @@ Per single-ended branch, sampled noise power referred to amplifier input:
 
 $$V_{n,sample,in,se}^2 = \frac{kT}{C_{in}} \quad\text{(rough; refine if separate sampling cap)}$$
 
-Closed-loop gain referred to output $\approx 1/\beta = 4$. Differential combines two uncorrelated branches:
+Amplifier-noise gain referred to output $= 1/\beta = 5$ ($= 1 + C_{in}/C_{fb}$; the **signal** gain is $C_{in}/C_{fb} = 4$ — see `01_specs_and_budget.md` §1). Differential combines two uncorrelated branches:
 
 $$V_{n,kT/C,out,diff}^2 \approx 2 \cdot \left(\frac{1}{\beta}\right)^2 \cdot \frac{kT}{C_{in}}$$
 
@@ -33,10 +33,10 @@ At $T = 300\,\mathrm{K}$, $kT = 4.14 \cdot 10^{-21}\,\mathrm{J}$:
 
 | $C_{in}$ [pF] | $\sqrt{kT/C_{in}}$ [µV] | $V_{n,kT/C,out,diff}$ [µV$_{rms}$] |
 |--------------:|------------------------:|------------------------------------:|
-| 10            | 20.4                    | 115                                 |
-| 20            | 14.4                    | 81                                  |
-| 32            | 11.4                    | 65                                  |
-| 64            | 8.05                    | 46                                  |
+| 10            | 20.4                    | 144                                 |
+| 20            | 14.4                    | 102                                 |
+| 32            | 11.4                    | 81                                  |
+| 64            | 8.05                    | 57                                  |
 
 Target: keep $kT/C$ contribution $\lesssim 50\,\%$ of total budget so amplifier noise has equal share.
 

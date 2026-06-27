@@ -49,7 +49,7 @@ only make it worse. For this project:
 |---|---|---|
 | $kT$ (300 K) | $4.142\times10^{-21}\,\mathrm{J}$ | — |
 | $F_{clk}$ | $20\,\mathrm{MHz}$ | $T_{settle}=T_{clk}/2=25\,\mathrm{ns}$, 20 MS/s ÷ 50 % duty |
-| $A_{req}=1/\beta$ | $4$ | residue gain $2^2$ (`01` §1) |
+| $A_{req}=C_{in}/C_{fb}$ | $4$ | residue gain $2^2$ (`01` §1) |
 | $DR=\mathrm{SNR}$ | $66\,\mathrm{dB}\Rightarrow 1995$ | `00` row 1 |
 
 $$P_{system} = 32\,kT\,(20\,\mathrm{MHz})(4)^2(1995)^2 \approx \mathbf{0.169\,mW}$$
@@ -160,8 +160,9 @@ line with the EE4520 baseline of $175.2\,\mathrm{dB}$ (`../from-ee4520/README.md
 
 The lecture's discrete-time SC analysis gives a **unified** output-noise
 expression that folds sampling ($kT/C$) and amplifier noise into one form. With
-SC gain $\text{Gain}=C_{in}/C_{fb}=3$ (note: closed-loop gain
-$1/\beta=1+\text{Gain}=4=A_{req}$) and $C_L=C_{in}=\text{Gain}\cdot C_{fb}$:
+SC gain $\text{Gain}=C_{in}/C_{fb}=4$ ($=A_{req}$, the residue gain; the feedback
+factor $\beta=C_{fb}/(C_{in}+C_{fb})$ gives $1/\beta=1+\text{Gain}=5$, the noise
+gain) and $C_L=C_{in}=\text{Gain}\cdot C_{fb}$:
 
 $$\overline{V_{n,out,tot}^2} = \underbrace{\frac{kT}{C_{fb}}(\text{Gain}+1)}_{\text{sampling }(kT/C)}
 \Bigl(1 + \frac{\mathrm{NEF}}{\text{Gain}}\Bigr)$$

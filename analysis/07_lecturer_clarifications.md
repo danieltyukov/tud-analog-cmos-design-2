@@ -200,7 +200,7 @@ The EE4520 reference deliverables and results are already in this repo under
 `from-ee4520/` (see `from-ee4520/baseline-amplifier-hw2/report/`).
 **All deliverables 1–8 are required.**
 
-### 5.8 Short explanation — required content (Deliverable 9)
+### 5.8 Short explanation (report page 8) — required content
 
 > "In your short explanation, please at least address the following points:"
 > - Explain **why the proposed architecture was selected**, including the CMFB
@@ -234,10 +234,30 @@ Related: `04_noise_budget.md` (NEF, dominant noise devices), `02_topology_choice
   results table filled in the same way as in the report. Filling all fields is the
   student's responsibility (no automatic checking). Submission date/time is recorded.
 - **Deadline: Sunday, 28 June 2026, 23:59.**
-- Issues → contact **f.sebastiano@tudelft.nl**.
+- Issues / questions → **f.sebastiano@tudelft.nl**; TAs **A.Gupta-6@tudelft.nl**
+  (Avish Gupta) and **Zenghui.Li@tudelft.nl** (Zenghui Li).
+
+### 6.1 Compulsory report structure (project PDF p. 11)
+
+**One page per item, fixed order:** (1) **Title** — Name + Student Number +
+"EE4525 2026"; (2) **D1** Table of Results; (3) **D2** node-voltage schematic;
+(4) **D3** branch-current schematic; (5) **D4** settling plot; (6) **D5** noise
+plot; (7) **D6** = the **FoM comparison** EE4520 ↔ EE4525 (this is the "skip if you
+didn't take EE4520" item — *we did take it, so it's required*); (8) **Short
+Explanation** (≤ 1 page) — must **explain every aspect of the D4 settling plot**
+plus the §5.8 bullets.
+
+> D2/D3 need **clean, readable** schematics (*"not a simulator schematic"*) — and
+> **separate sheets for the gain-boosters and CMFB**, each with the node voltages
+> / branch currents indicated. Full figure-extraction map → `../report/README.md`.
 
 ---
 
 *Source: course announcements ("Dear EE4525ers, …") from the TAs, transcribed
 into this repo on 2026-06-26. Figures referenced (example settling plot,
 example Deliverable-4 plot, FoM table) are the TAs' "EXAMPLE ONLY" illustrations.*
+
+*Project description in the repo is the **27 May 2026 updated** version
+(`Project EE4525 2025-2026_updated.pdf`). The only change vs. the earlier version
+was to the Short-Explanation bullets — add "including the CMFB implementation" and
+"choice of output swing and capacitor sizing" — both already reflected in §5.8.*

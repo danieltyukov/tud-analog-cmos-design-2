@@ -31,13 +31,13 @@ TA clarification (`07_lecturer_clarifications.md` §2): a two-stage amplifier ma
 | 25 ns  | $A\beta \geq 66\,\mathrm{dB}$ |
 |        | $A_{settle} \geq 78\,\mathrm{dB}$ |
 
-Both must be true at $t = 25\,\mathrm{ns}$. The amplifier curve $A(t)$ sits $1/\beta = 12\,\mathrm{dB}$ above the loop curve $A\beta(t)$.
+Both must be true at $t = 25\,\mathrm{ns}$. The amplifier curve $A(t)$ sits $20\log_{10}(C_{in}/C_{fb}) = 12\,\mathrm{dB}$ above the loop curve $A\beta(t)$ — the plot labels this gap "$1/\beta$", but it is the **closed-loop gain** $C_{in}/C_{fb}=4$ (the true loop $\beta = 1/5$; see `01_specs_and_budget.md` §1).
 
 ## Simulation setup
 
 Reuse `simulations/transient/transient_baseline.asc` (from EE4520 hw2). Edit:
 
-1. Step-voltage source amplitude → $V_{in,step} = V_{out,target} / 4$ (since $1/\beta = 4$).
+1. Step-voltage source amplitude → $V_{in,step} = V_{out,target} / 4$ (since the closed-loop gain $C_{in}/C_{fb} = 4$).
 2. $C_{load}$ on each output → equal to $C_{in}$ from §04.
 3. Replace ideal CMFB with the CMFB chosen in §05.
 4. Add a measure block. The accuracy can be thresholded **inline** (no separate

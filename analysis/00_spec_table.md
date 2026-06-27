@@ -4,7 +4,13 @@ Course: **EE4525 2025/2026 — A Residue Amplifier for a Pipeline ADC**
 Due: **2026-06-28**
 Process: 0.18-µm CMOS (BSIM3, 1.8 V), LTSpice
 
-Green = hard spec from the project PDF. Achieved column to be filled during design.
+**Bold** = the green-shaded "specifications you are asked to achieve" cells in the
+PDF table — rows **1–4, 8, 9, 13, 14, 17**. The Achieved column is filled during
+design; the PDF's example numbers are **illustrative only** (e.g. its row-8 "81"
+deliberately *violates* the < 3 mW spec to show the column is just an example, so
+do not copy them). Note: the PDF table prints row 22 as $10\log_{10}$ **without**
+the minus sign — the 21 Jun TA clarification adds it, so we use $-10\log_{10}$
+(positive dB). See `07_lecturer_clarifications.md` §4.2.
 
 | #  | Design Item                              | Unit       | Spec                | Achieved |
 |----|------------------------------------------|------------|---------------------|----------|
@@ -16,12 +22,12 @@ Green = hard spec from the project PDF. Achieved column to be filled during desi
 | 6  | $T_{38.6\,\mathrm{dB}}$                  | ns         | ---                 |          |
 | 7  | $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ | ns | ---            |          |
 | 8  | Power dissipation (amplifiers only)      | mW         | **< 3**, low as poss|          |
-| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | < 1.7, low as poss  |          |
+| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | **< 1.7**, low as poss |       |
 | 10 | Total effective $kT/C$ noise at output   | µV$_{rms}$ | free                |          |
 | 11 | Total integrated amplifier noise         | µV$_{rms}$ | free                |          |
 | 12 | Total integrated noise (10 kHz–100 GHz)  | µV$_{rms}$ | free                |          |
-| 13 | Input step voltage                       | mV         | $V_{out}/4$         |          |
-| 14 | Output step voltage                      | V          | free                |          |
+| 13 | Input step voltage                       | mV         | **$V_{out}/4$**     |          |
+| 14 | Output step voltage                      | V          | **free** (you choose) |        |
 | 15 | $C_{in}$                                 | pF         | ---                 |          |
 | 16 | $C_{fb}$                                 | pF         | ---                 |          |
 | 17 | $C_{load}$                               | pF         | **= $C_{in}$**      |          |
@@ -65,6 +71,7 @@ Green = hard spec from the project PDF. Achieved column to be filled during desi
 
 - BJT / JFET forbidden. Only NMOS / PMOS / R / C.
 - Total non-bias capacitance $\leq 1000\,\mathrm{pF}$. $R \leq$ a few MΩ ($\leq$ GΩ only for $R_{in}$ / $R_{fb}$).
+- $R_{in}$ / $R_{fb}$ are **simulation-only biasing** resistors with **$R_{fb}/R_{in} = C_{in}/C_{fb}$** (so the DC operating-point gain equals the high-frequency cap gain — PDF p. 1).
 - All NMOS bulk → GND. PMOS bulk free ($V_{dd}$ or own source).
 - $M$ (parallel-device count) must be integer.
 - $C_{load}$ must equal $C_{in}$.

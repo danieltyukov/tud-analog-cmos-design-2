@@ -66,15 +66,15 @@ Part of the settled architecture (need 78 dB single-stage) — see `02_topology_
 
 ## Phase 6 — Report & submission (week 7, by 2026-06-28)
 
-Deliverables (per PDF) — **how to extract each figure: `../report/README.md`**:
-1. Table of results (`00_spec_table.md` finalized)
-2. Schematic with all node voltages (`report/`)
-3. Schematic with all branch currents (`report/`)
-4. Settling accuracy vs time plot
-5. Output noise PSD vs frequency + integrated value
-6. ≤ 1-page design-process write-up
-7. FoM comparison vs EE4520 (step-by-step) — **required** (we took EE4520; reference results in `from-ee4520/baseline-amplifier-hw2/report/`)
-8. Submit via form **https://edu.nl/3c9tf** — report PDF named `[StudentNumber].pdf`, ≤ 2 submissions, **click Submit** (wait for confirmation page). Also fill the results table in the form. Issues → f.sebastiano@tudelft.nl.
+**Compulsory page-by-page structure** (PDF p. 11; figure extraction → `../report/README.md`):
+1. Title (Name + Student Number + EE4525 2026); **D1** Table of results (`00_spec_table.md`)
+2. **D2** Schematic + all node voltages — separate readable sheets for gain-boosters + CMFB
+3. **D3** Schematic + all branch currents (same)
+4. **D4** Settling plot — $A(t)$ & $A\beta(t)$, $A\beta$ from 0 dB
+5. **D5** Noise PSD 10 kHz–100 GHz + integrated value
+6. **D6** FoM comparison EE4520 ↔ EE4525 — **required** (we took EE4520; baseline 175.2 dB in `from-ee4520/`)
+7. **Short Explanation** (≤ 1 p): explain every aspect of the D4 plot + architecture / sizing (noise incl 1/f + settling) / dominant-noise devices + NEF / biasing
+8. **Submit** via **https://edu.nl/3c9tf** — PDF `[StudentNumber].pdf`, ≤ 2 submissions, **click Submit** (confirmation page). Issues → f.sebastiano@tudelft.nl (TAs: A.Gupta-6@, Zenghui.Li@tudelft.nl).
 
 > Aim for **FoM > 170 dB** ($\mathrm{FoM}_{lin} < 9.5\times10^{-18}\,\mathrm{J}$) to pass. See `07_lecturer_clarifications.md` §4–5.
 

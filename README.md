@@ -41,9 +41,9 @@ spec/rules ─► design derivations ─► sizing ─► simulate ─► extrac
 ## Current state
 
 Setup + analysis docs complete (the *plan* and *method*). Execution pending:
-sizing, sims, figures, report (Phase 1 onward — `PLAN.md`). One open item flagged:
-the **β / gain convention** (`1/β=4, Cin/Cfb=3` vs the EE4520 `gain=Cin/Cfb`
-precedent) to resolve before freezing caps — see `analysis/02` / `08 §7`.
+sizing, sims, figures, report (Phase 1 onward — `PLAN.md`). The earlier β/gain
+question is **resolved**: $C_{in}{:}C_{fb} = 4{:}1$ (residue gain $= C_{in}/C_{fb} = 4$;
+loop $\beta = C_{fb}/(C_{in}+C_{fb}) = 1/5$, noise gain 5) — see `analysis/01` §1.
 
 ## To execute (short version)
 

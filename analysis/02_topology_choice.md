@@ -39,6 +39,9 @@ Architecture is fully free per PDF. Three viable starting points; pick before si
 
 **When to pick:** if you can't make a single-stage hit GBW within power, or if output swing is the limiter.
 
+> Full write-up of *how we'd build it and why we rejected it* (for the report's
+> short explanation) → `11_two_stage_alternative.md`.
+
 ## Recommended decision flow
 
 1. Start in `design/core-amp/folded_cascode_baseline.asc` with the EE4520 sizing.

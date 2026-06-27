@@ -11,9 +11,9 @@ the `ltspice` MCP; tools per `../LTSPICE_TOOLCHAIN.md`. Figures land per
 > output noise (a common mistake — `faq.txt`, project PDF "common mistakes").
 
 > **β to update.** The baseline `.meas` carry the **EE4520** feedback factor
-> (`Abeta = A/9`, `=9`). EE4525 uses a different ratio — resolve `1/β` (see
-> `01_specs_and_budget.md` §1 / `08_power_prediction.md` §7) and update every
-> `.meas` that hard-codes `9`.
+> (`Abeta = A/9`, `=9`). EE4525 uses $C_{in}{:}C_{fb}=4{:}1 \Rightarrow \beta=C_{fb}/(C_{in}+C_{fb})=1/5$
+> (`01_specs_and_budget.md` §1), so replace every hard-coded `9` with **5** (e.g.
+> `Abeta = A/5`, `=5`).
 
 ## Map: sim → deliverable
 
@@ -56,7 +56,7 @@ the `ltspice` MCP; tools per `../LTSPICE_TOOLCHAIN.md`. Figures land per
 
 ## D. Transient settling — step response (**Deliverable 4**)
 
-- **Setup:** differential input step `= V_out/4` (1/β = 4); behavioural source
+- **Setup:** differential input step `= V_out/4` (closed-loop gain $C_{in}/C_{fb}=4$); behavioural source
   computes settling accuracy $\mathrm{Acc}_{dB}(t)=20\log_{10}(V_{out,max}/(|V(\text{vg})|+1\mathrm{n}))$
   (`06_settling_analysis.md`).
 - **`.meas`:** `T30dB when V(vsettledb)=30`; `T386dB when V(vsettledb)=38.6`;

@@ -2,15 +2,32 @@
 
 Goal: turn the PDF requirements into design-time numbers (gain, $\beta$, settling $\tau$, noise, power) before sizing transistors.
 
-## 1. Feedback factor $\beta$
+## 1. Closed-loop gain $G_{cl}$ and feedback factor $\beta$
 
-$$\beta = \frac{C_{fb}}{C_{in} + C_{fb}}$$
+**Final decision (2026-06-28): $C_{in} : C_{fb} = 4 : 1$.** Driven by the defining
+spec — the **residue (closed-loop) gain** is $2^n = 4$ ($n = 2$ bits/stage), and
+for this charge-transfer SC amplifier that gain *is* the capacitor ratio:
 
-The residue gain is $2^n = 4$ ($n = 2$ bits/stage), and at low frequency the closed-loop gain $\approx 1/\beta$. So:
+$$G_{cl} = \frac{V_{out}}{V_{in}} = \frac{C_{in}}{C_{fb}} = 4 \qquad(\text{input step} = V_{out}/4,\ \text{row 13}).$$
 
-$$\frac{1}{\beta} = 4 \quad\Longrightarrow\quad \frac{C_{in}}{C_{fb}} = 3 \quad\Longrightarrow\quad \beta = 0.25$$
+The **feedback factor** (the capacitive divider — sets loop stability + noise gain) is then
 
-This sets the *ratio* $C_{in} : C_{fb} = 3 : 1$. Absolute values come from the noise budget (§4).
+$$\beta = \frac{C_{fb}}{C_{in}+C_{fb}} = \frac{1}{5}\qquad\Rightarrow\qquad \frac{1}{\beta} = 1 + \frac{C_{in}}{C_{fb}} = 5\ \ (=\text{amplifier-noise gain}).$$
+
+> **Two distinct "gains" — do not conflate them:**
+> - **Signal gain $G_{cl} = C_{in}/C_{fb} = 4$** — sets $V_{out}/V_{in}$, the input
+>   step ($V_{out}/4$), and the **Deliverable-4 plot "$1/\beta$" gap**
+>   ($20\log_{10}4 = 12\,\mathrm{dB}$, so $A_{settle} = A\beta_{settle} + 12 = 78\,\mathrm{dB}$).
+>   The plot labels that gap "$1/\beta$" loosely — it is really $G_{cl}$.
+> - **Feedback factor $\beta = 1/5$** — the true loop $\beta$; the **noise gain**
+>   ($1/\beta = 5$) and the loop time-constant (§3) use this.
+>
+> **Why 4:1, not 3:1 (resolved):** residue gain $= C_{in}/C_{fb} = 4$ is the
+> unambiguous defining requirement (input step $= V_{out}/4$), and matches EE4520
+> (gain $= C_{in}/C_{fb}$; its $A$–$A\beta$ gap was $20\log_{10}(C_{in}/C_{fb})$).
+> The earlier "$3:1$" came from mis-reading the 12 dB gap as
+> $20\log_{10}((C_{in}+C_{fb})/C_{fb})$. `08`'s $(\text{Gain}+1)$ noise factor
+> already uses $1/\beta = 5$.
 
 > **Ideal vs. actual $\beta$ (TA clarification — `07_lecturer_clarifications.md` §3):**
 > the *realised* $\beta$ extracted from simulation is usually slightly **higher**
@@ -22,9 +39,11 @@ This sets the *ratio* $C_{in} : C_{fb} = 3 : 1$. Absolute values come from the n
 
 ## 2. Required open-loop DC gain $A_0$
 
-For the loop setting $A\beta = 66\,\mathrm{dB}$ and $\beta = 0.25$ ($1/\beta = 12\,\mathrm{dB}$):
+The amplifier curve sits $20\log_{10}G_{cl} = 20\log_{10}4 = 12\,\mathrm{dB}$ above the loop curve, so for $A\beta_{settle} = 66\,\mathrm{dB}$:
 
-$$A_0 \geq 66\,\mathrm{dB} + 12\,\mathrm{dB} = 78\,\mathrm{dB} \quad\text{(matches PDF spec)}$$
+$$A_0 \geq 66 + 12 = 78\,\mathrm{dB}\quad\text{(matches the PDF }A_{settle} > 78\text{ spec).}$$
+
+(For the loop to reach $66\,\mathrm{dB}$ static accuracy with $\beta = 1/5$, the DC loop gain $A_0\beta \ge 10^{66/20}$ wants $A_0 \gtrsim 80\,\mathrm{dB}$ — design with that margin.)
 
 ## 3. Required settling time-constant $\tau$
 
