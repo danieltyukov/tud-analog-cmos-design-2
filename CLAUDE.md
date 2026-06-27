@@ -3,6 +3,15 @@
 These rules **override** the parent `/home/danieltyukov/workspace/tud/CLAUDE.md` for this
 directory only.
 
+## Circuit simulation toolchain
+
+The full verified design→verify→simulate→extract→iterate workflow (which MCP for
+what, the `.asc`→SVG/PNG schematic renderer, gotchas) is in
+[`LTSPICE_TOOLCHAIN.md`](LTSPICE_TOOLCHAIN.md). This project uses **`ltspice`**
+(Wine) + **`spicelib`** (ngspice) for simulation and **`matlab`** (R2025b) for
+post-processing/report math — **not** SLiCAP. Always use the `log018.l` model
+(with $1/f$ noise), never `logic018 no1of.l` (`models/README.md`).
+
 ## Math notation
 
 Use **LaTeX math** in all markdown files in this project (NOT the parent's Unicode rule).

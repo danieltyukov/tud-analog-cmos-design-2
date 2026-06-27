@@ -12,6 +12,14 @@ $$\frac{1}{\beta} = 4 \quad\Longrightarrow\quad \frac{C_{in}}{C_{fb}} = 3 \quad\
 
 This sets the *ratio* $C_{in} : C_{fb} = 3 : 1$. Absolute values come from the noise budget (§4).
 
+> **Ideal vs. actual $\beta$ (TA clarification — `07_lecturer_clarifications.md` §3):**
+> the *realised* $\beta$ extracted from simulation is usually slightly **higher**
+> than the ideal $C_{fb}/(C_{in}+C_{fb})$, because the input-pair parasitics
+> ($C_{gs}$, $C_{gd}$) add to the capacitive divider at the virtual-ground node.
+> If your extracted $\beta$ comes out **lower** than ideal, the formula or design
+> has a bug. This effect must be **explained in the report**, and the Deliverable-4
+> plot shows $A$ and $A\beta$ together with $A\beta$ starting from exactly 0 dB.
+
 ## 2. Required open-loop DC gain $A_0$
 
 For the loop setting $A\beta = 66\,\mathrm{dB}$ and $\beta = 0.25$ ($1/\beta = 12\,\mathrm{dB}$):
@@ -65,12 +73,21 @@ $$V_{n,kT/C,\text{out,diff}}^2 \approx 2 \cdot \left(\frac{1}{\beta}\right)^2 \c
 Hard ceiling $P_{max} = 3\,\mathrm{mW}$ at $V_{dd} = 1.8\,\mathrm{V} \Rightarrow I_{dd,max} = 1.67\,\mathrm{mA}$.
 Best designs drop below $0.3\,\mathrm{mW}$. Use this as the optimization target after the spec is met.
 
+> **Single supply rail (TA clarification — `07_lecturer_clarifications.md` §5.1):**
+> the **entire** amplifier — core, gain boosters, second stage, **and the CMFB
+> circuit** — runs from the **same** $V_{DD} = 1.8\,\mathrm{V}$. Separate/boosted
+> rails per block are **not allowed**.
+>
+> **Don't over-design (§5.2):** meet $\mathrm{SNR} = 66\,\mathrm{dB}$ and
+> $T_{settle} = 25\,\mathrm{ns}$ with margin, then optimise for **low power** —
+> power is the figure to minimise, not gain or speed headroom.
+
 ## 6. Reused vs. new building blocks
 
 | Block | Source | Status |
 |---|---|---|
 | Biasing block (3-current cascode mirror) | EE4520 hw1 → `design/biasing/biasing_block.asc` | reuse, decouple bias lines with $C_{big}$ |
-| Process model `log018.l` | EE4520 → `models/log018.l` | reuse |
+| Process model `log018.l` (BSIM3, **with $1/f$ noise**) | lecturer-provided → `models/log018.l` | **required**; active schematics switched off the no-$1/f$ `logic018 no1of.l` — see `models/README.md` |
 | Folded-cascode core (skeleton) | EE4520 hw2 → `design/core-amp/folded_cascode_baseline.asc` | adapt — replace ideal CMFB / ideal gain-boost |
 | CMFB | EE4520 used **ideal** | **must redesign** in transistors |
 | Gain-boosters (NMOS, PMOS) | EE4520 used **ideal** | **must redesign** if used |

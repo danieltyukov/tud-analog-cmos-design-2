@@ -18,6 +18,11 @@ Closed-loop gain referred to output $\approx 1/\beta = 4$. Differential combines
 
 $$V_{n,kT/C,out,diff}^2 \approx 2 \cdot \left(\frac{1}{\beta}\right)^2 \cdot \frac{kT}{C_{in}}$$
 
+> **Scope of the $kT/C$ term (TA clarification — `07_lecturer_clarifications.md` §4.1):**
+> the reported effective $kT/C$ noise (Deliverable-1 term 10) includes **only**
+> $C_{in}$, $C_{fb}$, and $C_{load}\,(=C_{in})$. If a switched-capacitor CMFB is
+> used, the CMFB caps' $kT/C$ is **not** included in this term.
+
 At $T = 300\,\mathrm{K}$, $kT = 4.14 \cdot 10^{-21}\,\mathrm{J}$:
 
 | $C_{in}$ [pF] | $\sqrt{kT/C_{in}}$ [µV] | $V_{n,kT/C,out,diff}$ [µV$_{rms}$] |
@@ -44,6 +49,44 @@ Integrate against $|H(j\omega)|^2$ where $H$ is the noise-transfer to differenti
 $$V_{n,amp,out,diff}^2 \approx S_{v,in,total} \cdot \left(\frac{1}{\beta}\right)^2 \cdot \frac{\pi}{2} \cdot \mathrm{GBW}$$
 
 (this is the classic noise-bandwidth $= \tfrac{\pi}{2} \cdot \mathrm{GBW}$ approximation for a single-pole loop).
+
+## Flicker ($1/f$) noise — mandatory model, and sizing for the report
+
+The simulation **must** use `log018.l`, which models flicker noise
+(`NOIMOD = 1`, with `KF`/`AF`/`NOIA/NOIB/NOIC`); the old `logic018 no1of.l` had
+**no** $1/f$ noise and is forbidden (see `models/README.md` and
+`07_lecturer_clarifications.md` §1). With the flicker model active, the LTSpice
+`.noise` integral from $10\,\mathrm{kHz}$ already captures the low-frequency
+$1/f$ tail.
+
+Input-referred flicker PSD of a MOS:
+
+$$S_{v,1/f} = \frac{K_f}{C_{ox}\,W L}\cdot\frac{1}{f}\quad [\mathrm{V}^2/\mathrm{Hz}]$$
+
+**Sizing knobs (graded — discuss in the report):**
+
+- **Large gate area $W L$** on the dominant noise devices (input pair, and any
+  device whose noise is referred to the input with unity-ish gain) directly
+  lowers $1/f$ noise — increase $L$ and $W$ together once $g_m$ is set.
+- **PMOS input devices** typically show lower $K_f$ than NMOS in this process —
+  consider PMOS-input (or the $g_m$-reuse stage, `02_topology_choice.md`) if the
+  $1/f$ corner eats into the budget.
+- Keep the $1/f$ corner below the noise bandwidth so the thermal floor dominates
+  the integrated number.
+
+## Report items: dominant noise devices and NEF (Deliverable 9)
+
+The short explanation must (`07_lecturer_clarifications.md` §5.8):
+
+- **Name the devices that contribute significantly to the noise** (read off the
+  LTSpice `.noise` per-device contributions — typically the input pair and the
+  load/tail mirrors; cf. the thermal section above).
+- **Estimate the NEF** (Noise Efficiency Factor):
+
+$$\mathrm{NEF} = V_{n,in,rms}\sqrt{\frac{2\,I_{tot}}{\pi\,U_T\cdot 4kT\cdot \mathrm{BW}}}$$
+
+  with $V_{n,in,rms}$ the input-referred integrated noise, $I_{tot}$ the total
+  amplifier current, $U_T = kT/q$, and $\mathrm{BW}$ the noise bandwidth.
 
 ## Combined budget (template)
 

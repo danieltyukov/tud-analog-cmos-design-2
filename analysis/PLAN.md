@@ -1,13 +1,18 @@
 # EE4525 Project plan & phasing
 
-Today: **2026-05-09** | Due: **2026-06-28** → ~7 weeks.
+Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
+
+> TA clarifications collected in `07_lecturer_clarifications.md` (1/f-noise model,
+> ringing/$\tau$ rule, Deliverable-4 plot, FoM, single supply, submission).
 
 ## Phase 0 — Setup (done)
 
-- [x] Pull EE4520 reusable artefacts → `from-ee4520/`
+- [x] Pull EE4520 reusable artefacts → `from-ee4520/` (index + Deliverable-6 baseline: `from-ee4520/README.md`)
 - [x] Scaffold `design/`, `simulations/`, `analysis/`, `models/`, `report/`
 - [x] Init git
 - [x] Drop in baseline schematics + 0.18 µm model
+- [x] Switch active schematics to the **$1/f$-noise** model `log018.l` (off `logic018 no1of.l`) — `models/README.md`
+- [x] Transcribe TA clarifications → `07_lecturer_clarifications.md`
 
 ## Phase 1 — Specs & budget (week 1, by 2026-05-16)
 
@@ -54,8 +59,10 @@ Deliverables (per PDF):
 4. Settling accuracy vs time plot
 5. Output noise PSD vs frequency + integrated value
 6. ≤ 1-page design-process write-up
-7. FoM comparison vs EE4520 (step-by-step)
-8. Brightspace upload
+7. FoM comparison vs EE4520 (step-by-step) — **required** (we took EE4520; reference results in `from-ee4520/baseline-amplifier-hw2/report/`)
+8. Submit via form **https://edu.nl/3c9tf** — report PDF named `[StudentNumber].pdf`, ≤ 2 submissions, **click Submit** (wait for confirmation page). Also fill the results table in the form. Issues → f.sebastiano@tudelft.nl.
+
+> Aim for **FoM > 170 dB** ($\mathrm{FoM}_{lin} < 9.5\times10^{-18}\,\mathrm{J}$) to pass. See `07_lecturer_clarifications.md` §4–5.
 
 ## Risk log (revisit weekly)
 

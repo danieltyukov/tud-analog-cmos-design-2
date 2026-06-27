@@ -29,7 +29,22 @@ Green = hard spec from the project PDF. Achieved column to be filled during desi
 | 19 | $R_{fb}$                                 | GΩ         | big                 |          |
 | 20 | $C_{big}$                                | nF         | big                 |          |
 | 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   |          |
-| 22 | $\mathrm{FoM}_{dB} = 10\log_{10}(\mathrm{FoM}_{lin})$ | dB |          |          |
+| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          |          |
+
+## Deliverable-1 clarifications (TA announcements — see `07_lecturer_clarifications.md`)
+
+- **Row 10 ($kT/C$ noise):** the total effective $kT/C$ noise at the output includes
+  **only** $C_{in}$, $C_{fb}$, and $C_{load}\,(=C_{in})$. With a switched-capacitor
+  CMFB, the CMFB caps' $kT/C$ is **not** reported in this term.
+- **Row 21 ($\mathrm{FoM}_{lin}$):** "Power $\tau$" $=$ Power $\times\,\tau$. The
+  announcement's $T_{8.6\,\mathrm{dB}}$ is shorthand for **one $e$-fold of settling**
+  ($20\log_{10}e = 8.686\,\mathrm{dB}$), i.e. $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$
+  (rows 5–7). Confirmed by the EE4520 precedent (`from-ee4520/README.md`).
+- **Row 22 ($\mathrm{FoM}_{dB}$):** keep the **negative sign** so the result is a
+  **positive** dB value.
+- **Pass target:** aim for $\mathrm{FoM}_{dB} > 170\,\mathrm{dB}$, i.e.
+  $\mathrm{FoM}_{lin} < 9.5\times10^{-18}\,\mathrm{J}$.
+- **Power (rows 8–9):** biasing-circuit power is excluded.
 
 ## Pipeline-ADC context (from PDF)
 

@@ -1,0 +1,117 @@
+Circuit: * Z:\home\danieltyukov\workspace\tud\tud-analog-cmos-design-2\experiments\cmos1-edit-demo\after\Simulation_1.asc
+
+C4: both pins shorted together -- ignoring.
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Ignoring BSIM parameter ACM
+Ignoring BSIM parameter LDIF
+Ignoring BSIM parameter HDIF
+Ignoring BSIM parameter TLEV
+Ignoring BSIM parameter TLEVC
+Ignoring BSIM parameter CALCACM
+Ignoring BSIM parameter SFVTFLAGl
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Ignoring BSIM parameter ACM
+Ignoring BSIM parameter LDIF
+Ignoring BSIM parameter HDIF
+Ignoring BSIM parameter TLEV
+Ignoring BSIM parameter TLEVC
+Ignoring BSIM parameter CALCACM
+Ignoring BSIM parameter SFVTFLAGl
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Direct Newton iteration failed to find .op point.  (Use ".option noopiter" to skip.)
+Starting Gmin stepping
+Gmin = 10
+Gmin = 1.07374
+Gmin = 0.115292
+Gmin = 0.0123794
+Gmin = 0.00132923
+Gmin = 0.000142725
+Gmin = 1.5325e-005
+Gmin = 1.6455e-006
+Gmin = 1.76685e-007
+Gmin = 1.89714e-008
+Gmin = 2.03704e-009
+Gmin = 2.18725e-010
+Gmin = 2.34854e-011
+Gmin = 2.52173e-012
+Gmin = 2.70769e-013
+Gmin = 0
+Gmin stepping succeeded in finding the operating point.
+
+Semiconductor Device Operating Points:
+                        --- BSIM3 MOSFETS ---
+Name:        mn5         mn4         mn3         mn2         mn1
+Model:      nch.9       nch.9       nch.9       nch.9       nch.9
+Id:        0.00e+00    0.00e+00    2.32e-03    0.00e+00    0.00e+00
+Vgs:       0.00e+00    8.62e-01    8.62e-01    8.62e-01    0.00e+00
+Vds:       0.00e+00    0.00e+00    8.62e-01    0.00e+00    0.00e+00
+Vbs:       0.00e+00    0.00e+00    0.00e+00    0.00e+00    0.00e+00
+Vth:       5.27e-01    5.27e-01    5.25e-01    5.27e-01    5.27e-01
+Vdsat:     4.21e-02    2.20e-01    2.21e-01    2.20e-01    4.21e-02
+Gm:        0.00e+00    0.00e+00    9.37e-03    0.00e+00    0.00e+00
+Gds:       3.72e-09    1.53e-02    3.60e-04    1.53e-02    3.72e-09
+Gmb        0.00e+00    0.00e+00    2.72e-03    0.00e+00    0.00e+00
+Cbd:       0.00e+00    0.00e+00    0.00e+00    0.00e+00    0.00e+00
+Cbs:       0.00e+00    0.00e+00    0.00e+00    0.00e+00    0.00e+00
+Cgsov:     7.90e-15    7.90e-15    7.90e-15    7.90e-15    7.90e-15
+Cgdov:     7.90e-15    7.90e-15    7.90e-15    7.90e-15    7.90e-15
+Cgbov:     7.00e-16    7.00e-16    7.00e-16    7.00e-16    7.00e-16
+dQgdVgb:   2.66e-14    4.73e-14    4.20e-14    4.73e-14    2.66e-14
+dQgdVdb:  -7.90e-15   -2.24e-14   -7.87e-15   -2.24e-14   -7.90e-15
+dQgdVsb:  -7.90e-15   -2.26e-14   -3.03e-14   -2.26e-14   -7.90e-15
+dQddVgb:  -7.90e-15   -2.33e-14   -7.93e-15   -2.33e-14   -7.90e-15
+dQddVdb:   7.90e-15    4.97e-14    7.92e-15    4.97e-14    7.90e-15
+dQddVsb:  -5.01e-21   -2.18e-14    2.29e-17   -2.18e-14   -5.01e-21
+dQbdVgb:  -1.08e-14   -8.16e-16   -5.69e-15   -8.16e-16   -1.08e-14
+dQbdVdb:  -3.33e-21   -1.33e-14    2.11e-18   -1.33e-14   -3.33e-21
+dQbdVsb:   7.15e-19    2.53e-15   -4.18e-15    2.53e-15    7.15e-19
+
+Name:        mp5         mp4         mp3         mp2         mp1
+Model:      pch.9       pch.9       pch.9       pch.9       pch.9
+Id:       -4.01e-04   -4.01e-04   -3.00e-03   -4.00e-04   -4.00e-04
+Vgs:      -7.46e-01   -6.70e-01   -1.03e+00   -7.52e-01   -6.70e-01
+Vds:      -6.18e-01   -2.82e-01   -1.03e+00   -3.93e-01   -2.77e-01
+Vbs:       2.82e-01    0.00e+00    0.00e+00    2.77e-01    0.00e+00
+Vth:      -5.83e-01   -4.94e-01   -4.92e-01   -5.82e-01   -4.94e-01
+Vdsat:    -1.68e-01   -1.71e-01   -3.91e-01   -1.72e-01   -1.71e-01
+Gm:        3.75e-03    3.50e-03    8.97e-03    3.61e-03    3.48e-03
+Gds:       1.07e-04    2.43e-04    4.31e-04    1.64e-04    2.50e-04
+Gmb        1.13e-03    1.20e-03    3.09e-03    1.10e-03    1.20e-03
+Cbd:       0.00e+00    0.00e+00    0.00e+00    0.00e+00    0.00e+00
+Cbs:       0.00e+00    0.00e+00    0.00e+00    0.00e+00    0.00e+00
+Cgsov:     1.91e-14    1.91e-14    1.91e-14    1.91e-14    1.91e-14
+Cgdov:     1.91e-14    1.91e-14    1.91e-14    1.91e-14    1.91e-14
+Cgbov:     2.90e-15    2.90e-15    2.90e-15    2.90e-15    2.90e-15
+dQgdVgb:   1.08e-13    1.09e-13    1.13e-13    1.08e-13    1.09e-13
+dQgdVdb:  -1.89e-14   -1.91e-14   -1.89e-14   -1.89e-14   -1.92e-14
+dQgdVsb:  -8.25e-14   -8.28e-14   -8.84e-14   -8.28e-14   -8.28e-14
+dQddVgb:  -1.92e-14   -1.99e-14   -1.92e-14   -1.94e-14   -2.00e-14
+dQddVdb:   1.91e-14    1.98e-14    1.92e-14    1.93e-14    1.99e-14
+dQddVsb:   1.03e-16    3.98e-16    4.66e-17    2.32e-16    4.08e-16
+dQbdVgb:  -1.66e-14   -1.69e-14   -1.78e-14   -1.66e-14   -1.69e-14
+dQbdVdb:   7.09e-18   -2.22e-16    4.12e-19   -5.39e-17   -2.40e-16
+dQbdVsb:  -5.97e-15   -8.30e-15   -6.58e-15   -6.01e-15   -8.30e-15
+
+
+
+Date: Sat Jun 27 11:02:09 2026
+Total elapsed time: 0.026 seconds.
+
+tnom = 27
+temp = 27
+method = trap
+totiter = 397
+traniter = 0
+tranpoints = 0
+accept = 0
+rejected = 0
+matrix size = 13
+fillins = 0
+solver = Normal
+Matrix Compiler1:      39 opcodes
+Matrix Compiler2: off
