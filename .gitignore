@@ -1,9 +1,9 @@
-# LTSpice large binary outputs (regenerable)
+# LTSpice large binary outputs (regenerable) — includes *.op.raw
 *.raw
-!*.op.raw
 
-# LTSpice scratch / autosave / netlist outputs
+# LTSpice scratch / autosave / netlist / run logs (regenerable)
 *.net
+*.log
 *.bak
 *.rev
 *~

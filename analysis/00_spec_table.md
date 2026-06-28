@@ -38,8 +38,54 @@ Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
 | 18 | $C_{CM}$                                 | pF         | ---                 | *TBD (~0.5, Ph3)* |
 | 19 | $R_{fb}$                                 | GΩ         | big                 | **1** ($R_{fb}/R_{in}=4$) |
 | 20 | $C_{big}$                                | nF         | big                 | **1** |
-| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | *TBD (~1.5e-18)* |
-| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | *TBD (~178)* |
+| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | *Ph-2 pre-closure **1.32e-17** (final TBD, Ph-1 pred 1.5e-18)* |
+| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | *Ph-2 pre-closure **168.8** ⚠ <170 (final TBD, Ph-1 pred 178)* |
+
+## Phase-2 design-verification results (2026-06-28, ideal CMFB + ideal gain-boost)
+
+Core sized in `design/core-amp/folded_cascode_baseline.asc`, verified on the loaded
+AC bench `simulations/ac/loaded_ac_baseline.asc` ($C_L=5\,\mathrm{pF}$) and `.op`.
+Full sizing table + method in `03_sizing_calcs.md`. **These are Phase-2 numbers with
+the ideal CMFB/boost still in place and NMOS-only input (no current-reuse yet)** —
+real CMFB is Phase 3, real boosters Phase 4, current-reuse power optimisation Phase 5.
+
+| Metric | Spec / target | Phase-2 achieved | Note |
+|---|---|---|---|
+| $A_0$ (open-loop diff gain) | $\ge 78$ dB | **93.9 dB** | with **ideal** boost — "confirmed achievable"; real-booster 78 dB test is Phase 4 |
+| Amplifier GBW $=f_u/\beta$ | $\approx 242$ MHz | **264 MHz** | $g_{m,in}=12.2\,\mathrm{mS}$, $C_{L,eff}\approx7.3\,\mathrm{pF}$ |
+| Loop crossover $f_u$ ($|A|\beta=1$) | $\ge 48.4$ MHz | **52.9 MHz** | → $\tau_{cl}=1/2\pi f_u$ |
+| $\tau_{cl}$ | 3.0 ns (< 3.29 ceiling) | **3.01 ns** | row 7 design-verify (transient confirm in Phase 5) |
+| Phase margin | $\ge 60°$ | **89°** | single dominant pole; non-dominant poles $\gg f_u$ |
+| $g_{m,in}$ | $\approx 10$ mS | **12.2 mS** | input pair $g_m/I_D=20.4$, $I_D=597\,\mu\mathrm{A}$/side |
+| All transistors saturated | yes, $V_{DS,sat}\gtrsim100$ mV | **yes** (min 52 mV) | wide-swing/tail devices 52–85 mV (intrinsic, all in sat.) |
+| Branch rule $I_{top}\ge I_{in}$ | required | **773 µA ≥ 597 µA** (37 % fold margin) | folded-cascode "common mistake" check |
+| $I(V_{dd})$ (amps only) — **row 9** | $<1.7$ mA | **1.55 mA** | NMOS-only; drops in Phase 5 (current-reuse) |
+| Power (amps only) — **row 8** | $<3$ mW | **2.78 mW** | $=I(V_{dd})\cdot1.8$; Phase-5 target $\to0.3$ mW |
+
+Figures: open-loop Bode `../report/figures/phase2_openloop_bode.png`; sized core
+schematic `../report/figures/folded_cascode_baseline.{svg,png}`.
+
+### FoM reality check — the metric that grades this project (PRE-CLOSURE)
+
+With the Phase-2 power and the AC-derived settling proxy:
+
+$$\mathrm{FoM}_{lin} = \frac{2\pi\,P\,\tau}{\mathrm{SNR}_{lin}^2}
+ = \frac{2\pi\,(2.78\,\mathrm{mW})(3.01\,\mathrm{ns})}{1995^2}
+ = 1.32\times10^{-17}\,\mathrm{J}
+ \;\Rightarrow\; \mathrm{FoM}_{dB} = -10\log_{10}(\cdot) = \mathbf{168.8\,dB}.$$
+
+($\tau = 1/2\pi f_u = 3.01\,\mathrm{ns}$ from $f_u=52.9\,\mathrm{MHz}$; $\mathrm{SNR}_{lin}=1995$ at $66\,\mathrm{dB}$.)
+
+- **(a) 168.8 dB is BELOW the 170 dB pass line** and below the **EE4520 baseline (175.2 dB)** we must beat in Deliverable 6.
+- **(b) This is NOT a Phase-2 exit criterion.** FoM is a Phase-5/6 *closure* metric: it needs the **final** power, the **transient-measured** $\tau$ ($T_{38.6}-T_{30}$, not the AC proxy), and the **integrated noise / SNR**. The 168.8 dB here is a pre-closure indicator computed from the Phase-2 (NMOS-only, ideal-block) power only.
+- **(c) The lever to clear 170 dB is current-reuse (Phase 5).** FoM $\propto P$, so the dominant knob is power. The Phase-2 amp burns 2.78 mW NMOS-only; the complementary current-reuse input (≈2× $g_m/\mu\mathrm{A}$) is the planned path from 2.78 mW toward the 0.30 mW top-down floor → FoM toward ~178 dB. **Current-reuse is now MANDATORY, not optional.**
+
+> **On track for the real 78 dB (Phase 4).** With the ideal boost the single-stage
+> reads 93.9 dB; the *un-boosted* folded cascode here is $\sim$50–55 dB
+> ($g_{m,in}r_{o,casc}$ with $r_{o}$ in the kΩ range, short $L=0.18\,\mu$m). The
+> gain-boost must therefore supply $\gtrsim25$ dB of extra loop gain to clear 78 dB —
+> well within a single-stage NMOS/PMOS cascode booster's reach (Binkley target
+> $\ge 40$ dB), so **78 dB is on track**.
 
 ## Deliverable-1 clarifications (TA announcements — see `07_lecturer_clarifications.md`)
 

@@ -50,9 +50,17 @@ the `ltspice` MCP; tools per `../LTSPICE_TOOLCHAIN.md`. Figures land per
 ## C. AC loaded (replica) — realistic loading
 
 - Same `.meas` but on `V(Voutp2,Voutn2)` with the **replica amplifier** providing
-  realistic output loading (see the loaded-vs-unloaded note; the replica mimics the
-  next-stage load). The loaded $A$/BW is what actually governs settling.
-- **Produces:** loaded $A_0$, $A\beta$, BW, PM.
+  realistic output loading (the replica mimics the next-stage load). The loaded
+  $A$/BW is what actually governs settling.
+- **⚠ The `V(Voutp2,Voutn2)` `.meas` is UNRELIABLE — do NOT trust it for
+  $A_0$/GBW/PM.** Phase 2 found this loaded node reads ~42 dB (or ~132 dB with
+  wrapped phase) at the `at=10` point — a replica/probe artifact, not the real gain.
+  Extract $A_0$/GBW/PM instead from the **unloaded** `V(Voutp)−V(Voutn)` by complex
+  subtraction in Python ($\beta=1/5$), as done in Phase 2 (also saved to project
+  memory). Use the loaded bench only for the *loading effect* (settling cross-check),
+  never for the headline gain numbers.
+- **Produces:** loaded $A_0$, $A\beta$, BW, PM (via the Python post-processor on the
+  unloaded nodes — not the raw `Voutp2` `.meas`).
 
 ## D. Transient settling — step response (**Deliverable 4**)
 

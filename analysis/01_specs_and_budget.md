@@ -23,8 +23,8 @@ the architecture and $C_{in}{:}C_{fb}=4{:}1$ ratio were already settled (§1, `0
 | **$C_{fb}$** | **$1.25\,\mathrm{pF}$** | $=C_{in}/4$ |
 | **$C_{load}$** | **$5\,\mathrm{pF}$** | $=C_{in}$ (row 17) |
 | $\tau_{cl}$ ceiling / design | $3.29 / 3.0\,\mathrm{ns}$ | $N_{settle}=\ln(1995)=7.60$; 3.0 ns leaves slew/parasitic margin |
-| loop $f_u$ / amp GBW | $48.4 / 242\,\mathrm{MHz}$ | $\mathrm{GBW}=f_u/\beta$ |
-| $g_{m,in}$ first-cut | $\approx 10\,\mathrm{mS}$ | $=C_{L,eff}/(\beta\,\tau)$, $C_{L,eff}=6\,\mathrm{pF}$ |
+| loop $f_u$ / amp GBW | $48.4 / 242\,\mathrm{MHz}$ **(floor)** | $\mathrm{GBW}=f_u/\beta$; 242 is the floor at $\tau=3.29$ ceiling — **design point** is $\tau=3.0\Rightarrow f_u=53.1,\ \mathrm{GBW}\approx265$ MHz (Ph-2 achieved 264) |
+| $g_{m,in}$ first-cut | $\approx 10\,\mathrm{mS}$ → **12.2 mS** (Ph-2) | $=2\pi\,\mathrm{GBW}\,C_{L,eff}$; Ph-1 used estimated $C_{L,eff}=6\,\mathrm{pF}$, **sim-realised $C_{L,eff}=7.34\,\mathrm{pF}$** ⇒ $\tau=3.0$ ns needs $g_m=12.2$ mS (settling-bound; 10 mS → $\tau\approx3.7$ ns, fails) |
 | Input-stage current | $0.42$–$0.67\,\mathrm{mA}$ (reuse) | $g_m/I_D=15$–$24$; $0.83$–$1.33\,\mathrm{mA}$ without reuse |
 | $P_{system}$ floor | $0.169\,\mathrm{mW}$ | implementation-independent (`08` §2) |
 | Predicted $P$ (top-down / bottom-up) | $0.30 / 1.27\,\mathrm{mW}$ | both $<3\,\mathrm{mW}$; optimise toward floor in Phase 5 |
