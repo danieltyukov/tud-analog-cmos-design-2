@@ -43,8 +43,9 @@ Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
 
 ## Phase-2 design-verification results (2026-06-28, ideal CMFB + ideal gain-boost)
 
-Core sized in `design/core-amp/folded_cascode_baseline.asc`, verified on the loaded
-AC bench `simulations/ac/loaded_ac_baseline.asc` ($C_L=5\,\mathrm{pF}$) and `.op`.
+Core sized in `design/core-amp/folded_cascode_baseline.asc`, verified on the **Phase-2
+legacy** loaded AC bench `simulations/ac/loaded_ac_baseline.asc` ($C_L=5\,\mathrm{pF}$)
+and `.op`. (Phase-3+ uses the current real-CMFB bench `design/cmfb/folded_cascode_cmfb_ac.asc`.)
 Full sizing table + method in `03_sizing_calcs.md`. **These are Phase-2 numbers with
 the ideal CMFB/boost still in place and NMOS-only input (no current-reuse yet)** —
 real CMFB is Phase 3, real boosters Phase 4, current-reuse power optimisation Phase 5.

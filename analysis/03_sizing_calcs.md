@@ -44,8 +44,9 @@ Otherwise the differential pair starves the PMOS cascodes when input swings.
 
 Sized in `design/core-amp/folded_cascode_baseline.asc` (folded cascode, **ideal**
 CMFB `E1` + **ideal** gain-boost `E2–E7`, `Aadd=100`), verified by `.op`
-(`read_op_point` + device table) and the AC bench
-`simulations/ac/loaded_ac_baseline.asc` (loaded $C_L=5\,\mathrm{pF}$). All devices
+(`read_op_point` + device table) and the **Phase-2 legacy** AC bench
+`simulations/ac/loaded_ac_baseline.asc` (loaded $C_L=5\,\mathrm{pF}$; Phase-3+ uses
+`design/cmfb/folded_cascode_cmfb_ac.asc`). All devices
 share the unit cell $W/L = 1\,\mu\mathrm{m}/0.18\,\mu\mathrm{m}$; size set by the
 integer multiplier $M$.
 
