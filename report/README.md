@@ -3,6 +3,13 @@
 The execution map for the final report. Specs to match → `../analysis/00_spec_table.md`;
 sims → `../analysis/09_simulation_runbook.md`; tools → `../LTSPICE_TOOLCHAIN.md`.
 
+> **Report skeleton: `report.tex`** — the LaTeX report (article class), already in the
+> **compulsory EE4525 structure**, adapted from the EE4520 template
+> `../from-ee4520/HW2_EE4520_5714699/main.tex`. It compiles as-is (figure
+> placeholders). Fill the **Achieved** column and drop figures into `figures/`
+> (swap each commented `\includegraphics` line in for its placeholder). Build:
+> `pdflatex report.tex` (twice, for the ToC).
+
 > **EE4525 needs only 2 plots + 2 annotated schematics** (D4 settling, D5 noise;
 > D2/D3 schematics). Submit **PDF named `[StudentNumber].pdf`**, ≤ 2 submissions,
 > via `https://edu.nl/3c9tf` — **deadline Sun 28 Jun 2026, 23:59**.
