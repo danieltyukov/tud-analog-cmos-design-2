@@ -11,7 +11,7 @@ Architecture is fully free per PDF. Three viable starting points; pick before si
 
 **Cons:**
 - $A_0$ from a plain cascode at 0.18 µm is typically $50$–$70\,\mathrm{dB}$ → may **fall short of $78\,\mathrm{dB}$** without help.
-- Pushing $g_m$ up to hit $194\,\mathrm{MHz}$ GBW in a single stage costs current.
+- Pushing $g_m$ up to hit $242\,\mathrm{MHz}$ GBW in a single stage costs current.
 
 **When to pick:** if you can show $A_0 \geq 78\,\mathrm{dB}$ by sizing alone (long $L$, moderate $g_m / I_D$).
 

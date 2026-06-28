@@ -26,9 +26,9 @@ $C_{load,total} \approx C_{load} + C_{fb}(1-\beta) + \text{parasitics} \approx C
 
 $$\mathrm{GBW} \approx \frac{g_{m,in}}{2\pi \cdot C_{load,eff}}$$
 
-Required GBW from §01 ≈ **194 MHz** → fixes $g_{m,in}$.
+Required GBW from §01 ≈ **242 MHz** ($=f_u/\beta$, $\beta = 1/5$) → fixes $g_{m,in}$.
 
-$$g_{m,in,required} = 2\pi \cdot 194 \cdot 10^6 \cdot C_{load,eff}$$
+$$g_{m,in,required} = 2\pi \cdot 242 \cdot 10^6 \cdot C_{load,eff}$$
 
 Plug in $C_{in}$ (decided in §04 from noise budget) to get the absolute $g_{m,in}$ number, then divide by chosen $(g_m/I_D)_{in}$ to get $I_{D,in}$.
 

@@ -25,11 +25,11 @@ A classic **two-stage Miller-compensated** opamp:
   ($\omega_z = 1/[C_c(1/g_{m2}-R_z)]$) out of the way. Pole-splitting:
   dominant pole $\approx 1/(R_1 g_{m2} R_2 C_c)$, non-dominant $\approx g_{m2}/C_L$.
 - **GBW / PM:** $\mathrm{GBW}=g_{m1}/C_c$; size $g_{m2}$ so the 2nd pole
-  $g_{m2}/C_L$ sits well above GBW (PM $\ge 60$–$70°$). For our $194\,\mathrm{MHz}$
+  $g_{m2}/C_L$ sits well above GBW (PM $\ge 60$–$70°$). For our $242\,\mathrm{MHz}$
   GBW this forces a **large $g_{m2}$** (i.e. a lot of stage-2 current).
 - **CMFB:** two CM loops (one per stage) or a CMFB on the output stage — more CMFB
   than the single-stage's one loop.
-- **First-cut sizing sketch:** $g_{m1}=2\pi\cdot194\,\mathrm{MHz}\cdot C_c$;
+- **First-cut sizing sketch:** $g_{m1}=2\pi\cdot242\,\mathrm{MHz}\cdot C_c$;
   $C_c\sim0.2$–$0.5\,C_L$; $g_{m2}$ ≈ a few × $g_{m1}$ to keep the 2nd pole high.
 
 ## Why we'd consider it (the upsides)
@@ -46,7 +46,7 @@ A classic **two-stage Miller-compensated** opamp:
   Hitting **0.05 % in 25 ns** is materially harder than the single-stage's clean
   first-order settle. (`06_settling_analysis.md`, `07` §2.)
 - **Power = the grade.** Stage 2 burns extra current (to push $g_{m2}/C_L$ past
-  $194\,\mathrm{MHz}$) and slewing $C_c$ costs current → **worse FoM**. Single-stage
+  $242\,\mathrm{MHz}$) and slewing $C_c$ costs current → **worse FoM**. Single-stage
   spends every µA on bandwidth. (`08_power_prediction.md`.)
 - **Its advantages aren't needed here.** We already reach $>78\,\mathrm{dB}$ via
   gain-boosting, and SNR is only $66\,\mathrm{dB}$ (relaxed) so the big swing buys

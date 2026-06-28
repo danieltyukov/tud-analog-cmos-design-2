@@ -96,7 +96,7 @@ $$\omega_u \geq \frac{1}{\tau_{cl}} \approx 304\,\mathrm{Mrad/s} \quad\Longright
 
 And the **amplifier** GBW (open-loop) is:
 
-$$\mathrm{GBW} \approx \frac{\omega_u}{\beta} = 4 \cdot 48.4 \approx 194\,\mathrm{MHz}$$
+$$\mathrm{GBW} \approx \frac{f_u}{\beta} = 5 \cdot 48.4 \approx 242\,\mathrm{MHz}\qquad(\beta = 1/5)$$
 
 ## 4. Noise budget (output-referred, differential)
 
