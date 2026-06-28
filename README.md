@@ -40,10 +40,14 @@ spec/rules ─► design derivations ─► sizing ─► simulate ─► extrac
 
 ## Current state
 
-Setup + analysis docs complete (the *plan* and *method*). Execution pending:
-sizing, sims, figures, report (Phase 1 onward — `PLAN.md`). The earlier β/gain
-question is **resolved**: $C_{in}{:}C_{fb} = 4{:}1$ (residue gain $= C_{in}/C_{fb} = 4$;
-loop $\beta = C_{fb}/(C_{in}+C_{fb}) = 1/5$, noise gain 5) — see `analysis/01` §1.
+**Phases 1–3 done** (`PLAN.md`). Phase 1 specs/budget frozen; Phase 2 folded-cascode
+core sized (**A₀ 93.9 dB · GBW 264 MHz · PM 89° · I(Vdd) 1.55 mA**, ideal CMFB +
+ideal gain-boost); Phase 3 swapped in a **real switched-capacitor CMFB** (`design/cmfb/`,
+`analysis/05`) — differential AC unregressed, CM step stable, **I(Vdd) still 1.547 mA
+(SC adds 0 static)**. Next: Phase 4 real gain-boosters, Phase 5 current-reuse + noise/
+settling closure, Phase 6 report. The β/gain question is **resolved**:
+$C_{in}{:}C_{fb} = 4{:}1$ (residue gain $= C_{in}/C_{fb} = 4$; loop
+$\beta = C_{fb}/(C_{in}+C_{fb}) = 1/5$, noise gain 5) — see `analysis/01` §1.
 
 ## To execute (short version)
 

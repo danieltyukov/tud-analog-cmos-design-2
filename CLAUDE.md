@@ -12,6 +12,57 @@ what, the `.asc`→SVG/PNG schematic renderer, gotchas) is in
 post-processing/report math — **not** SLiCAP. Always use the `log018.l` model
 (with $1/f$ noise), never `logic018 no1of.l` (`models/README.md`).
 
+## LTspice `.asc` schematic hygiene (MANDATORY — applies to every phase/agent)
+
+The `.asc` is read by a human and a grader and is forked by later phases. It must
+**always be a complete, honest schematic of exactly what was simulated** — never a
+course-template file with bolt-on text and leftover labels.
+
+1. **Real drawn components, NOT text-directive elements.** Every circuit *element*
+   — transistor, R, C, switch, source, VCVS — must be a **drawn symbol**. Do **NOT**
+   add circuit elements as SPICE netlist text lines (e.g. `S1p ap Voutp phi2 0 SWCM`,
+   `Cs1 ap bp {Ccm}`, `Ehelp …`, `Vphi1 …`). This holds for every phase: SC-CMFB
+   switches/caps/clocks (Phase 3), gain-boosters (Phase 4), current-reuse devices
+   (Phase 5). *Text directives are allowed ONLY for non-element items:* `.lib`,
+   `.include`, `.model`, `.param`, `.op`, `.ac`, `.tran`, `.meas`, `.option`.
+
+2. **Connect components with drawn WIRES, not net-label flags.** Pins that connect must
+   be joined by actual `WIRE` segments so the schematic *looks* connected. Net-label
+   `FLAG`s are allowed **only** for nets that genuinely span the sheet (supply rails,
+   clock lines, shared far-apart I/O like `Voutp`/`Vbcm`) — **never** as a substitute
+   for wiring up a local cluster of parts. A field of floating symbols each tagged with
+   a net name (e.g. three switches + a cap all labelled `ap` with no wire between them)
+   is **not acceptable** — draw the wire.
+
+3. **All directives live INSIDE the one "Parameters, Simulations & Measurements" box.**
+   Every `.param`/`.model`/`.lib`/`.op`/`.ac`/`.tran`/`.meas`/`.option` goes inside that
+   single titled boundary box, consolidated — **not** in a floating block elsewhere on
+   the sheet. When you add new params/models (e.g. `Ccm`, `Cchold`, `Rhelp`,
+   `.model SWCM`), put them *in the box* alongside the existing ones; when something is
+   superseded, **remove the old line from the box**.
+
+4. **Lay it out cleanly — match the existing blocks, no overlaps, stay inside the box.**
+   Mirror the course template's style: each functional block sits inside its own titled
+   rectangle (Biasing, Decoupling, etc.). Newly drawn circuitry must **(a)** NOT overlap
+   any other symbol, wire, or text — give parts room; **(b)** stay **inside** its
+   designated boundary rectangle — if the block grows, **enlarge the rectangle** rather
+   than letting symbols/wires spill outside it; **(c)** use the **same title font size
+   and style** as the other block titles, with the title fitting inside its box. Match
+   the spacing/alignment of the existing blocks so the sheet reads consistently. Before
+   finishing, scan the render for overlaps and out-of-box elements and fix them.
+
+5. **Keep it updated — no stale anything.** When you replace an ideal block with a
+   real one: **delete the old symbols** (no orphan gaps where a part was removed),
+   **relabel the block** to what it now is (never an "Ideal CMFB" caption over a real
+   SC-CMFB), and **prune stale `.param`/`.meas`** that no longer apply (e.g. artifact
+   `Voutp2` measurements, superseded sizing). The file must show the *current* values
+   and *current* topology so the reader can see exactly what was calculated — never
+   leftover parameters or simulations from the course template.
+
+6. **Verify after every change.** Re-run the sim and `render_schematic` (white bg) and
+   confirm the verified numbers still hold. The clean report figure is still CircuiTikZ
+   (below), but the `.asc` itself must also be complete and current.
+
 ## Math notation
 
 Use **LaTeX math** in all markdown files in this project (NOT the parent's Unicode rule).

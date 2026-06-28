@@ -1,0 +1,64 @@
+% Phase-3 real switched-capacitor CMFB (replaces the ideal E1 VCVS).
+% Continuous sense/hold caps C_C (=C7,C8) couple the output CM to the control
+% node Vbcm (fast, ~diff GBW); switched caps C_CM (=Cs1,Cs2) refresh the DC level
+% each clock cycle (sample on phi1 between Vcmr and Vbn, transfer on phi2 between
+% Vout and Vbcm).  A weak ideal-DC helper (E through large R_help) sets the DC
+% operating point for .op/.ac only.  Vbcm drives the output-CM sink gates Mn5,Mn7.
+\input{header.tex}
+\begin{document}
+\begin{circuitikz}[american, scale=1.0, line width=0.6pt]
+
+  %% ===== control-node rail Vbcm =====
+  \draw (12,3.2) -- (12,-3.2);
+  \node[above] at (12,3.2) {$V_{bcm}$};
+  \fill (12,0) circle (1.6pt);
+  \draw[-latex] (12,0) -- ++(2.2,0) node[right,align=left]{to gates of\\$M_{n5},M_{n7}$\\(output CM sinks)};
+
+  %% ===== output terminals =====
+  \draw (0,3) node[left]{$V_{out+}$} to[short,o-] (1.2,3) coordinate (vop);
+  \draw (0,-3) node[left]{$V_{out-}$} to[short,o-] (1.2,-3) coordinate (von);
+
+  %% ===== continuous sense/hold caps C_C  (= C7, C8 = 1.25 pF) =====
+  \draw (vop) to[C, l=$C_{C}$] (6.5,3) -- (12,3);
+  \draw (von) to[C, l_=$C_{C}$] (6.5,-3) -- (12,-3);
+
+  %% ===== + side switched sampling branch (C_CM = Cs1 = 0.5 pF) =====
+  \draw (2.4,3) -- (2.4,1.4) coordinate (tp);
+  \draw (tp) to[nos, l=$\phi_2$] (4.2,1.4) coordinate (ap);
+  \draw (ap) to[C, l=$C_{CM}$] (8.2,1.4) coordinate (bp);
+  \draw (bp) to[nos, l=$\phi_2$] (12,1.4);
+  % phi1: ap -> Vcmr ,  bp -> Vbn
+  \draw (ap) -- (4.2,2.3) to[nos, l=$\phi_1$] (6.0,2.3) node[right]{$V_{cmr}$};
+  \draw (bp) -- (8.2,0.5) to[nos, l_=$\phi_1$] (10.0,0.5) node[right]{$V_{bn}$};
+
+  %% ===== - side switched sampling branch (C_CM = Cs2 = 0.5 pF) =====
+  \draw (2.4,-3) -- (2.4,-1.4) coordinate (tn);
+  \draw (tn) to[nos, l_=$\phi_2$] (4.2,-1.4) coordinate (an);
+  \draw (an) to[C, l_=$C_{CM}$] (8.2,-1.4) coordinate (bn);
+  \draw (bn) to[nos, l_=$\phi_2$] (12,-1.4);
+  \draw (an) -- (4.2,-2.3) to[nos, l_=$\phi_1$] (6.0,-2.3) node[right]{$V_{cmr}$};
+  \draw (bn) -- (8.2,-0.5) to[nos, l=$\phi_1$] (10.0,-0.5) node[right]{$V_{bn}$};
+
+  %% ===== weak ideal-DC CMFB helper (OP/AC only) =====
+  % drawn as a labelled block: senses the output CM via large R1,R2 averaging,
+  % compares to Vcmr, drives Vbcm through R_help (100 MOhm => kHz BW, DC only).
+  \node[draw, rectangle, rounded corners, align=center, font=\footnotesize,
+        minimum width=3.6cm, minimum height=1.3cm] (H) at (4.3,-5.0)
+    {ideal DC CMFB ($E$)\\senses $V_{out}$ CM ($R_1,R_2$)\\ref.\ $V_{cmr}$};
+  % CM sense input from the two outputs
+  \draw (vop) -- (1.7,3) coordinate(t1) ;
+  \draw (1.7,3) -- (1.7,-5.0) -- (H.west);
+  \draw (von) -- (1.7,-3);
+  \node[font=\footnotesize, anchor=east] at (1.55,-1.0) {$R_1,R_2$};
+  % output through R_help up to the Vbcm rail
+  \draw (H.east) to[R, l=$R_{help}$] (9.0,-5.0) -- (12,-5.0) -- (12,-3.2);
+  \node[font=\footnotesize, anchor=west] at (9.2,-5.35) {$100\,$M$\Omega$};
+  \node[align=left, font=\footnotesize] at (6.6,-6.2)
+    {weak DC helper -- sets the bias point for \texttt{.op}/\texttt{.ac} only\\(BW $\approx$ kHz $\ll$ signal band; the SC network does all in-band CM correction)};
+
+  %% ===== clock note =====
+  \node[align=left, font=\footnotesize] at (3.0,4.6)
+    {$\phi_1$: sample / reset\\$\phi_2$: amplify (non-overlap, 20\,MHz)};
+
+\end{circuitikz}
+\end{document}

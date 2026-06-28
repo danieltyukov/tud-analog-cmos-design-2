@@ -72,6 +72,10 @@ real SC-CMFB (replaces ideal `E1`) and re-verify differential AC.
 >   ≈ 30–75 µA tail each → **~60–150 µA total**; if cascoded for ≥40 dB / higher speed,
 >   up to ~250 µA.
 >
+> **✅ Phase-3 measured (2026-06-28):** the real SC-CMFB drew **0 mA static** (clocks
+> 0 A, helper ~0.5 pA) → **I(Vdd) = 1.547 mA, unchanged** from Phase-2. The SC choice
+> paid off exactly as predicted; ~0.15 mA headroom remains for Phase-4 boosters.
+>
 > **Verdict:** with a pure SC-CMFB (~0) and **lean boosters (≤~150 µA total)**,
 > post-Phase-4 I(Vdd) ≈ **1.55 + 0.15 ≈ 1.7 mA — right at the ceiling**; a generous
 > booster bias **breaches** 1.7 mA / 3 mW *before* Phase-5 current-reuse. The margin is
@@ -80,14 +84,29 @@ real SC-CMFB (replaces ideal `E1`) and re-verify differential AC.
 > **current-reuse forward** (it halves input-branch current — the dominant term) rather
 > than waiting for Phase 5. Current-reuse is in any case now mandatory for FoM (`00`).
 
-- [ ] Build **real SC-CMFB** (settled) per `05_cmfb_design.md` — replaces ideal `E1`
-- [ ] CM step response stable, GBW close to diff GBW
-- [ ] Verify nothing regressed in differential AC
-- [ ] **Re-check I(Vdd) ≤ 1.7 mA after CMFB drop-in** (power-ceiling watch above)
+## Phase 3 — CMFB — DONE 2026-06-28
+
+Replaced ideal `E1` with a **real switched-capacitor CMFB** (`design/cmfb/`,
+`05_cmfb_design.md`, results `design/cmfb/phase3_results.txt`). $C_{CM}=0.5$ pF
+switched + $C_C=1.25$ pF hold/sense per side, control node `Vbcm`, 20 MHz
+non-overlapping clock, ideal switches, weak ideal-DC helper (100 MΩ) for OP/AC.
+
+- [x] Build **real SC-CMFB** (settled) per `05_cmfb_design.md` — replaces ideal `E1`
+- [x] CM step response **stable** (overshoot +0.26 mV, no ringing); CM-loop $\tau_{cm}=4.15$ ns ($f_{cm}\approx38$ MHz) ≈ diff $f_u$=52.9 MHz → CM tracks during the 25 ns settle
+- [x] Differential AC **unregressed**: A₀ 93.81 dB · GBW 264 MHz · PM 89° (Δ ≈ 0 vs Phase 2)
+- [x] **I(Vdd) = 1.547 mA after CMFB drop-in** ✓ (== Phase-2; SC-CMFB adds 0 mA static; clocks draw 0 A)
 
 ## Phase 4 — Gain-boosting (committed; week 5, by 2026-06-13)
 
 Part of the settled architecture (need 78 dB single-stage) — see `02_topology_choice.md` build plan and **`10_gain_booster_design.md`** (Binkley Fig. 7 template + Ryu improvement, with the figure).
+
+> **Base schematic: fork from `design/cmfb/folded_cascode_cmfb.asc`** (the Phase-3
+> real-CMFB version) — **NOT** `design/core-amp/folded_cascode_baseline.asc` (ideal CMFB).
+> Keep the real SC-CMFB **and** the NMOS-only input; replace ONLY the ideal gain-boost
+> `E2–E7` (`Aadd=100`) with real cascode boosters. Expect $A_0$ to **drop** from 93.8 dB
+> toward the real-booster value — that drop *is* the genuine $\ge 78\,\mathrm{dB}$ test
+> (`00` Phase-2 note). Read A₀/GBW/PM from the unloaded `V(Voutp)−V(Voutn)` + Python,
+> never the `Voutp2` `.meas` (`09` §C). Keep total booster bias $\le\sim150\,\mu$A (ceiling).
 
 - [ ] Design **real NMOS-cascode booster** first, keep PMOS ideal (Binkley: $0.8\,\omega_u$/70°)
 - [ ] Then **real PMOS-cascode booster** (off-path one $0.4\,\omega_u$/60°; cascode-source pole $\ge 2.6\,\omega_u$)
@@ -121,10 +140,11 @@ Part of the settled architecture (need 78 dB single-stage) — see `02_topology_
 
 | Risk | Mitigation |
 |------|------------|
-| **Power ceiling breached in Phase 3–4 (LIVE).** Core already at 1.55 mA / 2.78 mW (93 % of ceiling); boosters add ~60–250 µA | Pure SC-CMFB (~0 µA); lean Binkley-min booster bias; re-measure I(Vdd) per block; pull current-reuse forward if breached (`PLAN` Phase-3 entry note) |
+| **Power ceiling breached in Phase 3–4 (LIVE).** Core already at 1.55 mA / 2.78 mW (93 % of ceiling); boosters add ~60–250 µA | Pure SC-CMFB (~0 µA) — **Phase-3 confirmed: I(Vdd) still 1.547 mA, 0 added**; lean Binkley-min booster bias next; re-measure I(Vdd) per block; pull current-reuse forward if breached |
+| **CMFB unstable / kicks CM during settle** (was a Phase-3 risk) | **RESOLVED Phase 3:** SC-CMFB stable (overshoot +0.26 mV), CM-loop $\tau$=4.15 ns ≈ diff settling; continuous $C_C$ path keeps CM loop ~ diff GBW |
 | **FoM 168.8 dB < 170 pass line (LIVE).** Pre-closure at Phase-2 power | Current-reuse now **mandatory** (FoM ∝ P): 2.78 mW → ~0.3 mW target lifts FoM → ~178 dB (`00` FoM block) |
 | Single-stage A₀ < 78 dB | Switch to gain-boosting (Phase 4); un-boosted ~50–55 dB, boost must add ≥25 dB (in reach) |
 | Settling τ > 3.3 ns at affordable power | Increase I_D in input pair / shorten L cascodes (Ph-2: 3.01 ns met at 12.2 mS) |
 | Noise dominated by kT/C, can't lift SNR | Increase C_in (re-sim power) |
-| CMFB unstable | Slow CMFB pole, add C_cmfb hold cap |
+| CMFB unstable | ✅ resolved Phase 3 (SC-CMFB, stable; see row above) |
 | Power > 3 mW after meeting specs | Lower (g_m/I_D) on tails, raise (g_m/I_D) on input |

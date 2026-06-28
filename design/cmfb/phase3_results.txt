@@ -1,0 +1,91 @@
+EE4525 Phase 3 - Real Switched-Capacitor CMFB - verified results (2026-06-28)
+============================================================================
+Entry state: design/core-amp/folded_cascode_baseline.asc (folded cascode, ideal
+CMFB E1 + ideal gain-boost E2-E7 (Aadd=100), NMOS-only input). Only the CMFB was
+changed this phase; gain-boost and input stage are unchanged (Phase 4 / 5).
+
+SCHEMATICS (design/cmfb/)
+  folded_cascode_cmfb.asc      .op       - core + real SC-CMFB + weak DC helper
+  folded_cascode_cmfb_ac.asc   .ac       - differential AC (loaded bench + replica)
+  folded_cascode_cmfb_tran.asc .tran 1us - CM-step transient (20 MHz clock)
+  extract_ac.py / analyze_cm_step.py     - post-processing (spicelib venv)
+
+SC-CMFB TOPOLOGY (replaces ideal E1; control node = Vbcm -> gates of Mn5.2,Mn7.2)
+  C_C  (continuous sense/hold) = C7,C8 = 1.25 pF each  Voutp/Voutn -> Vbcm
+  C_CM (switched sampling)     = Cs1,Cs2 = 0.50 pF each
+       phi1 (reset/sample): Cs charged between Vcmr(0.9) and Vbn(0.624) = 0.276 V
+       phi2 (amplify)     : Cs placed Vout -> Vbcm (parallel C_C), refreshes DC
+  8 ideal switches  .model SWCM SW(Ron=10 Roff=1e9 Vt=0.9 Vh=0)
+  clocks: non-overlapping 20 MHz (50 ns period), phi1 [1,24] ns, phi2 [26,49] ns
+  Vcmr = 0.9 V (ideal, bias class);  bias plate ref = Vbn = 0.624 V
+  Weak DC helper (OP/AC only): Bhelp Vh 0 V=V(vcmavg)-0.9+V(Vbn) ; Rhelp Vh Vbcm 100Meg
+       vcmavg = R1,R2 large-R output average (true CM sense); R1=R2={Rbig}=100G
+       -> sets DC bias point exactly (CM=0.900 V); BW ~ 0.6 kHz << signal band (faq-allowed)
+  Static current added by CMFB: 0  (clocks draw 0 A; helper draws ~0.5 pA)
+
+  SCHEMATIC HYGIENE (2026-06-28): every CMFB element is a DRAWN symbol
+  (sw/cap/voltage/bv/res/current) joined by real WIRES; net-label FLAGs only for the
+  sheet-spanning nets Voutp/Voutn/Vbcm/Vbn (+ ground, + vcmavg for the Bhelp expr).
+  ap/bp/an/bn switch+cap clusters wired by buses; phi1/phi2/vcmr distributed by wired
+  trunks to Vphi1/Vphi2/Vcmr. All directive .param/.model moved INSIDE the params box.
+  Boxes "Switched-Capacitor CMFB" + "DC-Bias Helper"; core annotation
+  "Ideal CMFB"->"SC-CMFB (Vbcm)"; artifact V(Voutp2,Voutn2) .meas chain pruned.
+  Behavioural Bhelp (true-CM sense) regulates .op CM to 0.900 V; an earlier VCVS
+  helper (Ehelp, sensing constants) had read 0.914 V -- corrected.
+
+  PLACEMENT (revised 2026-06-28): the whole wired CMFB block (helper + switched net)
+  is placed in the CLEAR FAR-RIGHT area (x>4512, right of the opamp core) in all three
+  files. An earlier version drew it in the cramped LEFT column; in the .ac bench that
+  column also holds the loaded replica + feedback, and an unintended WIRE CROSSING there
+  merged a CMFB internal node with replica wiring -> a CM->diff leak (output |CM|~0.019
+  for a differential drive) that made the .ac read GBW=260.4 MHz. That 260.4 was a
+  LAYOUT ARTIFACT, not physics: a symmetric SC-CMFB injects equal/opposite C_C charge for
+  a diff signal so Vbcm cannot move -> diff GBW must equal the ideal-CMFB case. The
+  far-right redraw (clear of all other wiring) gives CM->diff leak ~1e-13 and the correct
+  GBW=264.4 MHz. Lesson: verify CM->diff leak ~0; never trust a GBW from a layout whose
+  wires share a column with other circuitry. Box rectangles are sized to contain the
+  RENDERED net-name / instance labels (which overhang pin points ~65 px; tran source
+  value labels are long PULSE() strings needing ~500 px extra right margin), not the
+  bare pin bbox -- otherwise borders clip the labels.
+
+(A) OP-POINT  folded_cascode_cmfb.asc / .op
+  V(Voutp)=V(Voutn) = 900.28 mV   -> output CM = 0.900 V          OK
+  V(Vbcm)           = 624.3 mV  (= V(Vbn) = 624.1 mV)             OK (= ideal E1)
+  I(Vdd)=I(V2)      = 1.5468 mA  (== Phase-2 1.5468 mA)           POWER CEILING HELD
+  I(Vphi1)=I(Vphi2) = 0 A        -> pure SC, zero static current
+  All 17 core FETs saturated (Id/Vgs identical to Phase-2 baseline)
+
+(B) DIFFERENTIAL AC  folded_cascode_cmfb_ac.asc / .ac  (unloaded V(Voutp)-V(Voutn), beta=1/5)
+  metric            ideal-CMFB(Ph2)   SC-CMFB(Ph3)   delta
+  A0                  93.93 dB          93.81 dB     -0.12 dB
+  GBW (|A|=1)        264.4  MHz        264.4  MHz     0.0 %
+  f_u (|A.beta|=1)    52.92 MHz         52.92 MHz     0.0 %
+  PM @ f_u            89.23 deg         89.23 deg     0.0 deg
+  -> NO REGRESSION vs Phase-2 (93.9 dB / 264 MHz / 89 deg).
+  CM->diff leak |(Voutp+Voutn)/2| / |Voutp-Voutn| ~ 1e-13 at all freq -> symmetric CMFB,
+  no CM-to-diff coupling (the proof the diff GBW equals the ideal-CMFB case = 264.4 MHz).
+  (Extraction is python design/cmfb/extract_ac.py over V(Voutp),V(Voutn); the .ac .meas
+  chain was pruned. Replica node V(Voutp2,Voutn2) ~ 42 dB is an artifact; NOT used.)
+
+(C) TRANSIENT CM-STEP  folded_cascode_cmfb_tran.asc / .tran  (+50 uA CM current step)
+  CM settled (no disturbance)  : 900.43 mV (ripple 0.027 mV)     -> holds 0.9 V
+  initial SC settling          : 284 ns ~ 5.7 clock cycles (faq: run several cycles)
+  CM-loop response time const  : tau_cm = 4.15 ns -> f_cm ~ 38 MHz
+       comparable to diff loop f_u = 52.9 MHz / diff tau = 3.0 ns
+       -> CM tracks within the 25 ns amplify window
+  closed-loop CM impedance     : 590 ohm (= 1/gm_cmfb); 50 uA -> 30 mV droop (expected)
+  CM returns after disturbance : 900.37 mV
+  overshoot / ringing          : +0.26 mV  -> STABLE, no oscillation
+  differential disturbance     : max|Voutp-Voutn| = 0  (CMFB orthogonal to diff mode)
+  Vbcm regulation range        : 595 .. 627 mV (stays valid; devices in sat)
+
+FIGURES
+  report/figures/phase3_cm_step.png        - CM-step transient (CM, diff, Vbcm)
+  report/figures/cmfb_sc.svg/.png          - SC-CMFB schematic (CircuiTikZ)
+  report/figures/folded_cascode_cmfb.svg/.png - full Phase-3 amplifier schematic
+  circuits/cmfb_sc.tex                      - CircuiTikZ source
+
+CARRY-FORWARD
+  Row 18 C_CM = 0.50 pF (+ 1.25 pF hold cap C_C each side).
+  Post-CMFB I(Vdd) = 1.547 mA (unchanged) -> ~0.15 mA headroom to 1.7 mA ceiling.
+  Phase 4 (real gain-boosters) must keep total booster bias <= ~150 uA.

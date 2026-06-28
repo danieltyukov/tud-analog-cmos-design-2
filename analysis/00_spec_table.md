@@ -35,9 +35,9 @@ Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
 | 15 | $C_{in}$                                 | pF         | ---                 | **5** |
 | 16 | $C_{fb}$                                 | pF         | ---                 | **1.25** |
 | 17 | $C_{load}$                               | pF         | **= $C_{in}$**      | **5** |
-| 18 | $C_{CM}$                                 | pF         | ---                 | *TBD (~0.5, Ph3)* |
-| 19 | $R_{fb}$                                 | GΩ         | big                 | **1** ($R_{fb}/R_{in}=4$) |
-| 20 | $C_{big}$                                | nF         | big                 | **1** |
+| 18 | $C_{CM}$                                 | pF         | ---                 | **0.5** (switched; +1.25 hold $C_C$/side, Ph3) |
+| 19 | $R_{fb}$                                 | GΩ         | big                 | **400** ($R_{in}=100$; $R_{fb}/R_{in}=4$; sim-only bias R) |
+| 20 | $C_{big}$                                | nF         | big                 | **1** (supply decoup.; ideal rail → non-critical, excl. $\leq$1000 pF) |
 | 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | *Ph-2 pre-closure **1.32e-17** (final TBD, Ph-1 pred 1.5e-18)* |
 | 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | *Ph-2 pre-closure **168.8** ⚠ <170 (final TBD, Ph-1 pred 178)* |
 
@@ -87,6 +87,26 @@ $$\mathrm{FoM}_{lin} = \frac{2\pi\,P\,\tau}{\mathrm{SNR}_{lin}^2}
 > well within a single-stage NMOS/PMOS cascode booster's reach (Binkley target
 > $\ge 40$ dB), so **78 dB is on track**.
 
+## Phase-3 results (2026-06-28, real switched-capacitor CMFB)
+
+The ideal CMFB (`E1`) was replaced with a **real SC-CMFB** (`design/cmfb/`,
+`05_cmfb_design.md`); gain-boost (E2–E7) and NMOS-only input are unchanged
+(Phase 4/5). $C_{CM}=0.5$ pF switched sampling caps + $C_C=1.25$ pF continuous
+sense/hold caps; control node `Vbcm`; weak ideal-DC helper for OP/AC only.
+
+| Metric | Phase-2 (ideal CMFB) | Phase-3 (real SC-CMFB) | Note |
+|---|---|---|---|
+| $A_0$ | 93.93 dB | **93.81 dB** | Δ −0.12 dB — unregressed |
+| GBW | 264.4 MHz | **264.4 MHz** | Δ 0 % |
+| PM | 89.2° | **89.2°** | Δ 0° |
+| Output CM | 0.900 V | **0.900 V** | $V_{bcm}=0.624$ V (= ideal) |
+| $I(V_{dd})$ — **row 9** | 1.547 mA | **1.547 mA** | **SC adds 0 mA static** |
+| CM-loop response $\tau_{cm}$ | — | **4.15 ns** ($f_{cm}\!\approx\!38$ MHz) | ≈ diff $f_u$=52.9 MHz; CM tracks in 25 ns |
+| CM step stability | — | **stable**, overshoot +0.26 mV | no oscillation |
+
+Power ceiling held: 1.547 mA / 2.78 mW = 91 % of the 3 mW limit, **~0.15 mA**
+headroom for Phase-4 boosters. The $C_{CM}$ kT/C is **not** in the row-10 term (TA).
+
 ## Deliverable-1 clarifications (TA announcements — see `07_lecturer_clarifications.md`)
 
 - **Row 10 ($kT/C$ noise):** the total effective $kT/C$ noise at the output includes
@@ -120,8 +140,8 @@ $$\mathrm{FoM}_{lin} = \frac{2\pi\,P\,\tau}{\mathrm{SNR}_{lin}^2}
 ## Key constraints (from PDF + faq.txt)
 
 - BJT / JFET forbidden. Only NMOS / PMOS / R / C.
-- Total non-bias capacitance $\leq 1000\,\mathrm{pF}$. $R \leq$ a few MΩ ($\leq$ GΩ only for $R_{in}$ / $R_{fb}$).
-- $R_{in}$ / $R_{fb}$ are **simulation-only biasing** resistors with **$R_{fb}/R_{in} = C_{in}/C_{fb}$** (so the DC operating-point gain equals the high-frequency cap gain — PDF p. 1).
+- Total non-bias capacitance $\leq 1000\,\mathrm{pF}$ ($C_{big}$ is supply-decoupling on the **ideal** rail — bias, excluded). Signal $R \leq$ a few MΩ; $R_{in}$/$R_{fb}$ are the **simulation-only** exception (PDF allows GΩ-scale), set here to $R_{in}=100\,\mathrm{G\Omega}$, $R_{fb}=400\,\mathrm{G\Omega}$ (see next bullet for why so large).
+- $R_{in}$ / $R_{fb}$ are **simulation-only biasing** resistors with **$R_{fb}/R_{in} = C_{in}/C_{fb}=4$** (so the DC operating-point gain equals the high-frequency cap gain — PDF p. 1). They are sized large ($R_{in}=100\,\mathrm{G\Omega}$, $R_{fb}=400\,\mathrm{G\Omega}$) so the DC-feedback RC corner $1/(2\pi R_{fb}C_{fb})\approx 0.3\,\mathrm{Hz}$ sits $\ll$ the $A_0$ `.meas … at=10` (10 Hz): capacitive feedback dominates and the measured $A_0\approx 94\,\mathrm{dB}$ is the true open-loop gain, not the resistive $\sim\!12\,\mathrm{dB}$. A $\leq\!1\,\mathrm{G\Omega}$ value would push the corner to $\sim\!127\,\mathrm{Hz}$ (above 10 Hz) and corrupt the $A_0$ read.
 - All NMOS bulk → GND. PMOS bulk free ($V_{dd}$ or own source).
 - $M$ (parallel-device count) must be integer.
 - $C_{load}$ must equal $C_{in}$.

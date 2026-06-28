@@ -1574,7 +1574,7 @@
     <text fill="black" font-family="Arial" font-size="56.0px" text-anchor="start" x="56" y="51.599999999999994">Voltage Source</text>
   </g>
   <g class="text-group">
-    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="-160" y="-687.6">.param Cbig=1000n Lbig=1T Rbig=100G Rin=100G</text>
+    <text fill="black" font-family="Arial" font-size="24.0px" text-anchor="start" x="-160" y="-687.6">.param Cbig=1n Lbig=1T Rbig=100G Rin=100G</text>
   </g>
   <g class="text-group">
     <text fill="black" font-family="Arial" font-size="56.0px" text-anchor="start" x="2080" y="-356.4">Decoupling Capacitors</text>
