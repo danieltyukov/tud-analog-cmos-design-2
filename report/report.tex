@@ -1,190 +1,395 @@
-% EE4525 2025/2026 — A Residue Amplifier for a Pipeline ADC — final report
-% Template adapted from the EE4520 HW2 report (from-ee4520/HW2_EE4520_5714699/main.tex).
-% STRUCTURE IS COMPULSORY (project PDF p.11): Title, D1 table, D2 node-V, D3 branch-I,
-%   D4 settling plot, D5 noise plot, D6 FoM comparison, then the Short Explanation (page 8).
-% Fill the Achieved column + the figures (see ../analysis/09_simulation_runbook.md and
-%   report/README.md for how to extract each figure). Submit PDF named [StudentNumber].pdf.
-\documentclass{article}
+% EE4525 2025/2026 - A Residue Amplifier for a Pipeline ADC - final report.
+% Compulsory structure (project PDF p.11): Title, D1 table, D2 node-V, D3 branch-I,
+% D4 settling plot, D5 noise plot, D6 FoM comparison, then the Short Explanation.
+% Final verified design: design/current-reuse/folded_cascode_cr.asc (Phase 5).
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=2.0cm]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{booktabs}
-\usepackage{siunitx}
 \usepackage{float}
+\usepackage{xcolor}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\newcommand{\ok}{\textcolor{green!45!black}{\checkmark}}
+\newcommand{\warn}{\textcolor{orange!85!black}{$\triangle$}}
 
-% Compile-ready placeholder box — replace each with the real \includegraphics line above it.
-\newcommand{\fig}[1]{\fbox{\parbox[c][0.32\textheight][c]{0.92\textwidth}{\centering\itshape%
-  [Figure placeholder --- #1. Replace with \texttt{\textbackslash includegraphics}.]}}}
-
-\title{EE4525 2025/2026 -- A Residue Amplifier for a Pipeline ADC}
+\title{EE4525 2025/2026 \\ A Residue Amplifier for a Pipeline ADC}
 \author{Daniel Tyukov \\ Student Number: 5714699 \\ Electrical Engineering, TU Delft}
 \date{June 2026}
 
 \begin{document}
-
 \maketitle
 \tableofcontents
 \clearpage
 
 % ============================== DELIVERABLE 1 ==============================
 \section{Deliverable 1 -- Table of Results}
-% Hard specs (green-shaded in the PDF) are \textbf{bold}: rows 1--4, 8, 9, 13, 14, 17.
-% Fill the Achieved column. FoM_dB uses the NEGATIVE sign (gives a positive dB).
+The final operating point is the current-reuse folded cascode of
+\texttt{design/current-reuse/folded\_cascode\_cr.asc}, with a real switched-capacitor
+CMFB and two real gain-boosters. All entries are measured at one common operating point.
+Green-shaded specification cells of the project table (rows 1--4, 8, 9, 13, 14, 17) are
+\textbf{bold}.
+
 \begin{table}[H]
-\centering
-\small
+\centering\small
 \begin{tabular}{@{}c l l l l@{}}
 \toprule
 \# & Design Item & Unit & Spec & Achieved \\
 \midrule
-1  & SNR & [dB] & \textbf{66} & \\
-2  & $A\beta_{\text{settle}}$ (loop setting) & [dB] & \textbf{66} & \\
-3  & $A_{\text{settle}}$ (amplifier settling) & [dB] & \textbf{$>78$} & \\
-4  & $T_{\text{settle}}$ (to required accuracy) & [ns] & \textbf{25} & 25 \\
-5  & $T_{30\text{dB}}$ & [ns] & --- & \\
-6  & $T_{38.6\text{dB}}$ & [ns] & --- & \\
-7  & $\tau = T_{38.6\text{dB}} - T_{30\text{dB}}$ & [ns] & --- & \\
-8  & Power dissipation (amplifiers only) & [mW] & \textbf{$<3$}, low as poss. & \\
-9  & $I(V_{dd})$ (amplifiers only, no biasing) & [mA] & \textbf{$<1.7$}, low as poss. & \\
-10 & Total effective $kT/C$ noise at output & [$\mu$V$_{\text{rms}}$] & free & 204 \\
-11 & Total integrated amplifier noise & [$\mu$V$_{\text{rms}}$] & free & \\
-12 & Total integrated noise (10\,kHz--100\,GHz) & [$\mu$V$_{\text{rms}}$] & free & \\
-13 & Input step voltage & [mV] & \textbf{Output/4} & 225 \\
-14 & Output step voltage & [V] & \textbf{free} & 0.9 \\
-15 & $C_{in}$ & [pF] & --- & 5 \\
-16 & $C_{fb}$ & [pF] & --- & 1.25 \\
-17 & $C_{load}$ & [pF] & \textbf{$= C_{in}$} & 5 \\
-18 & $C_{CM}$ & [pF] & --- & \\
-19 & $R_{fb}$ & [G$\Omega$] & big & 1 \\
-20 & $C_{big}$ & [nF] & big & 1 \\
-21 & FoM$_{lin}=2\pi\cdot$Power$\cdot\tau\,/\,$SNR$_{lin}^2$ & [J] & & \\
-22 & FoM$_{dB}=-10\log_{10}(\mathrm{FoM}_{lin})$ & [dB] & $>170$ & \\
+1  & SNR & dB & \textbf{66} & \textbf{66.8} \ok \\
+2  & $A\beta_{\text{settle}}$ (loop setting) & dB & \textbf{66} & $62.7$ @ 25\,ns\,\textsuperscript{\dag} \warn \\
+3  & $A_{\text{settle}}$ (amplifier settling) & dB & \textbf{$>78$} & $106.7$ ($A_0$); $77.2$ @ 25\,ns\,\textsuperscript{\dag} \warn \\
+4  & $T_{\text{settle}}$ (to required accuracy) & ns & \textbf{25} & $\approx 26.5$\,\textsuperscript{\dag} \\
+5  & $T_{30\,\mathrm{dB}}$ (after step) & ns & $-$ & $11.42$ \\
+6  & $T_{38.6\,\mathrm{dB}}$ (after step) & ns & $-$ & $14.71$ \\
+7  & $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ & ns & $-$ & $3.29$ \\
+8  & Power dissipation (amplifiers only) & mW & \textbf{$<3$}, min. & \textbf{2.04} \ok \\
+9  & $I(V_{dd})$ (amplifiers only, no biasing) & mA & \textbf{$<1.7$}, min. & \textbf{1.135} \ok \\
+10 & Total effective $kT/C$ noise at output & $\mu$V$_{\text{rms}}$ & free & $204$ (hand) \\
+11 & Total integrated amplifier noise & $\mu$V$_{\text{rms}}$ & free & $209.5$ \\
+12 & Total integrated noise (10\,kHz--100\,GHz) & $\mu$V$_{\text{rms}}$ & free & $292$ \\
+13 & Input step voltage & mV & \textbf{$V_{out}/4$} & \textbf{225} \\
+14 & Output step voltage (differential) & V & \textbf{free} & \textbf{0.9} \\
+15 & $C_{in}$ & pF & $-$ & $5$ \\
+16 & $C_{fb}$ & pF & $-$ & $1.25$ \\
+17 & $C_{load}$ & pF & \textbf{$=C_{in}$} & \textbf{5} \ok \\
+18 & $C_{CM}$ (switched, per side) & pF & $-$ & $0.5$ \\
+19 & $R_{fb}$ (simulation-only bias) & G$\Omega$ & big & $400$ \\
+20 & $C_{big}$ (supply decoupling) & nF & big & $1$ \\
+21 & $\mathrm{FoM}_{lin}=2\pi\,P\,\tau/\mathrm{SNR}_{lin}^2$ & J & $-$ & $8.91\times10^{-18}$ \\
+22 & $\mathrm{FoM}_{dB}=-10\log_{10}(\mathrm{FoM}_{lin})$ & dB & $>170$ & \textbf{170.5} \ok \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent\textit{Design choices (see \texttt{analysis/01\_specs\_and\_budget.md}):} residue gain
-$C_{in}/C_{fb}=4$ ($\Rightarrow C_{in}:C_{fb}=4{:}1$, $\beta=C_{fb}/(C_{in}+C_{fb})=1/5$,
-noise gain $5$); $C_{load}=C_{in}$; output common-mode $0.9$\,V.
+\noindent\textsuperscript{\dag}\,\textbf{Honest settling near-miss (rows 2--4).} At
+$t=25\,\mathrm{ns}$ the design reaches $A=77.2\,\mathrm{dB}$ and $A\beta=62.7\,\mathrm{dB}$,
+i.e.\ short of the $78/66\,\mathrm{dB}$ targets by $0.8/3.3\,\mathrm{dB}$. Both thresholds
+are met at $\approx26.5\,\mathrm{ns}$, about $6\,\%$ past the window. The output is
+slew-limited on this Class-A folded topology ($\mathrm{SR}=I_{cas}/C_L=27\,\mathrm{V/\mu s}$,
+so $\approx15\,\mathrm{ns}$ of the budget is slewing) plus a residual gain-booster
+pole-zero doublet; see Deliverable~4 and the Short Explanation. Every other specification
+passes.
 
-\subsection*{Computation notes}
-\begin{itemize}
-\item SNR: $\mathrm{SNR}_{dB}=20\log_{10}(V_{sig,rms}/V_{n,tot,rms})$, with
-      $V_{n,tot}=\sqrt{V_{n,amp}^2+V_{n,kT/C}^2}$ (amplifier noise + hand-computed $kT/C$).
-\item $\tau$: $\tau=T_{38.6\text{dB}}-T_{30\text{dB}}$ (one $e$-fold $=8.6$\,dB).
-\item Power: $P=\overline{I(V_{dd})}\cdot 1.8~\mathrm{V}$ (biasing on a separate $V_{ddb}$, excluded).
-\item FoM: linear $<9.5\times10^{-18}$\,J $\Leftrightarrow$ FoM$_{dB}>170$.
-\end{itemize}
+\medskip
+\noindent\textbf{FoM margin (honest).} $\mathrm{FoM}_{dB}=170.5\,\mathrm{dB}$ uses the
+achieved $\mathrm{SNR}=66.8\,\mathrm{dB}$. At the spec-minimum $\mathrm{SNR}=66\,\mathrm{dB}$
+the same $P\tau$ gives $169.7\,\mathrm{dB}$, so the $>170\,\mathrm{dB}$ pass is real but
+relies on the $0.8\,\mathrm{dB}$ SNR margin (the simulated amplifier noise of
+$209.5\,\mu\mathrm{V}$ came in under the $225\,\mu\mathrm{V}$ budget).
+
+\medskip
+\noindent\textit{Design choices.} Residue gain $C_{in}/C_{fb}=4$, feedback factor
+$\beta=C_{fb}/(C_{in}+C_{fb})=1/5$ (noise gain $1/\beta=5$); $C_{load}=C_{in}=5\,\mathrm{pF}$;
+output common-mode $0.9\,\mathrm{V}$ (mid-rail). Power: $P=\overline{I(V_{dd})}\cdot1.8\,\mathrm{V}$,
+with the bias block on a separate $V_{ddb}$ rail (excluded). $R_{in}/R_{fb}$ are
+simulation-only DC-bias resistors with $R_{fb}/R_{in}=C_{in}/C_{fb}=4$.
 \clearpage
 
 % ============================== DELIVERABLE 2 ==============================
 \section{Deliverable 2 -- Schematic with All Node Voltages}
-% Clean, readable schematic (NOT a simulator screenshot). Separate sheets for the
-% gain-boosters and the CMFB, each with node voltages. (PDF p.8 / report/README.md.)
+Clean CircuiTikZ schematics (not simulator screenshots), annotated with the DC node
+voltages from the verified \texttt{.op} (\texttt{read\_op\_point}). The core amplifier,
+the two gain-boosters, the SC-CMFB and the bias block are drawn on separate readable
+sheets. NMOS bulks tie to ground, PMOS bulks to $V_{dd}$ (not drawn).
+
 \begin{figure}[H]\centering
-% \includegraphics[width=\textwidth]{figures/d2_node_voltages.pdf}
-\fig{Deliverable 2: clean amplifier schematic + DC node voltages (+ separate booster/CMFB sheets)}
-\caption{Amplifier with annotated DC node voltages.}
+\includegraphics[height=0.82\textheight]{figures/d2_core.pdf}
+\caption{\textbf{Core} current-reuse folded cascode, DC node voltages. The PMOS input
+pair $M_{p1,3}$ and NMOS input pair $M_{n3,4}$ drive the \emph{same} fold nodes
+$V_{gp\pm}$, so $g_m=g_{m,p}+g_{m,n}=12.45\,\mathrm{mS}$ on one current path.}
+\end{figure}
+\clearpage
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{figures/d2_boosters.pdf}
+\caption{\textbf{Gain-boosters} (separate sheet), DC node voltages. Booster~A
+(PMOS-input) regulates the NMOS cascodes and is in the signal path; Booster~B
+(NMOS-input) regulates the PMOS cascodes. Each has its own reference-pinned CMFB.}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.93\textwidth]{figures/d2_cmfb.pdf}
+\caption{\textbf{Switched-capacitor CMFB} (separate sheet). Continuous sense/hold caps
+$C_C$ track the output common-mode; switched caps $C_{CM}$ refresh the DC level each
+clock. Control node $V_{bcm}=0.601\,\mathrm{V}$ drives the output-sink gates $M_{n5},M_{n7}$.}
+\end{figure}
+\clearpage
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\textwidth]{figures/d2_bias.pdf}
+\caption{\textbf{Bias block}, DC node voltages, on the separate $V_{ddb}$ rail (its power
+is excluded from rows 8--9). A wide-swing cascode mirror generates $V_{bp},V_{cp}$
+(PMOS side) and $V_{bn},V_{cn}$ (NMOS side) for the core and both boosters.}
 \end{figure}
 \clearpage
 
 % ============================== DELIVERABLE 3 ==============================
 \section{Deliverable 3 -- Schematic with All Branch Currents}
+The same sheets, annotated with the per-branch drain currents $I_d$ from the \texttt{.op}.
+The current-reuse identity is visible at the fold node: $I_{Mp1}=470\,\mu\mathrm{A}$
+splits into $I_{Mn3}=334\,\mu\mathrm{A}$ (NMOS input) plus $I_{Mp2}=136\,\mu\mathrm{A}$
+(cascode to the output). The folded-cascode branch rule
+$I_{\text{top}}\ge I_{\text{input}}$ holds.
+
 \begin{figure}[H]\centering
-% \includegraphics[width=\textwidth]{figures/d3_branch_currents.pdf}
-\fig{Deliverable 3: clean amplifier schematic + DC branch currents (+ separate booster/CMFB sheets)}
-\caption{Amplifier with annotated DC branch currents. Recall $I(M_{n4})+I(M_{n5}) \ge I(M_{n8})$.}
+\includegraphics[height=0.82\textheight]{figures/d3_core.pdf}
+\caption{\textbf{Core} branch currents. Total $I(V_{dd})=1.135\,\mathrm{mA}$: two PMOS
+input branches ($2\times470\,\mu\mathrm{A}$) source the fold; the NMOS input tail
+($668\,\mu\mathrm{A}$) and the $136\,\mu\mathrm{A}$ output branches close it.}
+\end{figure}
+\clearpage
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{figures/d3_boosters.pdf}
+\caption{\textbf{Gain-boosters} branch currents. Lean Binkley-minimum bias: Booster~A
+$\approx100\,\mu\mathrm{A}$, Booster~B $\approx95\,\mu\mathrm{A}$ from $V_{dd}$ (scaled
+$2\times$ to push the booster doublet beyond $\omega_u$).}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.93\textwidth]{figures/d3_cmfb.pdf}
+\caption{\textbf{Switched-capacitor CMFB} branch currents. The SC network draws
+$\approx0\,\mathrm{mA}$ \emph{static} supply current (clocked charge-transfer, no
+continuous DC path), which is why it adds no power to rows 8--9.}
+\end{figure}
+\clearpage
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\textwidth]{figures/d3_bias.pdf}
+\caption{\textbf{Bias block} branch currents (on $V_{ddb}$, excluded from the amplifier
+power budget).}
 \end{figure}
 \clearpage
 
 % ============================== DELIVERABLE 4 ==============================
 \section{Deliverable 4 -- Settling Accuracy Versus Time}
-Settling accuracy uses a \emph{fixed} $V_{out,max}$ (not $V_{out}(t)$):
+Settling accuracy uses a \emph{fixed} target $V_{out,max}=0.9\,\mathrm{V}$ (the chosen
+differential output step), not $V_{out}(t)$:
 \[
-\mathrm{Accuracy}_{dB}(t)=20\log_{10}\!\left(\frac{V_{out,max}}{|V(\mathrm{virtualground})|+1\mathrm{n}}\right).
+A(t)=20\log_{10}\!\left(\frac{V_{out,max}}{|V(\mathrm{vg})|+1\,\mathrm{nV}}\right),
+\qquad V(\mathrm{vg})=V(\mathrm{vip})-V(\mathrm{vin}).
 \]
+$A\beta(t)$ is the loop accuracy: the same curve referenced to $0\,\mathrm{dB}$ at $t=0$
+by subtracting the measured offset $20\log_{10}(1/\beta)=14.5\,\mathrm{dB}$.
+
 \begin{figure}[H]\centering
-% \includegraphics[width=\textwidth]{figures/d4_settling.png}
-\fig{Deliverable 4: $A(t)$ and $A\beta(t)$ in ONE figure, $A\beta$ starting from 0\,dB, markers at 25\,ns / 78\,dB / 66\,dB}
-\caption{Settling accuracy $A(t)$ and $A\beta(t)$ vs.\ time. The $A$--$A\beta$ gap is
-$20\log_{10}(C_{in}/C_{fb})=12$\,dB.}
+\includegraphics[width=0.95\textwidth]{figures/cr_d4_settling.png}
+\caption{Amplifier accuracy $A(t)$ (red) and loop accuracy $A\beta(t)$ (orange, from
+$0\,\mathrm{dB}$). The vertical gap between $A(t)$ and $A\beta(t)$ is the fixed $20\log_{10}(1/\beta)=14.5\,\mathrm{dB}$
+(noise gain $1/\beta=1+C_{in}/C_{fb}=5$). At $25\,\mathrm{ns}$: $A=77.2\,\mathrm{dB}$,
+$A\beta=62.7\,\mathrm{dB}$; both thresholds ($78/66\,\mathrm{dB}$) are reached at
+$\approx26.5\,\mathrm{ns}$. The two peaks after $25\,\mathrm{ns}$ are the post-settle
+ringing of the booster doublet.}
 \end{figure}
-At $t=25$\,ns: $A\beta_{\text{settle}}\ge 66$\,dB and $A_{\text{settle}}>78$\,dB. First ringing
-peak (if any) appears after 25\,ns; up to two ringing cycles are acceptable.
+
+\noindent This is the documented near-miss. The output is slew-limited
+($\mathrm{SR}=I_{cas}/C_L=136\,\mu\mathrm{A}/5\,\mathrm{pF}=27\,\mathrm{V/\mu s}$), so the
+curve climbs slowly for the first $\approx15\,\mathrm{ns}$ (slewing $0.45\,\mathrm{V}$ per
+side), leaving only $\approx3\tau$ of linear settle. A full description of every feature
+of this plot is in the Short Explanation.
 \clearpage
 
 % ============================== DELIVERABLE 5 ==============================
 \section{Deliverable 5 -- Output Noise Power Density Versus Frequency}
 \begin{figure}[H]\centering
-% \includegraphics[width=\textwidth]{figures/d5_noise.png}
-\fig{Deliverable 5: output-noise PSD 10\,kHz--100\,GHz with the integrated value shown}
-\caption{Differential output-noise density vs.\ frequency, integrated 10\,kHz--100\,GHz.}
+\includegraphics[width=0.95\textwidth]{figures/cr_d5_noise.png}
+\caption{Differential output-noise density of the closed-loop current-reuse amplifier
+(model \texttt{log018.l}, with $1/f$). The low-frequency slope is the flicker tail; the
+roll-off above $\approx30\,\mathrm{MHz}$ is the closed-loop noise bandwidth.}
 \end{figure}
-Integrated amplifier noise $V_{n,amp}=\;$\rule{1.5cm}{0.4pt}$\;\mu$V$_{rms}$; adding the
-hand-computed $kT/C$ (from $C_{in},C_{fb},C_{load}$ only) gives $V_{n,tot}$ and SNR $=$
-\rule{1.2cm}{0.4pt}\,dB $\ge 66$\,dB.
+
+\noindent Integrating $10\,\mathrm{kHz}$--$100\,\mathrm{GHz}$ gives the amplifier noise
+$V_{n,amp}=209.5\,\mu\mathrm{V}_{rms}$ (row~11, under the $225\,\mu\mathrm{V}$ budget).
+Adding the hand-computed sampling noise $V_{n,kT/C}=\sqrt{2(1/\beta)^2\,kT/C_{in}}
+=204\,\mu\mathrm{V}$ (row~10, from $C_{in},C_{fb},C_{load}$ only) gives the total
+$V_{n,tot}=\sqrt{V_{n,amp}^2+V_{n,kT/C}^2}=292\,\mu\mathrm{V}$ (row~12). With
+$V_{sig,rms}=0.636\,\mathrm{V}$,
+\[
+\mathrm{SNR}=20\log_{10}\!\left(\frac{0.636}{292\,\mu\mathrm{V}}\right)=66.8\,\mathrm{dB}\ge66\,\mathrm{dB}.\quad\ok
+\]
 \clearpage
 
 % ============================== DELIVERABLE 6 ==============================
 \section{Deliverable 6 -- FoM Comparison: EE4520 vs.\ EE4525}
-Step-by-step explanation of the FoM difference (we took EE4520).
-\begin{table}[H]\centering
-\begin{tabular}{@{}l c c@{}}
+I took EE4520, so this comparison is required. Both designs are scored with the same
+metric $\mathrm{FoM}_{lin}=2\pi\,P\,\tau/\mathrm{SNR}_{lin}^2$,
+$\mathrm{FoM}_{dB}=-10\log_{10}(\mathrm{FoM}_{lin})$.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{@{}l c c c@{}}
 \toprule
-Quantity & EE4520 & EE4525 (this work) \\
+Quantity & EE4520 (baseline) & EE4525 (this work) & ratio \\
 \midrule
-SNR [dB] & 80.85 & \\
-$\tau$ [ns] & 497.4 & \\
-Power [mW] & 0.1119 & \\
-FoM$_{dB}$ [dB] & 175.20 & \\
+SNR & $80.85\,\mathrm{dB}$ ($\mathrm{SNR}_{lin}=11015$) & $66.8\,\mathrm{dB}$ ($2178$) & \\
+$\tau$ & $497.4\,\mathrm{ns}$ & $3.29\,\mathrm{ns}$ & $151\times$ faster \\
+$T_{settle}$ & $2800\,\mathrm{ns}$ & $\approx26.5\,\mathrm{ns}$ & $\approx106\times$ faster \\
+Power (amp) & $0.112\,\mathrm{mW}$ & $2.04\,\mathrm{mW}$ & $18\times$ higher \\
+$\mathrm{FoM}_{lin}$ & $3.02\times10^{-18}\,\mathrm{J}$ & $8.91\times10^{-18}\,\mathrm{J}$ & \\
+$\mathbf{FoM_{dB}}$ & $\mathbf{175.2\,dB}$ & $\mathbf{170.5\,dB}$ & $-4.7\,\mathrm{dB}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
-\noindent Discuss the main reasons the FoM differs (real CMFB/gain-boosters vs.\ ideal;
-$1/f$ noise model; the much faster 25\,ns settling vs.\ 2.8\,$\mu$s; relaxed SNR; the
-$\eta_{gm}/\mathrm{NEF}/\eta_{cur}/\eta_{vol}$ levers --- see \texttt{analysis/08\_power\_prediction.md}).
+
+\noindent\textbf{Step by step.} For EE4525:
+\[
+\mathrm{FoM}_{lin}=\frac{2\pi\,(2.04\times10^{-3})(3.29\times10^{-9})}{2178^2}
+=8.91\times10^{-18}\,\mathrm{J}\;\Rightarrow\;\mathrm{FoM}_{dB}=170.5\,\mathrm{dB}.
+\]
+For EE4520 the same arithmetic on $(0.112\,\mathrm{mW},\,497.4\,\mathrm{ns},\,11015)$
+gives $3.02\times10^{-18}\,\mathrm{J}=175.2\,\mathrm{dB}$.
+
+\medskip
+\noindent\textbf{Why EE4525 is lower despite settling $106\times$ faster.} The key is the
+closed-form FoM identity (Bult method, \texttt{analysis/08}):
+\[
+\mathrm{FoM}_{lin}=\frac{16\pi\,kT\,A_{req}^2\,\mathrm{NEF}}
+{\eta_{gm}\,\eta_{cur}\,\eta_{vol}^2\,F_{supply}}.
+\]
+The clock rate, SNR and settling time all \emph{cancel}. So:
+\begin{itemize}
+\item \textbf{Faster settling is FoM-neutral.} The $25\,\mathrm{ns}$ window forces a
+$151\times$ smaller $\tau$, which demands $\approx18\times$ more power, but $P$ and $\tau$
+trade one-for-one in the metric. The $106\times$ speed-up alone does \emph{not} move the FoM.
+\item \textbf{The $4.7\,\mathrm{dB}$ gap is a circuit-efficiency penalty,} i.e.\ a higher
+$\mathrm{NEF}$ and lower $\eta_{cur}$. EE4520 used an \emph{ideal} CMFB and \emph{ideal}
+gain-boost (no real branches, no added noise) and no $1/f$ model. EE4525 replaces these
+with real transistor circuits: two folded-cascode boosters plus their CMFBs and the
+cascode/sink branches all burn current that adds no input $g_m$ ($\eta_{cur}\downarrow$),
+and the mandatory $1/f$ model (\texttt{log018.l}) raises the input-referred noise
+($\mathrm{NEF}\uparrow$). Current-reuse claws part of this back by doubling $g_m/\mu\mathrm{A}$.
+\item \textbf{The relaxed SNR ($66$ vs $80.85\,\mathrm{dB}$) does not directly help the FoM}
+either, because $\mathrm{SNR}$ cancels in the identity. It only buys swing slack and smaller
+caps; the score is set by the four efficiency factors, not by the noise target.
+\end{itemize}
+\noindent In short, the redesign trades $4.7\,\mathrm{dB}$ of FoM for the realism the
+EE4525 brief demands (real CMFB, real boosters, $1/f$) while still clearing the
+$>170\,\mathrm{dB}$ bar.
 \clearpage
 
 % ============================ SHORT EXPLANATION ============================
 \section*{Short Explanation}
 \addcontentsline{toc}{section}{Short Explanation}
-% Max one page. Must EXPLAIN EVERY ASPECT OF THE D4 SETTLING PLOT, plus the bullets below.
-\textbf{The settling plot (Deliverable 4).} [Explain the $A(t)$/$A\beta(t)$ shapes, the
-$1/\beta$ gap, and why both meet 78/66\,dB at 25\,ns.]
 
-\begin{itemize}
-\item \textbf{Architecture + CMFB.} Single-stage gain-boosted cascode + current-reuse
-      input; real switched-capacitor CMFB. [Why --- see \texttt{analysis/02}.]
-\item \textbf{Sizing for noise (incl.\ $1/f$) and settling; output swing + capacitor sizing.}
-      [\texttt{analysis/03}, \texttt{04}, \texttt{01}.]
-\item \textbf{Dominant noise devices + NEF estimate.} [\texttt{analysis/04}.]
-\item \textbf{Biasing.} [EE4520 bias block on a separate $V_{ddb}$; \texttt{analysis/01}.]
-\end{itemize}
+\noindent\textbf{The settling plot (Deliverable 4).} Two curves share one axis. The red
+$A(t)$ is the raw amplifier accuracy at the summing (virtual-ground) node; the orange
+$A\beta(t)$ is the same curve shifted down by the measured offset so it starts at exactly
+$0\,\mathrm{dB}$. They are separated by a fixed $14.5\,\mathrm{dB}=20\log_{10}(1/\beta)$,
+the noise gain $1/\beta=1+C_{in}/C_{fb}=5$ (not the residue gain $4=12\,\mathrm{dB}$): at
+the step instant the virtual-ground error is $\Delta V\,C_{in}/(C_{in}+C_{fb})$ while the
+target output is $\Delta V\,C_{in}/C_{fb}$, whose ratio is $1+C_{in}/C_{fb}$. The measured
+$14.5\,\mathrm{dB}$ sits slightly \emph{above} the ideal $14.0\,\mathrm{dB}$ because the
+input-pair parasitics add to the capacitive divider (the actual-vs-ideal $\beta$ effect; a
+value \emph{below} $14\,\mathrm{dB}$ would signal an error). The shape has three regions: a
+fast jump at $t=0$ set by the capacitive divider; a slow climb for $\approx15\,\mathrm{ns}$
+while the Class-A output \emph{slews} at $I_{cas}/C_L=27\,\mathrm{V/\mu s}$ across
+$0.45\,\mathrm{V}$ per side; then a straight-line (exponential) linear settle. At
+$25\,\mathrm{ns}$ the curves read $77.2/62.7\,\mathrm{dB}$, just under the $78/66\,\mathrm{dB}$
+lines, and cross them at $\approx26.5\,\mathrm{ns}$. The two spikes past $25\,\mathrm{ns}$
+are post-settle ringing of the gain-booster pole-zero doublet, and the slow droop after
+that is leakage/common-mode drift through $R_{fb}$. \emph{Root cause and honest status:}
+only $\approx3\tau$ of linear settle is left after slewing, so the loop lands $3.3\,\mathrm{dB}$
+short of $66\,\mathrm{dB}$ at $25\,\mathrm{ns}$. A lever sweep confirmed the limit is
+genuine: raising $I_{cas}$ for faster slew adds cascode capacitance that re-opens the
+doublet, and reducing $C$ hurts the phase margin, so the lean point ($I_{cas}=136\,\mu\mathrm{A}$,
+$2\times$ booster bias, $C=5\,\mathrm{pF}$) is optimal. Full closure needs a Class-AB output
+(decoupling slew current from quiescent current) or separately-sized sink and cascode
+devices; both are documented but not taken, since FoM, SNR and power already pass.
+
+\medskip
+\noindent\textbf{Architecture and CMFB.} A single-stage gain-boosted folded cascode with a
+complementary current-reuse input~\cite{ryu2007} and a real SC-CMFB. The spec is fast-settle
+($25\,\mathrm{ns}$), modest gain ($78\,\mathrm{dB}$), relaxed SNR ($66\,\mathrm{dB}$) and
+lowest power, so a single high-impedance output node gives one dominant pole and the
+cleanest fast settle per microamp; gain-boosting reaches $78\,\mathrm{dB}$ without adding a
+pole; and current-reuse stacks an NMOS and a PMOS input pair on one current path so their
+transconductances add ($g_m=g_{m,n}+g_{m,p}=12.45\,\mathrm{mS}$), which is the power lever
+(it cut $I(V_{dd})$ from $1.66$ to $1.135\,\mathrm{mA}$). The CMFB is switched-capacitor
+because it draws $\approx0\,\mathrm{mA}$ static (clocked charge-transfer), whereas a
+continuous-time error amplifier would cost $20$--$50\,\mu\mathrm{A}$, fatal against the
+razor-thin power ceiling; its common-mode loop ($\tau_{cm}=4.15\,\mathrm{ns}$) tracks within
+the $25\,\mathrm{ns}$ window and is stable ($+0.26\,\mathrm{mV}$ overshoot). Each gain-booster
+is a folded-cascode aux-amp with a \emph{reference-pinned} CMFB, sized for minimum settling
+following Binkley~\cite{binkley2010} (booster GBW and phase margin chosen to push the
+pole-zero doublet beyond $\omega_u$); a self-biased CMFB mislands the cascode-gate common
+mode and balloons the main current into a ceiling breach.
+
+\medskip
+\noindent\textbf{Sizing for noise ($1/f$), settling, swing and caps.} The caps come from the
+$kT/C$ budget: $\mathrm{SNR}=66\,\mathrm{dB}$ sets $V_{n,tot}\le319\,\mu\mathrm{V}$; a
+$50/50$ split gives a $225\,\mu\mathrm{V}$ sampling target, so
+$C_{in}=2(1/\beta)^2kT/V_{n,kT/C}^2\ge4.07\,\mathrm{pF}$, rounded to $C_{in}=5\,\mathrm{pF}$
+($C_{fb}=1.25$, $C_{load}=5$). Settling sets $g_m$: $\tau=T_{settle}/\ln(\mathrm{SNR})
+=25/7.6=3.29\,\mathrm{ns}$ needs $g_m\approx10\,\mathrm{mS}$ (GBW $\approx242\,\mathrm{MHz}$),
+delivered by the current-reuse pair. For $1/f$, the model \texttt{log018.l} is mandatory; the
+input devices use a large gate area and moderate inversion ($g_m/I_D\approx12$--$20$) to push
+the flicker corner below the noise band, and the PMOS half of the input has the lower $K_f$.
+Swing and caps: output common-mode at mid-rail $0.9\,\mathrm{V}$ for maximum
+$\eta_{vol}=0.5$, with $C_{load}=C_{in}$ as required.
+
+\medskip
+\noindent\textbf{Dominant noise devices and NEF.} The \texttt{.noise} per-device
+contributions are dominated by the input pair ($M_{n3.2}$, $M_{p1.2}$) and the NMOS output
+sinks ($M_{n5.2}$, $M_{n7.2}$). Referring the integrated output noise to the input
+($V_{n,in}=V_{n,amp}\,\beta=209.5\,\mu\mathrm{V}/5=41.9\,\mu\mathrm{V}$) and using
+$I_{tot}=1.135\,\mathrm{mA}$, $U_T=25.85\,\mathrm{mV}$ and a noise bandwidth set by the
+loop crossover $f_u\approx54\,\mathrm{MHz}$,
+\[
+\mathrm{NEF}=V_{n,in}\sqrt{\frac{2I_{tot}}{\pi\,U_T\,4kT\,\mathrm{BW}}}\approx7.4.
+\]
+This is moderate rather than near-unity because the boosters, the two booster CMFBs and the
+cascode/sink branches all draw current without adding input $g_m$; the current-reuse input
+keeps it from being worse.
+
+\medskip
+\noindent\textbf{Biasing.} A wide-swing cascode current-mirror bias block, reused from
+EE4520, sits on a \emph{separate} $V_{ddb}$ rail so its power is excluded from rows 8--9. A
+single $350\,\mu\mathrm{A}$ seed ($I_{bm}$) and the mirror ratios $R_n=5.8$, $R_p=7.5$
+generate the four wide-swing cascode references $V_{bp},V_{cp}$ (PMOS side) and
+$V_{bn},V_{cn}$ (NMOS side) for the core and both boosters; every node is decoupled with
+$C_{big}=1\,\mathrm{nF}$.
+
+\medskip
+\noindent\textbf{Alternative considered.} A two-stage Miller amplifier reaches high gain
+trivially but its compensation eats slew rate and power, which is the wrong trade for a
+$25\,\mathrm{ns}$ settle; it was rejected in favour of the single-stage gain-boosted cascode.
+\clearpage
+
+% ============================== REFERENCES ==============================
+\begin{thebibliography}{9}
+\bibitem{binkley2010}
+W.~Yang, D.~M.~Binkley, and W.~Li, ``Modeling and optimization of fast-settling-time
+gain-boosted cascode CMOS amplifiers,'' in \emph{Proc. IEEE SoutheastCon}, 2010.
+\bibitem{ryu2007}
+S.-T.~Ryu, B.-S.~Song, and K.~Bacrania, ``A 10-bit 50-MS/s pipelined ADC with opamp
+current reuse,'' \emph{IEEE J. Solid-State Circuits}, vol.~42, no.~3, pp.~475--485, 2007.
+\end{thebibliography}
 \clearpage
 
 % ============================== APPENDIX ==============================
 \appendix
-\section{Appendix -- Design Budget (Phase 1)}
-% Pre-sizing budget that froze the swing, caps, gm/current and predicted power/FoM.
-% Generated by analysis/phase1_budget.m (numbers in analysis/01 \S0).
+\section{Appendix -- Phase-1 Design Budget}
 \begin{figure}[H]\centering
-\includegraphics[width=0.85\textwidth]{figures/phase1_noise_budget.png}
-\caption{Noise budget: $kT/C$ output noise vs.\ $C_{in}$ at SNR $=66$\,dB with a
-50/50 split. Frozen $C_{in}=5$\,pF gives $204~\mu$V$_{rms}$ (under the $225~\mu$V
-share), leaving the other half for amplifier thermal $+\,1/f$ noise.}
+\includegraphics[width=0.78\textwidth]{figures/phase1_noise_budget.png}
+\caption{$kT/C$ output noise vs.\ $C_{in}$ at $\mathrm{SNR}=66\,\mathrm{dB}$ with a $50/50$
+split. The frozen $C_{in}=5\,\mathrm{pF}$ gives $204\,\mu\mathrm{V}_{rms}$, under the
+$225\,\mu\mathrm{V}$ share.}
 \end{figure}
 \begin{figure}[H]\centering
-\includegraphics[width=0.85\textwidth]{figures/phase1_fom_power.png}
-\caption{Predicted FoM and amplifier power vs.\ output swing $\eta_{vol}$ (Bult
-top-down model). The frozen $\eta_{vol}=0.50$ (single-ended $0.9~$V$_{pp}$ on
-$1.8$\,V) predicts $\sim$0.30\,mW and FoM $\approx 178$\,dB, above the 170\,dB pass line.}
+\includegraphics[width=0.78\textwidth]{figures/phase1_fom_power.png}
+\caption{Predicted FoM and amplifier power vs.\ output swing $\eta_{vol}$ (Bult top-down
+model). The frozen $\eta_{vol}=0.5$ predicts $\approx0.30\,\mathrm{mW}$ and
+FoM\,$\approx178\,\mathrm{dB}$, above the pass line.}
 \end{figure}
 
-\section{Appendix -- Simulation Schematics}
-% Optional: the LTspice simulator schematics (render_schematic output), NOT D2/D3.
+\section{Appendix -- Simulator Schematic (verification only)}
 \begin{figure}[H]\centering
-% \includegraphics[width=\textwidth]{figures/appendix_ac.png}
-\fig{Appendix: LTspice testbench schematics (AC / transient / noise)}
-\caption{Simulation testbenches.}
+\includegraphics[width=\textwidth]{figures/folded_cascode_cr.png}
+\caption{The LTspice schematic actually simulated
+(\texttt{design/current-reuse/folded\_cascode\_cr.asc}), shown for verification. The clean
+report figures of Deliverables 2--3 are the CircuiTikZ redrawings above.}
 \end{figure}
 
 \end{document}

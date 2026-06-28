@@ -1,0 +1,284 @@
+% ===========================================================================
+%  GAIN-BOOST AUX-AMPLIFIERS — the two folded-cascode regulation amps of the
+%  current-reuse core (design/current-reuse/folded_cascode_cr.asc).  SHARED
+%  drawing for D2 (node voltages, \showIfalse) and D3 (branch currents,
+%  \showItrue); the thin boosters_v.tex / boosters_i.tex wrappers set the mode.
+%
+%  To stay report-grade readable each booster is drawn as ONE differential
+%  HALF (one input device, fold node, cascode, load, sink -> the output node),
+%  with the shared reference-pinned CMFB drawn once in its own separated column.
+%  The output node both drives the main-amp cascode gate and is sensed (with
+%  its mirror-half output) by the 100 MOhm CMFB averager.
+%
+%   Booster A : PMOS-input folded cascode, senses the main BOTTOM fold node
+%               Vgn+ (0.190 V), output Vnl (0.825 V) -> main NMOS cascode gate.
+%   Booster B : NMOS-input folded cascode, senses the main TOP fold node
+%               Vgp- (1.533 V), output Vpr (0.850 V) -> main PMOS cascode gate.
+%
+%  CMFB (A pinned to Vcn, B to Vcp): PMOS-mirror / NMOS-diff-pair amp.
+%  Bulk: NMOS->GND, PMOS->Vdd (not drawn).  Values from the verified .op.
+% ===========================================================================
+\begin{circuitikz}[american, line width=0.6pt,
+    every node/.style={font=\small},
+    nm/.style ={nmos},
+    pm/.style ={pmos},
+    nmr/.style={nmos, xscale=-1},
+    pmr/.style={pmos, xscale=-1},
+    dev/.style={font=\tiny, text=black!75},
+    gl/.style ={font=\scriptsize, left=1pt},
+    gr/.style ={font=\scriptsize, right=1pt}]
+  \ctikzset{transistors/scale=0.62}
+
+% ###########################################################################
+% #  BOOSTER A  —  PMOS-input, regulates the main NMOS cascodes (in-path)    #
+% ###########################################################################
+\begin{scope}[xshift=0cm]
+
+  % ---- enclosing box + title --------------------------------------------
+  \draw[rounded corners=3pt, gray] (-1.7,-2.0) rectangle (14.4,13.6);
+  \node[font=\bfseries\small, align=center] at (6.35,13.05)
+    {Booster A: PMOS-input $\;\to\;$ regulates main NMOS cascodes (in-path)};
+
+  % ---- supply rails ------------------------------------------------------
+  \draw[line width=0.9pt] (-1.5,12) -- (14.2,12)
+        node[right, font=\scriptsize]{\Vdd\,\Vtag{1.8}};
+  \draw[line width=0.9pt] (-1.5,0)  -- (14.2,0)
+        node[right, font=\scriptsize]{$0$};
+
+  % =================== folded-cascode core (one half) ====================
+  % input column (tail + one PMOS input device)
+  \node[pm]  (Mta) at (1.8,10.4) {};
+  \node[pm]  (MiA) at (1.8, 7.4) {};
+  % output column (PMOS load - NMOS cascode - NMOS sink), gates face out
+  \node[pmr] (Ms1) at (4.3,10.4) {};
+  \node[nmr] (Mc1) at (4.3, 7.0) {};
+  \node[nmr] (Mb1) at (4.3, 3.4) {};
+
+  % input column wiring
+  \draw (Mta.S) -- (1.8,12);
+  \draw (Mta.D) -- (1.8,8.9) coordinate (N006);
+  \draw (MiA.S) -- (N006);
+  \draw (MiA.D) -- (1.8,5.4) coordinate (N014);
+  \fill (N006) circle (1.6pt);  \fill (N014) circle (1.6pt);
+  % output column wiring
+  \draw (Ms1.S) -- (4.3,12);
+  \draw (Ms1.D) -- (Mc1.D) coordinate[pos=0.45] (Vnl);
+  \draw (Mc1.S) -- (4.3,5.4) coordinate (J14) -- (Mb1.D);
+  \draw (Mb1.S) -- (4.3,0);
+  \fill (Vnl) circle (1.6pt);
+  % the FOLD : input drain -> fold node -> output-branch junction
+  \draw (N014) -- (J14);
+  \fill (J14) circle (1.6pt);
+
+  % ---- gate stubs --------------------------------------------------------
+  \draw (Mta.G) -- ++(-0.9,0) node[gl]{$V_{bp}$};
+  \draw (MiA.G) -- ++(-0.9,0) node[gl, align=right]{$V_{gn+}$ \Vtag{(0.190)}\\\tiny(sense)};
+  \draw (Ms1.G) -- ++( 0.9,0) node[gr]{$V_{cmfba}$};
+  \draw (Mc1.G) -- ++( 0.9,0) node[gr]{$V_{cn}$};
+  \draw (Mb1.G) -- ++( 0.9,0) node[gr]{$V_{bn}$};
+
+  % ---- output node: drives the main Mn cascode AND feeds the CMFB averager
+  \draw (Vnl) -- (7.4,8.8);                       % sense wire to averager top
+  \fill (7.0,8.8) circle (1.2pt);
+  \draw[-latex] (7.0,8.8) -- (7.0,10.7)
+        node[above, font=\scriptsize, align=center]{$\to$ main\\$M_n$ casc};
+  \node[above left=0pt and 1pt, font=\scriptsize] at (Vnl) {$V_{nl}$\,\Vtag{0.825}};
+
+  % ---- device labels (consistent: left of body) + node tags (right) -----
+  \node[dev, left=8pt]  at (Mta.D) {$M_{ta}{\times}6$};
+  \node[dev, left=8pt]  at (MiA.D) {$M_{iA}{\times}4$};
+  \node[dev, right=7pt] at (Ms1.D) {$M_{s1}{\times}2$};
+  \node[dev, right=7pt] at (Mc1.D) {$M_{c1}{\times}4$};
+  \node[dev, right=7pt] at (Mb1.D) {$M_{b1}{\times}2$};
+  \node[font=\tiny, right=2pt] at (N006) {\Vtag{1.024}};
+  \node[font=\tiny, left=2pt]  at (N014) {\Vtag{0.230}};
+
+  % ---- branch-current tags (D3) -----------------------------------------
+  \node[font=\tiny, left=1pt]  at (1.8,11.3) {\Itag{34}};
+  \node[font=\tiny, left=1pt]  at (1.8,6.3)  {\Itag{17}};
+  \node[font=\tiny, right=1pt] at (4.3,11.3) {\Itag{16.7}};
+  \node[font=\tiny, right=1pt] at (4.3,5.9)  {\Itag{16.7}};
+  \node[font=\tiny, right=1pt] at (4.3,1.7)  {\Itag{33.7}};
+  \node[font=\tiny, align=center] at (5.6,1.2) {\Itag{\text{all currents in }\mu\mathrm{A}}};
+
+  % ====================== reference-pinned CMFB (pin Vcn) =================
+  \node[font=\scriptsize, align=center] at (10.4,11.5) {CMFB (pin $V_{cn}$)};
+  % 100 MOhm output-CM averager (own column, clear of the transistors)
+  \draw (7.4,8.8) to[R, l={\scriptsize$R_{cm1a}$}] (7.4,7.0) coordinate (N010);
+  \draw (N010)    to[R, l={\scriptsize$R_{cm2a}$}] (7.4,5.2);
+  \fill (N010) circle (1.4pt);
+  \node[below=1pt, font=\scriptsize] at (7.4,5.2) {$V_{nr}$};
+  \node[font=\tiny, left=1pt] at (N010) {\Vtag{0.825}};
+  % PMOS mirror (Mcmp1 diode + Mcmp2)
+  \node[pmr] (Mp1) at (9.2,10.4) {};
+  \node[pm]  (Mp2) at (11.6,10.4){};
+  % NMOS diff pair (sense N010 vs ref Vcn) + tail
+  \node[nm]  (Md1) at (9.2, 7.0) {};
+  \node[nmr] (Md2) at (11.6,7.0) {};
+  \node[nm]  (Mtc) at (10.4,3.9) {};
+
+  \draw (Mp1.S) -- (9.2,12);
+  \draw (Mp2.S) -- (11.6,12);
+  \draw (Mp1.D) -- (Md1.D) coordinate[pos=0.5] (N005);
+  \draw (Mp2.D) -- (Md2.D) coordinate[pos=0.5] (Vcmfba);
+  \fill (N005) circle (1.6pt);  \fill (Vcmfba) circle (1.6pt);
+  % mirror gate tie (below the devices), diode tie at N005
+  \draw (Mp1.G) -- (9.6,9.6) -- (11.2,9.6) -- (Mp2.G);
+  \draw (9.2,9.6) -- (9.6,9.6);  \draw (9.2,9.6) -- (N005);
+  \fill (9.2,9.6) circle (1.4pt);
+  % diff-pair tail node N013
+  \draw (Md1.S) |- (10.4,5.4) coordinate (N013);
+  \draw (Md2.S) |- (N013);
+  \draw (N013) -- (Mtc.D);
+  \draw (Mtc.S) -- (10.4,0);
+  \fill (N013) circle (1.6pt);
+  % sense wire + reference / tail-bias stubs
+  \draw (N010) -- (Md1.G);
+  \draw (Md2.G) -- ++(0.9,0) node[gr]{$V_{cn}$};
+  \draw (Mtc.G) -- ++(-0.9,0) node[gl]{$V_{bn}$};
+  % CMFB output back to the load gate
+  \draw[-latex] (Vcmfba) -- (12.9,8.7) |- (12.9,11.3)
+        node[right=-1pt, font=\scriptsize, align=left]{$\to M_{s1}$\\\tiny load gate};
+
+  % CMFB device names (left of body) + node tags (right)
+  \node[dev, left=7pt]  at (Mp1.D) {$M_{cmp1}$};
+  \node[dev, left=7pt]  at (Mp2.D) {$M_{cmp2}$};
+  \node[dev] at (9.75,6.2) {$M_{cm1}$};
+  \node[dev] at (11.05,6.2) {$M_{cm2}$};
+  \node[dev, left=7pt]  at (Mtc.D) {$M_{cmt}$};
+  \node[font=\tiny, right=2pt] at (N005)  {\Vtag{1.123}};
+  \node[font=\tiny, right=2pt] at (Vcmfba){\Vtag{0.945}};
+  \node[font=\tiny, right=2pt] at (N013)  {\Vtag{0.217}};
+  % CMFB branch currents (D3) — beside the branch risers
+  \node[font=\tiny] at (8.6,5.7)  {\Itag{16.3}};
+  \node[font=\tiny] at (12.1,5.7) {\Itag{17.0}};
+  \node[font=\tiny] at (10.9,1.9) {\Itag{33}};
+
+\end{scope}
+
+% ###########################################################################
+% #  BOOSTER B  —  NMOS-input, regulates the main PMOS cascodes (off-path)   #
+% ###########################################################################
+\begin{scope}[xshift=16.5cm]
+
+  % ---- enclosing box + title --------------------------------------------
+  \draw[rounded corners=3pt, gray] (-1.7,-2.0) rectangle (14.4,13.6);
+  \node[font=\bfseries\small, align=center] at (6.35,13.05)
+    {Booster B: NMOS-input $\;\to\;$ regulates main PMOS cascodes (off-path)};
+
+  % ---- supply rails ------------------------------------------------------
+  \draw[line width=0.9pt] (-1.5,12) -- (14.2,12)
+        node[right, font=\scriptsize]{\Vdd\,\Vtag{1.8}};
+  \draw[line width=0.9pt] (-1.5,0)  -- (14.2,0)
+        node[right, font=\scriptsize]{$0$};
+
+  % =================== folded-cascode core (one half, flipped) ===========
+  % input column (one NMOS input device + tail at the bottom)
+  \node[nm]  (MiP1) at (1.8, 4.6) {};
+  \node[nm]  (Mtb)  at (1.8, 1.7) {};
+  % output column (PMOS source - PMOS cascode - NMOS load), gates face out
+  \node[pm]  (Mbb1) at (4.3,10.4) {};
+  \node[pmr] (Mcb1) at (4.3, 7.2) {};
+  \node[nmr] (Msb1) at (4.3, 3.1) {};
+
+  % input column wiring
+  \draw (Mtb.S) -- (1.8,0);
+  \draw (Mtb.D) -- (1.8,2.9) coordinate (N011);
+  \draw (MiP1.S) -- (N011);
+  \draw (MiP1.D) -- (1.8,8.8) coordinate (N007);
+  \fill (N011) circle (1.6pt);  \fill (N007) circle (1.6pt);
+  % output column wiring
+  \draw (Mbb1.S) -- (4.3,12);
+  \draw (Mbb1.D) -- (4.3,8.8) coordinate (J7) -- (Mcb1.S);
+  \draw (Mcb1.D) -- (Msb1.D) coordinate[pos=0.45] (Vpr);
+  \draw (Msb1.S) -- (4.3,0);
+  \fill (Vpr) circle (1.6pt);  \fill (J7) circle (1.6pt);
+  % the FOLD : input drain -> top fold node -> output-branch junction
+  \draw (N007) -- (J7);
+
+  % ---- gate stubs --------------------------------------------------------
+  \draw (Mtb.G)  -- ++(-0.9,0) node[gl]{$V_{bn}$};
+  \draw (MiP1.G) -- ++(-0.9,0) node[gl, align=right]{$V_{gp-}$ \Vtag{(1.533)}\\\tiny(sense)};
+  \draw (Mbb1.G) -- ++( 0.9,0) node[gr]{$V_{bp}$};
+  \draw (Mcb1.G) -- ++( 0.9,0) node[gr]{$V_{cp}$};
+  \draw (Msb1.G) -- ++( 0.9,0) node[gr]{$V_{cmfbb}$};
+
+  % ---- output node: drives the main Mp cascode AND feeds the CMFB averager
+  \draw (Vpr) -- (7.4,5.3);                       % sense wire to averager bottom
+  \fill (6.5,5.3) circle (1.2pt);
+  \draw[-latex] (6.5,5.3) -- (6.5,8.2)
+        node[above, font=\scriptsize, align=center]{$\to$ main\\$M_p$ casc};
+  \node[below left=0pt and 1pt, font=\scriptsize] at (Vpr) {$V_{pr}$\,\Vtag{0.850}};
+
+  % ---- device labels (consistent: left of body) + node tags (right) -----
+  \node[dev, left=8pt]  at (MiP1.D) {$M_{iP1}{\times}4$};
+  \node[dev, left=8pt]  at (Mtb.D)  {$M_{tb}{\times}2$};
+  \node[dev, right=7pt] at (Mbb1.D) {$M_{bb1}{\times}6$};
+  \node[dev, right=7pt] at (Mcb1.D) {$M_{cb1}{\times}4$};
+  \node[dev, right=7pt] at (Msb1.D) {$M_{sb1}{\times}2$};
+  \node[font=\tiny, right=2pt] at (N011) {\Vtag{0.817}};
+  \node[font=\tiny, left=2pt]  at (N007) {\Vtag{1.537}};
+
+  % ---- branch-current tags (D3) -----------------------------------------
+  \node[font=\tiny, left=1pt]  at (1.8,5.7)  {\Itag{21.3}};
+  \node[font=\tiny, left=1pt]  at (1.8,1.0)  {\Itag{42.5}};
+  \node[font=\tiny, right=1pt] at (4.3,11.3) {\Itag{28.7}};
+  \node[font=\tiny, right=1pt] at (4.3,5.9)  {\Itag{7.4}};
+  \node[font=\tiny, right=1pt] at (4.3,1.4)  {\Itag{7.4}};
+  \node[font=\tiny, align=center] at (5.6,9.6) {\Itag{\text{all currents in }\mu\mathrm{A}}};
+
+  % ====================== reference-pinned CMFB (pin Vcp) =================
+  \node[font=\scriptsize, align=center] at (10.4,11.5) {CMFB (pin $V_{cp}$)};
+  \draw (7.4,9.0) to[R, l={\scriptsize$R_{cmb1}$}] (7.4,7.0) coordinate (N009);
+  \draw (N009)    to[R, l={\scriptsize$R_{cmb2}$}] (7.4,5.3);
+  \fill (N009) circle (1.4pt);
+  \node[above=1pt, font=\scriptsize] at (7.4,9.0) {$V_{pl}$};
+  \node[font=\tiny, left=1pt] at (N009) {\Vtag{0.850}};
+  \node[pmr] (Bp1) at (9.2,10.4) {};
+  \node[pm]  (Bp2) at (11.6,10.4){};
+  \node[nm]  (Bd1) at (9.2, 7.0) {};
+  \node[nmr] (Bd2) at (11.6,7.0) {};
+  \node[nm]  (Btc) at (10.4,3.9) {};
+
+  \draw (Bp1.S) -- (9.2,12);
+  \draw (Bp2.S) -- (11.6,12);
+  \draw (Bp1.D) -- (Bd1.D) coordinate[pos=0.5] (N004);
+  \draw (Bp2.D) -- (Bd2.D) coordinate[pos=0.5] (Vcmfbb);
+  \fill (N004) circle (1.6pt);  \fill (Vcmfbb) circle (1.6pt);
+  \draw (Bp1.G) -- (9.6,9.6) -- (11.2,9.6) -- (Bp2.G);
+  \draw (9.2,9.6) -- (9.6,9.6);  \draw (9.2,9.6) -- (N004);
+  \fill (9.2,9.6) circle (1.4pt);
+  \draw (Bd1.S) |- (10.4,5.4) coordinate (N012);
+  \draw (Bd2.S) |- (N012);
+  \draw (N012) -- (Btc.D);
+  \draw (Btc.S) -- (10.4,0);
+  \fill (N012) circle (1.6pt);
+  \draw (N009) -- (Bd1.G);
+  \draw (Bd2.G) -- ++(0.9,0) node[gr]{$V_{cp}$};
+  \draw (Btc.G) -- ++(-0.9,0) node[gl]{$V_{bn}$};
+  \draw[-latex] (Vcmfbb) -- (12.9,8.7) |- (12.9,11.3)
+        node[right=-1pt, font=\scriptsize, align=left]{$\to M_{sb1}$\\\tiny load gate};
+
+  \node[dev, left=7pt]  at (Bp1.D) {$M_{cmp1}$};
+  \node[dev, left=7pt]  at (Bp2.D) {$M_{cmp2}$};
+  \node[dev] at (9.75,6.2) {$M_{cm1}$};
+  \node[dev] at (11.05,6.2) {$M_{cm2}$};
+  \node[dev, left=7pt]  at (Btc.D) {$M_{cmt}$};
+  \node[font=\tiny, right=2pt] at (N004)   {\Vtag{1.125}};
+  \node[font=\tiny, right=2pt] at (Vcmfbb) {\Vtag{0.558}};
+  \node[font=\tiny, right=2pt] at (N012)   {\Vtag{0.237}};
+  \node[font=\tiny] at (8.6,5.7)  {\Itag{16.1}};
+  \node[font=\tiny] at (12.1,5.7) {\Itag{17.8}};
+  \node[font=\tiny] at (10.9,1.9) {\Itag{33.9}};
+
+\end{scope}
+
+% ---- overall caption ----------------------------------------------------
+\node[font=\footnotesize, align=center] at (15.5,-2.7)
+  {Each booster is a single-stage folded cascode shown as \emph{one differential half}
+   (the other half is its mirror) with its own reference-pinned CMFB; the
+   $R_{cm}=100\,\mathrm{M}\Omega$ averagers sense the output CM
+   ($V_{nl},V_{nr}$ / $V_{pr},V_{pl}$), A pinned to $V_{cn}$, B to $V_{cp}$.
+   Bulk: NMOS$\to$GND, PMOS$\to$Vdd (not drawn).};
+
+\end{circuitikz}

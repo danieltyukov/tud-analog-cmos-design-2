@@ -1,0 +1,131 @@
+% ===========================================================================
+%  CORE: current-reuse folded-cascode amplifier (the .2 devices of
+%  design/current-reuse/folded_cascode_cr.asc).  SHARED drawing for D2 (node
+%  voltages, \showIfalse) and D3 (branch currents, \showItrue) — the thin
+%  core_v.tex / core_i.tex wrappers set the mode.  All values are from the
+%  verified .op (read_op_point).  Bulk: NMOS->GND, PMOS->Vdd (not drawn).
+% ===========================================================================
+\ctikzset{transistors/scale=0.75}
+\begin{circuitikz}[american, line width=0.6pt,
+    every node/.style={font=\small},
+    nm/.style={nmos},
+    pm/.style={pmos}]
+
+  % ---- supply rails -------------------------------------------------------
+  \draw[line width=0.9pt] (-2.0,15) -- (11.0,15) node[right]{\Vdd\ \Vtag{1.8\,\mathrm{V}}};
+  \draw[line width=0.9pt] (-2.0,-0.6) node[left]{$0$} -- (11.0,-0.6);
+  \node at (4.5,-1.0) {\Vtag{\mathrm{GND}}};
+
+  % =========================== LEFT column (V_{out+}) ======================
+  \node[pm] (Mp1) at (0,13)   {};   % PMOS input,  gate Vip
+  \node[pm] (Mp2) at (0,10)   {};   % PMOS cascode, gate Vpr (Booster B)
+  \node[nm] (Mn6) at (0,6)    {};   % NMOS cascode, gate Vnr (Booster A)
+  \node[nm] (Mn5) at (0,2.5)  {};   % NMOS sink,    gate Vbcm (CMFB)
+
+  % =========================== RIGHT column (V_{out-}) =====================
+  \node[pm] (Mp3) at (9,13)   {};
+  \node[pm] (Mp4) at (9,10)   {};
+  \node[nm] (Mn8) at (9,6)    {};
+  \node[nm] (Mn7) at (9,2.5)  {};
+
+  % =========================== CENTRE (NMOS input + tail) ==================
+  \node[nm] (Mn3) at (3.6,11) {};   % NMOS input, gate Vip
+  \node[nm] (Mn4) at (5.4,11) {};   % NMOS input, gate Vin
+  \node[nm] (Mn2) at (4.5,7)  {};   % tail cascode, gate Vbcn
+  \node[nm] (Mn1) at (4.5,3.5){};   % tail sink,    gate Vbn
+
+  % ---- LEFT vertical string ----------------------------------------------
+  \draw (Mp1.S) -- (0,15);                              % source -> Vdd
+  \draw (Mp1.D) -- (Mp2.S) coordinate[midway] (Vgpn);   % top fold node Vgp-
+  \draw (Mp2.D) -- (Mn6.D) coordinate[midway] (VoP);    % output +
+  \draw (Mn6.S) -- (Mn5.D) coordinate[midway] (Vgnn);   % bottom fold Vgn-
+  \draw (Mn5.S) -- (0,-0.6);                            % sink -> GND
+  \fill (Vgpn) circle (2pt); \fill (Vgnn) circle (2pt);
+
+  % ---- RIGHT vertical string ---------------------------------------------
+  \draw (Mp3.S) -- (9,15);
+  \draw (Mp3.D) -- (Mp4.S) coordinate[midway] (Vgpp);
+  \draw (Mp4.D) -- (Mn8.D) coordinate[midway] (VoN);
+  \draw (Mn8.S) -- (Mn7.D) coordinate[midway] (Vgnp);
+  \draw (Mn7.S) -- (9,-0.6);
+  \fill (Vgpp) circle (2pt); \fill (Vgnp) circle (2pt);
+
+  % ---- CENTRE string: input pair -> tail cascode -> tail sink ------------
+  \draw (Mn3.S) -- (4.5,9.4) coordinate (N001) -- (Mn4.S);   % shared tail
+  \draw (N001) -- (Mn2.D);
+  \draw (Mn2.S) -- (Mn1.D) coordinate[midway] (N003);
+  \draw (Mn1.S) -- (4.5,-0.6);
+  \fill (N001) circle (2pt); \fill (N003) circle (2pt);
+
+  % ---- current-reuse: NMOS input drains -> the SAME fold nodes -----------
+  \draw (Mn3.D) |- (1.0,11.9) -- (Vgpn);   % Mn3 drain -> left fold  Vgp-
+  \draw (Mn4.D) |- (8.0,11.9) -- (Vgpp);   % Mn4 drain -> right fold Vgp+
+
+  % ---- gates: inputs (Vip / Vin) ----------------------------------------
+  \draw (Mp1.G) -- (-2.0,13) node[left]{$V_{i+}$};
+  \draw (-1.4,13) |- (Mn3.G);                       % Vip also to NMOS input
+  \fill (-1.4,13) circle (1.6pt);
+  \draw (Mp3.G) -- (11.0,13) node[right]{$V_{i-}$};
+  \draw (10.4,13) |- (Mn4.G);
+  \fill (10.4,13) circle (1.6pt);
+
+  % ---- gates: cascode / sink / tail bias stubs ---------------------------
+  \draw (Mp2.G) -- ++(-1.4,0) node[left,align=right]{$V_{pr}$\\\scriptsize(Bst.\,B)};
+  \draw (Mp4.G) -- ++( 1.4,0) node[right,align=left]{$V_{pl}$\\\scriptsize(Bst.\,B)};
+  \draw (Mn6.G) -- ++(-1.4,0) node[left,align=right]{$V_{nr}$\\\scriptsize(Bst.\,A)};
+  \draw (Mn8.G) -- ++( 1.4,0) node[right,align=left]{$V_{nl}$\\\scriptsize(Bst.\,A)};
+  \draw (Mn5.G) -- ++(-1.4,0) node[left,align=right]{$V_{bcm}$\\\scriptsize(CMFB)};
+  \draw (Mn7.G) -- ++( 1.4,0) node[right,align=left]{$V_{bcm}$\\\scriptsize(CMFB)};
+  \draw (Mn2.G) -- ++(-1.6,0) node[left]{$V_{bcn}$};
+  \draw (Mn1.G) -- ++(-1.6,0) node[left]{$V_{bn}$};
+
+  % ---- outputs + load caps ----------------------------------------------
+  \draw (VoP) -- ++(-1.7,0) coordinate (oP) to[C, l_=$C_{L}$] (oP|-0,-0.6);
+  \node[left] at (oP) {$V_{o+}$};
+  \draw (VoN) -- ++( 1.7,0) coordinate (oN) to[C, l=$C_{L}$] (oN|-0,-0.6);
+  \node[right] at (oN) {$V_{o-}$};
+  \fill (VoP) circle (2pt); \fill (VoN) circle (2pt);
+
+  % ---- device labels (name + multiplicity) ------------------------------
+  \node[font=\scriptsize, right=1pt] at (Mp1.D) {$M_{p1}\,{\times}145$};
+  \node[font=\scriptsize, right=1pt] at (Mp2.D) {$M_{p2}\,{\times}38$};
+  \node[font=\scriptsize, right=1pt] at (Mn6.D) {$M_{n6}\,{\times}11$};
+  \node[font=\scriptsize, right=1pt] at (Mn5.D) {$M_{n5}\,{\times}11$};
+  \node[font=\scriptsize, left=1pt]  at (Mp3.D) {$M_{p3}\,{\times}145$};
+  \node[font=\scriptsize, left=1pt]  at (Mp4.D) {$M_{p4}\,{\times}38$};
+  \node[font=\scriptsize, left=1pt]  at (Mn8.D) {$M_{n8}\,{\times}11$};
+  \node[font=\scriptsize, left=1pt]  at (Mn7.D) {$M_{n7}\,{\times}11$};
+  \node[font=\scriptsize, left=1pt]  at (Mn3.G) {$M_{n3}$};
+  \node[font=\scriptsize, right=1pt] at (Mn4.B) {$M_{n4}$};
+  \node[font=\scriptsize, right=1pt] at (Mn2.D) {$M_{n2}\,{\times}42$};
+  \node[font=\scriptsize, right=1pt] at (Mn1.D) {$M_{n1}\,{\times}42$};
+  \node[font=\scriptsize] at (4.5,12.6) {\scriptsize NMOS input pair $M_{n3,4}{\times}210$};
+
+  % ---- node-voltage tags (D2) -------------------------------------------
+  \node[right=2pt] at (Vgpn) {\Vtag{V_{gp-}{=}1.53}};
+  \node[left=2pt]  at (Vgpp) {\Vtag{1.53{=}V_{gp+}}};
+  \node[right=2pt] at (VoP)  {\Vtag{0.898}};
+  \node[left=2pt]  at (VoN)  {\Vtag{0.898}};
+  \node[right=2pt] at (Vgnn) {\Vtag{V_{gn-}{=}0.190}};
+  \node[left=2pt]  at (Vgnp) {\Vtag{0.190{=}V_{gn+}}};
+  \node[right=3pt] at (N001) {\Vtag{V_{tail}{=}0.597}};
+  \node[right=3pt] at (N003) {\Vtag{0.173}};
+
+  % ---- branch-current tags (D3) -----------------------------------------
+  \node[right=1pt] at (0,14)   {\Itag{470\,\mu\mathrm{A}}};
+  \node[right=1pt] at (0,9)    {\Itag{136\,\mu\mathrm{A}}};
+  \node[right=1pt] at (0,4.3)  {\Itag{136\,\mu\mathrm{A}}};
+  \node[left=1pt]  at (9,14)   {\Itag{470\,\mu\mathrm{A}}};
+  \node[left=1pt]  at (9,9)    {\Itag{136\,\mu\mathrm{A}}};
+  \node[left=1pt]  at (9,4.3)  {\Itag{136\,\mu\mathrm{A}}};
+  \node at (2.7,10.4) {\Itag{334\,\mu\mathrm{A}}};
+  \node[right=2pt] at (Mn2.S) {\Itag{668\,\mu\mathrm{A}}};
+
+  % ---- title ------------------------------------------------------------
+  \node[font=\bfseries] at (4.5,16.4)
+    {Current-reuse folded-cascode core \ \small ($I(V_{dd}){=}1.135$\,mA / $2.04$\,mW)};
+  \node[font=\footnotesize, align=center] at (4.5,15.7)
+    {PMOS input $M_{p1,3}$ + NMOS input $M_{n3,4}$ share fold nodes $V_{gp\pm}$:
+     $g_m{=}g_{m,p}{+}g_{m,n}{=}12.45$\,mS on one current path};
+
+\end{circuitikz}

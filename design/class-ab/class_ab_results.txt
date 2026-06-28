@@ -1,0 +1,154 @@
+EE4525 Class-AB OUTPUT redesign attempt - results (2026-06-28)
+================================================================================================
+GOAL: close the 25 ns settling that the Class-A current-reuse design misses by ~1.5 ns, WITHOUT
+raising static power (preserve FoM), by giving the output high TRANSIENT slew current at low
+STATIC bias (Class-AB). Target ALL specs simultaneously @ t=25 ns:
+  A_settle >= 78 dB AND Abeta_settle >= 66 dB (binding pair), SNR >= 66 dB, FoM >= 170 dB,
+  P < 3 mW, I(Vdd) < 1.7 mA, all FETs saturated, out-CM = 0.9 V.
+
+ENTRY POINT (forked, untouched, RE-VERIFIED in this folder):
+  design/class-ab/folded_cascode_ab{,_ac,_tran,_noise}.asc  (bit copies of design/current-reuse)
+
+OUTCOME (honest): the Class-AB *differential* slew-boost mechanism is VALIDATED in principle
+(the differential output settles to ~1.3 mV by 20 ns, faster than the Class-A baseline), but NO
+clean, stable, spec-preserving realization was found on this single-stage current-reuse +
+gain-boosted topology. Root causes are fundamental (below) and are exactly the obstacles the
+task flagged ("complexity / input-CM coupling"). RECOMMENDED design remains the Class-A
+near-miss (FoM 170.5 dB; settles 78/66 at ~26.5 ns).
+
+================================================================================================
+0. BASELINE re-verified in design/class-ab/ (Class-A = the recommended fallback)
+------------------------------------------------------------------------------------------------
+  .op   : all FETs saturated; I(Vdd) = 1.135 mA ; out-CM = 0.898 V ; vg = 0 ; I_cas = 136 uA
+          Mp1.2 Id -470 uA gm 5.66 mS | Mn3.2 Id 334 uA gm 6.79 mS | Mn5.2/Mn7.2 sink 136 uA each
+  .ac   : A0 = 106.66 dB | GBW = 266.02 MHz | f_u = 54.07 MHz | PM = 86.88 deg |
+          CM->diff leak = 8.4e-13 (symmetric bench)  [V(Voutp)-V(Voutn) complex subtraction, beta=1/5]
+  .noise: Vn,amp = 209.5 uV ; + kT/C 203.5 uV -> Vn,tot 292.1 uV -> SNR = 66.76 dB
+  .tran : A(25ns) = 77.23 dB | Abeta(25ns) = 62.71 dB | offset(1/beta) 14.52 dB | tau 3.289 ns
+          power 2.043 mW ; pre-step bias reproduces the .op (idd 1.135 mA, vg 0, out-CM 0.898)
+  FoM   = -10*log10(2*pi*P*tau/SNR_lin^2) = 170.50 dB
+
+  SLEW DIAGNOSIS (the problem to fix): peak post-step slopes are ASYMMETRIC --
+    Voutn (rising, current-reuse PMOS over-sources) = +57 mV/ns
+    Voutp (falling, NMOS sink hard-clamped at the 136 uA fixed current source Mn5.2/Mn7.2) = -35 mV/ns
+  vg decays LINEARLY (138->126->114->102->88->76 mV, const 12 mV/ns) for the first ~7 ns =
+  textbook slew limiting. The binding limiter is the PULL-DOWN sink current (136 uA), not the
+  small-signal tau. So the fix must boost the falling-output sink TRANSIENTLY at zero static cost.
+
+================================================================================================
+1. CLASS-AB MECHANISMS TRIED (all on the closed-loop differential-step bench; step @30 ns,
+   spec read @55 ns; ring-robustness checked by MAX|vg| over a wide late window 45-58 ns)
+------------------------------------------------------------------------------------------------
+Notation: assist = NMOS sink "Mq" added to boost the falling output. "inject node" = where its
+drain connects. "drive" = what controls its gate. Vqab = its DC gate bias (class-A/B knob).
+
+(1) Cap-coupled cross-coupled sink, DRAIN AT Voutp (direct), drive = opposite output (Voutn):
+    Rab.Cab=7.5us -> LATCHED (A 22 dB, never settles). Sweeping the hold (Rab 1k..100k): best
+    Rab=3k -> A 61.9 dB but a HARD CEILING. ROOT CAUSE: the assist's on-resistance LOADS the
+    high-impedance output node -> loop gain / accuracy ceiling; the cap-held gate keeps it
+    partially on -> the relaxation tail corrupts the 18-25 ns settling tail. Power preserved (2.05 mW).
+
+(2) Same, sweeping strength Mqab 4..20 at Rab=3k: monotone plateau ~50-62 dB (loading ceiling).
+    Confirms (1): direct-output drain cannot exceed the loading-limited ceiling.
+
+(3) Cap-coupled cross-coupled sink, DRAIN AT Vgnn (cascode SOURCE, so the cascode isolates the
+    tail from the output): one stepped run reported A 100.6 / Abeta 86.1 dB -- but this was a
+    LUCKY ZERO-CROSSING of an OSCILLATION. Full-window probe: SUSTAINED limit cycle, envelope
+    grows back to ~10 mV at 46-49 ns, period ~2.6 ns (~385 MHz). The exact value at 55 ns is
+    timestep-sensitive (A 80.6 @ 0.05ns vs 97.7 @ 0.02ns). ROOT CAUSE: Vgnn is the *input* node
+    of the NMOS gain-booster; injecting a fast current there drives the booster loop into
+    oscillation. The amp itself is rock-stable (PM 86.9 deg) -- this is a NEW local loop.
+
+(4) Input-error-driven sink (gate cap-coupled from Vip/Vin; FEEDFORWARD, non-regenerative),
+    drain at Vgnn: STABLE and clean at low strength (no ring) but TOO WEAK -- A(25ns) = 70 dB,
+    WORSE than the 77 dB baseline, because (a) the +-85 mV input swing barely turns on a class-B
+    device, and (b) the assist's subthreshold standby SHIFTS the bias (offset 14.52 -> 14.61 dB),
+    degrading the razor-thin Abeta margin. Pushing Mqab 60->300 -> it too oscillates (wide window)
+    + larger offset shift. No usable window between "too weak" and "oscillates/perturbs".
+
+(5) Class-B cross-coupled (lower Vqab to kill subthreshold regeneration): ring got WORSE
+    (2.9 -> 3.0 mV). The cross-coupling is intrinsically regenerative (Voutp v -> gnn v ->
+    Vgnp ^ -> Voutn ^ -> gnp ^ -> more Voutp v).
+
+(6) Sink driven by the PMOS-cascode-gate Vpr/Vpl (large +-860 mV swing, returns to bias at
+    settle, self-limiting via the main loop), drain at Vgnn: OSCILLATES (vgosc 4-6 mV) -- the
+    860 mV swing slams the boost (tau crashes to ~0.5 ns) -> overshoot -> limit cycle.
+
+(7) Sink at Voutp driven by Vpr/Vpl (class-B, off at settle -> no DC loading): OSCILLATES
+    (vgosc 3.5-4.6 mV, tau ~0.3 ns). Strong output-derived drives all form fast loops.
+
+(8) Push-pull (NMOS sink on falling + PMOS source on rising, input-driven, class-B) to be
+    CM-neutral: WORSE (vgosc 9 mV). N/P current mismatch leaves a residual CM kick, and the 4
+    large devices' standby shifts the bias hard (offset 14.52 -> 14.80 dB).
+
+(9) Steerable sink pair (a differential pair, drains = Voutp/Voutn, gates = Vip/Vin, shared
+    tail) -- CM-neutral and power-neutral by construction (the tail is constant; CMFB lowers the
+    fixed sink as the pair takes over). DRAIN AT OUTPUT crashed A0: accuracy fell to 32 dB.
+    ROOT CAUSE: the gain-boosted output Rout is ~16.6 MOhm (A0=106 dB / gm=12 mS); any
+    NON-cascoded conductance draining there (the pair's gds, even at L=2 um -> ~2 uS -> 0.5 MOhm)
+    destroys the gain.
+
+(10) Cap-coupled CASCODED class-B steered sink (own fixed cascode gate to preserve A0 + isolate
+    the tail; cap does the 1.2V->0.6V level shift; class-B; differential -> CM-neutral): still
+    OSCILLATES (vgosc 6 mV) AND perturbs bias (offset 14.72 dB, standby through the cascode).
+
+  The CM-vs-differential probe (decisive): with a single-ended sink boost, the DIFFERENTIAL
+  output settles BEAUTIFULLY (von-vop to ~1.3 mV by 20 ns), while the COMMON MODE swings
+  43->57->102 mV and the CM ring couples back into vg. Slowing the ideal CMFB helper
+  (Rhelp 100M->5G) did NOT fix it -- the assist's CM kick is faster than any helper can reject.
+
+================================================================================================
+2. WHY IT DOESN'T CLEANLY CLOSE -- the fundamental obstacles (all confirmed by simulation)
+------------------------------------------------------------------------------------------------
+ (a) HIGH OUTPUT IMPEDANCE: the gain-boosted cascode Rout ~ 16.6 MOhm. ANY non-cascoded assist
+     draining at the output destroys A0 (-> poor accuracy). So the assist MUST be cascoded.
+ (b) INPUT-CM / OUTPUT-CM MISMATCH: a cascoded NMOS sink needs its gate BELOW the 0.9 V output;
+     the only STABLE (feedforward) drive is the input, but the input CM is deliberately at 1.2 V
+     (raised for the current-reuse PMOS moderate inversion, gm/ID=12). Gate-above-drain -> a
+     cascoded sink cannot be driven from the input without an added level shifter (more devices,
+     own dynamics, defeats "clean").
+ (c) HIGH-GAIN BOOSTER LOOPS: any large-swing internal drive (output, cascode gates) closes a
+     fast feedback path that OSCILLATES (~385 MHz) through the gain-boosters. Only the gentle
+     feedforward input drive is stable -- and it is too weak.
+ (d) CMFB SIM-AID RING: single-ended boosts disturb the common mode; the ideal continuous CMFB
+     helper (a sim-aid the phase-5 notes already flag as marginal) rings and couples into the
+     differential vg.
+ (e) RAZOR-THIN MARGIN vs STANDBY: the binding spec (Abeta >= 66 <=> A >= 80.5 <=> vg <= 85 uV at
+     25 ns) leaves ~3.3 dB to find. Any assist standby current shifts the 1/beta offset and the
+     settled vg by enough to erase the gain. True class-B (zero standby) needs a big gate swing
+     to turn on -- which the small input swing cannot provide and the large internal swings
+     provide only by oscillating.
+
+================================================================================================
+3. RECOMMENDATION + remaining option
+------------------------------------------------------------------------------------------------
+RECOMMENDED: the Class-A current-reuse near-miss (design/current-reuse) -- A0 106.7 / GBW 266 /
+PM 86.9 / SNR 66.8 / I(Vdd) 1.135 mA / FoM 170.5 dB, settling A 77.2 / Abeta 62.7 @ 25 ns
+(reaches 78/66 at ~26.5 ns). It PASSES every spec except the 25 ns settling, which it misses by
+~1.5 ns; the Class-AB redesign did not produce a cleaner overall result on this topology.
+
+ONLY architecture that sidesteps obstacles (a)-(d): a full TWO-STAGE Class-AB output stage
+(push-pull CS, both devices signal-driven -> strong slew in BOTH directions, low static bias),
+with its OWN bias rail (independent of the 1.2 V input CM) and its OWN output CMFB. NOT pursued
+here because:
+  - it is a separate full design (Miller Rz.Cc compensation, 2nd pole, output CMFB) and a
+    half-built two-stage is worse than a clean Class-A;
+  - analysis/11 already documents why it is disfavored for THIS spec: the Miller Rz.Cc doublet
+    rings (the exact TA "two-stage ringing" clarification), and stage-2 bias + Cc-slewing current
+    worsen the FoM the project grades on;
+  - the slew reframe makes it worth a future attempt, but only with budget to verify A0/GBW/PM/
+    settling/SNR/FoM all simultaneously.
+
+================================================================================================
+4. METHOD NOTES (for reproducibility)
+------------------------------------------------------------------------------------------------
+- Mechanisms were prototyped by grafting the assist as SPICE text directives into a scratch copy
+  of the tran bench (scratch_ab.asc) -- a non-deliverable, so the "real drawn components" rule
+  does not bind it -- and swept via .step/.param with fast (~1 s) LTspice batch runs. No clean
+  drawn schematic was produced because no variant passed; the deliverable .asc remain the
+  verified Class-A baseline.
+- Settling read by Python (spicelib) on V(vip)-V(vin): A(t)=20*log10(0.9/(|vg|+1n)), beta=1/5,
+  offset ~14.5 dB. Ring-robustness via MAX|vg| over 45-58 ns (the exact-25 ns .meas is fooled by
+  oscillation zero-crossings -- a key lesson).
+- AC A0/GBW/PM via complex subtraction of V(Voutp)-V(Voutn) (extract_gb.py), NEVER the loaded
+  replica node. Noise: INTEG(onoise) 10k-100G + hand kT/C 203.5 uV.

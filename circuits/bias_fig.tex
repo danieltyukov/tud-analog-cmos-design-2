@@ -1,0 +1,100 @@
+% ===========================================================================
+%  BIAS BLOCK: wide-swing cascode current-mirror bias generator on the
+%  SEPARATE Vddb rail.  Generates the PMOS cascode rails (Vbp,Vcp) and the
+%  NMOS cascode rails (Vbn,Vcn) that bias the main amp + gain boosters.
+%  SHARED drawing for D2 (node voltages, \showIfalse) and D3 (branch currents,
+%  \showItrue) via the thin bias_v.tex / bias_i.tex wrappers.
+%  Biasing runs on Vddb (NOT Vdd) -> its power is EXCLUDED from the amp budget.
+% ===========================================================================
+\ctikzset{transistors/scale=0.75}
+\begin{circuitikz}[american, line width=0.6pt,
+    every node/.style={font=\small},
+    nm/.style={nmos},
+    pm/.style={pmos},
+    nmr/.style={nmos, xscale=-1}]
+
+  % ---- supply rails (separate bias rail Vddb) ----------------------------
+  \draw[line width=0.9pt] (-2.2,12) -- (12.8,12)
+        node[right]{\Vddb\ \Vtag{1.8\,\mathrm{V}}};
+  \draw[line width=0.9pt] (-2.2,-2.0) node[left]{$0$} -- (12.8,-2.0);
+  \node at (5.3,-2.45) {\Vtag{\mathrm{GND}}};
+
+  % ===================== COL 1 (x=0): PMOS diode Mp3 + Ibp -> Vcp =========
+  \node[pm] (Mp3) at (0,9.4) {};
+  \draw (Mp3.S) -- (0,12);
+  \draw (Mp3.D) -- (0,7.5) coordinate (Vcp);
+  \fill (Vcp) circle (2pt);
+  \draw (Mp3.G) -- (-1.0,9.4) -- (-1.0,7.5) -- (Vcp);     % diode: gate=drain
+  \draw (Vcp) -- (0,6.0) to[isource, l_=$I_{bp}$] (0,0.6) -- (0,-2.0);
+
+  % ===================== COL 2 (x=3.4): PMOS cascode Mp1/Mp2 =============
+  \node[pm] (Mp1) at (3.4,9.4) {};
+  \node[pm] (Mp2) at (3.4,5.6) {};
+  \draw (Mp1.S) -- (3.4,12);
+  \draw (Mp1.D) -- (Mp2.S) coordinate[midway] (Vsp);
+  \draw (Mp2.D) -- (3.4,3.6) coordinate (Vbp);
+  \fill (Vsp) circle (2pt); \fill (Vbp) circle (2pt);
+  \draw (Mp2.G) -- (2.1,5.6) -- (2.1,7.5) -- (Vcp);       % cascode gate <- Vcp
+  \draw (Mp1.G) -- (2.5,9.4) -- (2.5,3.6) -- (Vbp);       % wide-swing: Mp1.G <- Vbp
+
+  % ===================== COL 3 (x=7.6): NMOS cascode Mn1/Mn2 (gates right) =
+  \node[nmr] (Mn2) at (7.6,2.7) {};
+  \node[nmr] (Mn1) at (7.6,-0.3) {};
+  \draw (Mn2.D) -- (7.6,3.6) coordinate (Vbn);
+  \draw (Mn2.S) -- (Mn1.D) coordinate[midway] (Vsn);
+  \draw (Mn1.S) -- (7.6,-2.0);
+  \fill (Vbn) circle (2pt); \fill (Vsn) circle (2pt);
+  \draw (Mn1.G) -- (8.5,-0.3) -- (8.5,3.6) -- (Vbn);      % wide-swing: Mn1.G <- Vbn
+
+  % ===================== COL 4 (x=11): NMOS diode Mn3 + Ibn -> Vcn =======
+  \node[nmr] (Mn3) at (11,-0.3) {};
+  \draw (Mn3.D) -- (11,1.0) coordinate (Vcn);
+  \fill (Vcn) circle (2pt);
+  \draw (Mn3.G) -- (12.0,-0.3) -- (12.0,1.0) -- (Vcn);    % diode: gate=drain
+  \draw (Mn3.S) -- (11,-2.0);
+  \draw (11,12) -- (11,9.4) to[isource, l=$I_{bn}$] (11,3.0) -- (Vcn);
+  \draw (Mn2.G) -- (9.6,2.7) -- (9.6,1.0) -- (Vcn);       % cascode gate <- Vcn
+
+  % ===================== Ibm: bridges Vbp -> Vbn (350 uA) ===============
+  \draw (Vbp) to[isource, l=$I_{bm}$] (Vbn);
+
+  % ---- device labels (name + multiplicity) ------------------------------
+  \node[font=\scriptsize, left=2pt]  at (Mp3.S) {$M_{p3}{\times}75$};
+  \node[font=\scriptsize, right=2pt] at (Mp1.S) {$M_{p1}{\times}75$};
+  \node[font=\scriptsize, right=2pt] at (Mp2.S) {$M_{p2}{\times}75$};
+  \node[font=\scriptsize, left=2pt]  at (Mn2.S) {$M_{n2}{\times}22$};
+  \node[font=\scriptsize, left=2pt]  at (Mn1.S) {$M_{n1}{\times}22$};
+  \node[font=\scriptsize, right=2pt] at (Mn3.S) {$M_{n3}{\times}22$};
+
+  % ---- node-voltage tags (D2) -------------------------------------------
+  \node[below left=1pt and 1pt] at (Vcp) {\Vtag{V_{cp}{=}0.873}};
+  \node[right=3pt] at (Vsp) {\Vtag{V_{sp}{=}1.573}};
+  \node[below left=1pt and 1pt] at (Vbp) {\Vtag{V_{bp}{=}1.165}};
+  \node[above right=0pt and 2pt] at (Vbn) {\Vtag{V_{bn}{=}0.624}};
+  \node[left=3pt] at (Vsn) {\Vtag{V_{sn}{=}0.174}};
+  \node[above left=1pt and 1pt] at (Vcn) {\Vtag{V_{cn}{=}0.831}};
+
+  % ---- branch-current tags (D3) -----------------------------------------
+  \node[right=2pt] at (0,2.6)    {\Itag{2.625\,\mathrm{mA}}};
+  \node[right=1pt] at (3.4,10.6) {\Itag{350\,\mu\mathrm{A}}};
+  \node[below=3pt] at (6.3,3.6)  {\Itag{350\,\mu\mathrm{A}}};
+  \node[left=2pt]  at (7.6,1.0)  {\Itag{350\,\mu\mathrm{A}}};
+  \node[left=2pt]  at (11,6.2)   {\Itag{2.03\,\mathrm{mA}}};
+
+  % ---- exported-rail callouts -------------------------------------------
+  \node[font=\scriptsize, align=center, blue!55!black] at (3.4,-0.9)
+    {$V_{bp},V_{cp}\!\rightarrow$ PMOS cascodes\\(main amp + boosters)};
+  \node[font=\scriptsize, align=center, blue!55!black] at (9.0,-1.2)
+    {$V_{bn},V_{cn}\!\rightarrow$ NMOS cascodes\\(main amp + boosters)};
+
+  % ---- title + notes ----------------------------------------------------
+  \node[font=\bfseries] at (5.3,13.2)
+    {Bias block (on separate $V_{ddb}$; excluded from amplifier power)};
+  \node[font=\footnotesize, align=center] at (5.3,12.55)
+    {wide-swing cascode mirror: diodes $M_{p3},M_{n3}$ set $V_{cp},V_{cn}$;
+     cascode legs set $V_{bp},V_{bn}$ ($I_{bm}=350\,\mu$A)};
+  \node[font=\scriptsize, align=left] at (5.3,-3.1)
+    {$V_{bp},V_{sp},V_{cp},V_{bn},V_{sn},V_{cn}$ each decoupled with $C_{big}=1\,$nF to the
+     adjacent rail.};
+
+\end{circuitikz}

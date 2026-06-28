@@ -1,0 +1,84 @@
+% Phase-3 switched-capacitor CMFB -- BRANCH-CURRENT / charge view (D3 sheet).
+% Companion to cmfb_sc.tex (the voltage view): SAME drawing, annotation focus
+% swapped to currents/charge.  KEY FACT (stated on the sheet): the SC-CMFB
+% draws ~0 mA STATIC supply current.  It is clocked charge-transfer with NO
+% continuous DC bias path -- the non-overlapping clocks move charge packets
+% Q = C dV each cycle (net DC current = 0 A); the clock lines draw 0 A and the
+% only DC path is the weak ideal-DC helper through R_help = 100 MOhm, drawing
+% ~0.05 nA.  The control node Vbcm = 0.601 V drives the high-impedance MOS
+% gates of Mn5, Mn7 (0 A DC gate current).
+\input{header.tex}
+% local hand-written current/charge annotation (red), as cmfb_i is self-contained
+\newcommand{\Imark}[1]{\textcolor{red!65!black}{\footnotesize #1}}
+\begin{document}
+\begin{circuitikz}[american, scale=1.0, line width=0.6pt]
+
+  %% ===== headline: 0 mA static supply current =====
+  \node[draw, rounded corners, thick, red!65!black, align=center,
+        font=\small\bfseries, inner sep=5pt] at (5.8,6.2)
+    {Static supply current $\approx 0\,$mA:\ switched-capacitor charge-transfer CMFB\\
+     {\footnotesize\mdseries no continuous DC bias path; clocks move charge packets $Q=C\,\Delta V$ each cycle (net DC $=0$)}};
+
+  %% ===== control-node rail Vbcm =====
+  \draw (12,3.2) -- (12,-3.2);
+  \node[above] at (12,3.2) {$V_{bcm}=0.601\,$V};
+  \fill (12,0) circle (1.6pt);
+  \draw[-latex] (12,0) -- ++(2.2,0) node[right,align=left]{to gates of\\$M_{n5},M_{n7}$\\(output CM sinks)};
+  \node[align=left, text=red!65!black, font=\footnotesize] at (13.95,-1.25)
+    {$0\,$A DC\\gate current};
+
+  %% ===== output terminals =====
+  \draw (0,3) node[left]{$V_{out+}$} to[short,o-] (1.2,3) coordinate (vop);
+  \draw (0,-3) node[left]{$V_{out-}$} to[short,o-] (1.2,-3) coordinate (von);
+
+  %% ===== continuous sense/hold caps C_C  (= C7, C8 = 1.25 pF) =====
+  \draw (vop) to[C, l=$C_{C}$] (6.5,3) -- (12,3);
+  \draw (von) to[C, l_=$C_{C}$] (6.5,-3) -- (12,-3);
+  \node[align=left] at (8.7,3.45) {\Imark{AC sense only: $I_{\mathrm{DC}}=0$}};
+  \node[align=left] at (8.7,-3.5) {\Imark{AC sense only: $I_{\mathrm{DC}}=0$}};
+
+  %% ===== + side switched sampling branch (C_CM = Cs1 = 0.5 pF) =====
+  \draw (2.4,3) -- (2.4,1.4) coordinate (tp);
+  \draw (tp) to[nos, l=$\phi_2$] (4.2,1.4) coordinate (ap);
+  \draw (ap) to[C, l=$C_{CM}$] (8.2,1.4) coordinate (bp);
+  \draw (bp) to[nos, l=$\phi_2$] (12,1.4);
+  % phi1: ap -> Vcmr ,  bp -> Vbn
+  \draw (ap) -- (4.2,2.3) to[nos, l=$\phi_1$] (6.0,2.3) node[right]{$V_{cmr}$};
+  \draw (bp) -- (8.2,0.5) to[nos, l_=$\phi_1$] (10.0,0.5) node[right]{$V_{bn}$};
+  \node[align=center] at (6.2,0.78) {\Imark{$Q=C_{CM}\,\Delta V$ per $\phi_2$ (avg DC $=0$)}};
+
+  %% ===== - side switched sampling branch (C_CM = Cs2 = 0.5 pF) =====
+  \draw (2.4,-3) -- (2.4,-1.4) coordinate (tn);
+  \draw (tn) to[nos, l_=$\phi_2$] (4.2,-1.4) coordinate (an);
+  \draw (an) to[C, l_=$C_{CM}$] (8.2,-1.4) coordinate (bn);
+  \draw (bn) to[nos, l_=$\phi_2$] (12,-1.4);
+  \draw (an) -- (4.2,-2.3) to[nos, l_=$\phi_1$] (6.0,-2.3) node[right]{$V_{cmr}$};
+  \draw (bn) -- (8.2,-0.5) to[nos, l=$\phi_1$] (10.0,-0.5) node[right]{$V_{bn}$};
+
+  %% ===== weak ideal-DC CMFB helper (OP/AC only) =====
+  % drawn as a labelled block: senses the output CM via large R1,R2 averaging,
+  % compares to Vcmr, drives Vbcm through R_help (100 MOhm => kHz BW, DC only).
+  \node[draw, rectangle, rounded corners, align=center, font=\footnotesize,
+        minimum width=3.6cm, minimum height=1.3cm] (H) at (4.3,-5.0)
+    {ideal DC CMFB ($E$)\\senses $V_{out}$ CM ($R_1,R_2$)\\ref.\ $V_{cmr}$};
+  % CM sense input from the two outputs
+  \draw (vop) -- (1.7,3) coordinate(t1) ;
+  \draw (1.7,3) -- (1.7,-5.0) -- (H.west);
+  \draw (von) -- (1.7,-3);
+  \node[font=\footnotesize, anchor=east] at (1.55,-1.0) {$R_1,R_2$};
+  % output through R_help up to the Vbcm rail
+  \draw (H.east) to[R, l=$R_{help}$] (9.0,-5.0) -- (12,-5.0) -- (12,-3.2);
+  \node[font=\footnotesize, anchor=west] at (9.2,-5.35) {$100\,$M$\Omega$};
+  \node[align=left, text=red!65!black, font=\footnotesize] at (10.6,-4.6)
+    {$I_{help}\approx 0.05\,$nA\\(sets DC op.\ only)};
+  \node[align=left, font=\footnotesize] at (5.0,-6.3)
+    {weak DC helper: the only DC path; BW $\approx$ kHz $\ll$ signal band\\(the SC network does all in-band CM correction)};
+
+  %% ===== clock note =====
+  \node[align=left, font=\footnotesize] at (2.3,4.6)
+    {$\phi_1$: sample / reset\\$\phi_2$: amplify (non-overlap, 20\,MHz)};
+  \node[anchor=west, text=red!65!black, font=\footnotesize] at (0.4,3.85)
+    {clocks draw $0\,$A net DC};
+
+\end{circuitikz}
+\end{document}

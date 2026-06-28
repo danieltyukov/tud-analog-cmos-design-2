@@ -39,7 +39,7 @@ ax.set_title(f"D5 — Differential output noise PSD (current-reuse residue amp)\
              f"+kT/C {VnkTC*1e6:.0f} µV → $V_{{n,tot}}$={Vntot*1e6:.0f} µV, SNR={SNRdB:.1f} dB")
 ax.axvline(1e4, color="0.6", ls="--", lw=0.8); ax.axvline(1e11, color="0.6", ls="--", lw=0.8)
 ax.grid(True, which="both", alpha=0.3)
-fig.tight_layout(); fig.savefig(f"{FIG}/cr_d5_noise.png", dpi=140); print(f"  wrote {FIG}/cr_d5_noise.png")
+fig.tight_layout(); fig.savefig(f"{FIG}/cr_d5_noise.png", dpi=140, bbox_inches="tight"); print(f"  wrote {FIG}/cr_d5_noise.png")
 
 # ---------- D4 settling ----------
 rt = RawRead(f"{BASE}/design/current-reuse/folded_cascode_cr_tran.raw")
@@ -61,11 +61,12 @@ ax.axhline(66, color="C1", ls=":", lw=0.9)
 ax.annotate("25 ns", (25, 5), fontsize=9); ax.annotate("78 dB", (0, 79), color="C3", fontsize=9)
 ax.annotate("66 dB", (0, 67), color="C1", fontsize=9)
 def at(tt):
-    i = np.searchsorted(t, TSTEP+tt*1e-9); return A[i], Ab[i]
+    # linear interpolation to the exact time (consistent with the .meas extraction)
+    return np.interp(TSTEP+tt*1e-9, t, A), np.interp(TSTEP+tt*1e-9, t, Ab)
 A25, Ab25 = at(25)
 ax.set_xlim(-1, 35); ax.set_ylim(0, 100)
 ax.set_xlabel("time after amplify-phase step [ns]"); ax.set_ylabel("settling accuracy [dB]")
 ax.set_title(f"D4 — Settling: A(25ns)={A25:.1f} dB, Aβ(25ns)={Ab25:.1f} dB  "
              f"(offset 1/β={OFF:.1f} dB; reaches 78/66 at ~26.5 ns)")
 ax.legend(loc="lower right", fontsize=9); ax.grid(True, alpha=0.3)
-fig.tight_layout(); fig.savefig(f"{FIG}/cr_d4_settling.png", dpi=140); print(f"  wrote {FIG}/cr_d4_settling.png")
+fig.tight_layout(); fig.savefig(f"{FIG}/cr_d4_settling.png", dpi=140, bbox_inches="tight"); print(f"  wrote {FIG}/cr_d4_settling.png")

@@ -4,6 +4,7 @@
 \documentclass[border=6pt]{standalone}
 \usepackage{circuitikz}
 \usepackage{amsmath}
+\usepackage{xcolor}
 \usetikzlibrary{calc,positioning}
 
 % Project style — tuned for analog CMOS schematics
@@ -29,3 +30,14 @@
 \newcommand{\Vdd}{\ensuremath{V_{dd}}}
 \newcommand{\Vddb}{\ensuremath{V_{ddb}}}
 \newcommand{\Vss}{\ensuremath{V_{ss}}}
+
+% --- Annotation mode: voltages (D2) vs branch currents (D3) ---------------
+% A wrapper sets \showItrue for the current sheet; default is the voltage sheet.
+% \vlab{...} renders only on the voltage sheet, \ilab{...} only on the current
+% sheet, so one shared *_fig.tex drawing produces both D2 and D3 figures.
+\newif\ifshowI \showIfalse
+\newcommand{\vlab}[1]{\ifshowI\else#1\fi}
+\newcommand{\ilab}[1]{\ifshowI#1\fi}
+% Styled node-voltage tag (blue) and branch-current tag (red).
+\newcommand{\Vtag}[1]{\vlab{\textcolor{blue!60!black}{\footnotesize $#1$}}}
+\newcommand{\Itag}[1]{\ilab{\textcolor{red!65!black}{\footnotesize $#1$}}}
