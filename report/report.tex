@@ -40,10 +40,10 @@ Green-shaded specification cells of the project table (rows 1--4, 8, 9, 13, 14, 
 \midrule
 1  & SNR & dB & \textbf{66} & \textbf{66.8} \ok \\
 2  & $A\beta_{\text{settle}}$ (loop setting) & dB & \textbf{66} & $62.7$ @ 25\,ns\,\textsuperscript{\dag} \warn \\
-3  & $A_{\text{settle}}$ (amplifier settling) & dB & \textbf{$>78$} & $106.7$ ($A_0$); $77.2$ @ 25\,ns\,\textsuperscript{\dag} \warn \\
+3  & $A_{\text{settle}}$ (amplifier settling) & dB & \textbf{$>78$} & $77.2$ @ 25\,ns\,\textsuperscript{\dag} \warn \\
 4  & $T_{\text{settle}}$ (to required accuracy) & ns & \textbf{25} & $\approx 26.5$\,\textsuperscript{\dag} \\
-5  & $T_{30\,\mathrm{dB}}$ (after step) & ns & $-$ & $11.42$ \\
-6  & $T_{38.6\,\mathrm{dB}}$ (after step) & ns & $-$ & $14.71$ \\
+5  & $T_{30\,\mathrm{dB}}$ (after step) & ns & $-$ & $11.4$ \\
+6  & $T_{38.6\,\mathrm{dB}}$ (after step) & ns & $-$ & $14.7$ \\
 7  & $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ & ns & $-$ & $3.29$ \\
 8  & Power dissipation (amplifiers only) & mW & \textbf{$<3$}, min. & \textbf{2.04} \ok \\
 9  & $I(V_{dd})$ (amplifiers only, no biasing) & mA & \textbf{$<1.7$}, min. & \textbf{1.135} \ok \\
@@ -56,7 +56,7 @@ Green-shaded specification cells of the project table (rows 1--4, 8, 9, 13, 14, 
 16 & $C_{fb}$ & pF & $-$ & $1.25$ \\
 17 & $C_{load}$ & pF & \textbf{$=C_{in}$} & \textbf{5} \ok \\
 18 & $C_{CM}$ (switched, per side) & pF & $-$ & $0.5$ \\
-19 & $R_{fb}$ (simulation-only bias) & G$\Omega$ & big & $400$ \\
+19 & $R_{big}$ (simulation-only bias) & G$\Omega$ & big & $100$ \\
 20 & $C_{big}$ (supply decoupling) & nF & big & $1$ \\
 21 & $\mathrm{FoM}_{lin}=2\pi\,P\,\tau/\mathrm{SNR}_{lin}^2$ & J & $-$ & $8.91\times10^{-18}$ \\
 22 & $\mathrm{FoM}_{dB}=-10\log_{10}(\mathrm{FoM}_{lin})$ & dB & $>170$ & \textbf{170.5} \ok \\
@@ -66,7 +66,9 @@ Green-shaded specification cells of the project table (rows 1--4, 8, 9, 13, 14, 
 
 \noindent\textsuperscript{\dag}\,\textbf{Honest settling near-miss (rows 2--4).} At
 $t=25\,\mathrm{ns}$ the design reaches $A=77.2\,\mathrm{dB}$ and $A\beta=62.7\,\mathrm{dB}$,
-i.e.\ short of the $78/66\,\mathrm{dB}$ targets by $0.8/3.3\,\mathrm{dB}$. Both thresholds
+i.e.\ short of the $78/66\,\mathrm{dB}$ targets by $0.8/3.3\,\mathrm{dB}$. (The static
+open-loop gain is $A_0=106.7\,\mathrm{dB}\gg78\,\mathrm{dB}$, so the gain itself is ample;
+row~3 reports the binding $25\,\mathrm{ns}$ \emph{transient} accuracy.) Both thresholds
 are met at $\approx26.5\,\mathrm{ns}$, about $6\,\%$ past the window. The output is
 slew-limited on this Class-A folded topology ($\mathrm{SR}=I_{cas}/C_L=27\,\mathrm{V/\mu s}$,
 so $\approx15\,\mathrm{ns}$ of the budget is slewing) plus a residual gain-booster
