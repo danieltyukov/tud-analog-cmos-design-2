@@ -20,13 +20,13 @@ Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
 |----|------------------------------------------|------------|---------------------|----------|
 | 1  | SNR                                      | dB         | **66**              | *TBD (≥66)* |
 | 2  | $A\beta_{settle}$ (loop setting)         | dB         | **66**              | *TBD (≥66)* |
-| 3  | $A_{settle}$ (amplifier settling)        | dB         | **> 78**            | *TBD (>78)* |
+| 3  | $A_{settle}$ (amplifier settling)        | dB         | **> 78**            | *101.3 static ($A_0$, Ph-4 real boosters); 25 ns transient confirm Ph-5* |
 | 4  | $T_{settle}$ (to required accuracy)      | ns         | **25**              | **25** |
 | 5  | $T_{30\,\mathrm{dB}}$                    | ns         | ---                 | *TBD* |
 | 6  | $T_{38.6\,\mathrm{dB}}$                  | ns         | ---                 | *TBD* |
 | 7  | $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ | ns | ---            | *TBD (~3.0)* |
-| 8  | Power dissipation (amplifiers only)      | mW         | **< 3**, low as poss| *TBD (0.30–1.27)* |
-| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | **< 1.7**, low as poss | *TBD (0.16–0.70)* |
+| 8  | Power dissipation (amplifiers only)      | mW         | **< 3**, low as poss| *2.985 (Ph-4 pre-reuse) ⚠; ↓ with current-reuse (Ph-5); Ph-1 pred 0.30–1.27* |
+| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | **< 1.7**, low as poss | *1.658 (Ph-4 pre-reuse); ↓ with current-reuse (Ph-5); Ph-1 pred 0.16–0.70* |
 | 10 | Total effective $kT/C$ noise at output   | µV$_{rms}$ | free                | **204** (hand-calc) |
 | 11 | Total integrated amplifier noise         | µV$_{rms}$ | free                | *TBD (≤225)* |
 | 12 | Total integrated noise (10 kHz–100 GHz)  | µV$_{rms}$ | free                | *TBD (≤319)* |
@@ -38,8 +38,8 @@ Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
 | 18 | $C_{CM}$                                 | pF         | ---                 | **0.5** (switched; +1.25 hold $C_C$/side, Ph3) |
 | 19 | $R_{fb}$                                 | GΩ         | big                 | **400** ($R_{in}=100$; $R_{fb}/R_{in}=4$; sim-only bias R) |
 | 20 | $C_{big}$                                | nF         | big                 | **1** (supply decoup.; ideal rail → non-critical, excl. $\leq$1000 pF) |
-| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | *Ph-2 pre-closure **1.32e-17** (final TBD, Ph-1 pred 1.5e-18)* |
-| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | *Ph-2 pre-closure **168.8** ⚠ <170 (final TBD, Ph-1 pred 178)* |
+| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | *Ph-4 pre-closure **1.42e-17** (final TBD, Ph-1 pred 1.5e-18)* |
+| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | *Ph-4 pre-closure **168.5** ⚠ <170 (final TBD, Ph-1 pred 178)* |
 
 ## Phase-2 design-verification results (2026-06-28, ideal CMFB + ideal gain-boost)
 
@@ -107,6 +107,35 @@ sense/hold caps; control node `Vbcm`; weak ideal-DC helper for OP/AC only.
 
 Power ceiling held: 1.547 mA / 2.78 mW = 91 % of the 3 mW limit, **~0.15 mA**
 headroom for Phase-4 boosters. The $C_{CM}$ kT/C is **not** in the row-10 term (TA).
+
+## Phase-4 results (2026-06-28, REAL gain-boosters)
+
+The ideal gain-boost VCVS blocks (`E2/E3` PMOS-side, `E5/E6` NMOS-side, `Aadd=100`)
+were replaced with **two real differential folded-cascode booster aux-amps, each with
+a reference-pinned CMFB** (`design/gain-boost/`, `10_gain_booster_design.md`). Booster A
+(in-path, NMOS-cascode) is a PMOS-input fold; Booster B (off-path, PMOS-cascode) is an
+NMOS-input fold. Real SC-CMFB and NMOS-only input unchanged (current-reuse is Phase 5).
+This is the **genuine $\ge 78\,\mathrm{dB}$ test** — the inflated ideal-boost $A_0$ (93.8 dB)
+is replaced by the real-booster value.
+
+| Metric | Phase-3 (ideal boost) | Phase-4 (REAL boosters) | Note |
+|---|---|---|---|
+| $A_0$ (open-loop diff) | 93.81 dB (inflated) | **101.27 dB** | $\ge 78$ ✓ with **+23 dB** margin; un-boosted core 55.8 dB → real boosters add **+45.5 dB** |
+| Amp GBW $=f_u/\beta$ | 264.4 MHz | **261.9 MHz** | Δ ≈ −1 % (differential response not degraded) |
+| Phase margin | 89.2° | **85.9°** | $\ge 60$ ✓; booster doublet beyond $\omega_u$ |
+| Output CM | 0.900 V | **0.906 V** | SC-CMFB unregressed, CM-step stable (Δdiff ≈ 0) |
+| $I(V_{dd})$ — **row 9** | 1.547 mA | **1.658 mA** | boosters add **+111 µA**; $<1.7$ mA ✓ (42 µA headroom) |
+| Power — **row 8** | 2.78 mW | **2.985 mW** | $<3$ mW ✓ |
+| All transistors saturated | yes (17) | **yes** (incl. all 28 booster FETs) | $V_{DS,sat}$ margins per `03` |
+
+So **row 3 ($A_{settle}>78$) is confirmed achievable with REAL boosters at 101.3 dB** (the
+settling-extracted $A_{settle}$ closes in Phase 5). The booster pole-zero doublet sits
+beyond $\omega_u$ (clean single-pole AC, monotone CM recovery) → no slow settling tail.
+
+> **⚠ Power-ceiling watch (Phase-4 update).** Post-booster $I(V_{dd})=1.658$ mA $=97.5\,\%$
+> of the 1.7 mA / 3 mW ceiling — only **42 µA** headroom. Current-reuse (Phase 5) halves the
+> input-branch current (dominant term) and opens ample margin; it is in any case mandatory
+> for FoM. Lean Binkley-min booster bias kept the adder to +111 µA (vs the ~150 µA budget).
 
 ## Deliverable-1 clarifications (TA announcements — see `07_lecturer_clarifications.md`)
 

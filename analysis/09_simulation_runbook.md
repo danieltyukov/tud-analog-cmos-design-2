@@ -19,18 +19,19 @@ the `ltspice` MCP; tools per `../LTSPICE_TOOLCHAIN.md`. Figures land per
 
 | Sim | Testbench (`.asc`) | Analysis | Feeds |
 |---|---|---|---|
-| **A. DC op-point** | core (`design/core-amp/…`) with `.op` | bias, regions | **D1** (τ inputs), **D2** node V, **D3** branch I, $\eta_{cur}$ (`08`) |
-| **B. AC (open-loop, internal)** | `design/cmfb/folded_cascode_cmfb_ac.asc` (`.ac dec 1000 1 100G`) | $A_0$, GBW, PM, GM | **D1** (gain), design verify (*not a required figure*) |
-| **C. AC loaded (replica)** | `design/cmfb/folded_cascode_cmfb_ac.asc` | realistic $A$, $A\beta$, BW, PM | **D1**, settling cross-check |
+| **A. DC op-point** | current canonical `design/gain-boost/folded_cascode_gb.asc` (`.op`) | bias, regions | **D1** (τ inputs), **D2** node V, **D3** branch I, $\eta_{cur}$ (`08`) |
+| **B. AC (open-loop, internal)** | `design/gain-boost/folded_cascode_gb_ac.asc` (`.ac dec 1000 1 100G`) | $A_0$, GBW, PM, GM | **D1** (gain), design verify (*not a required figure*) |
+| **C. AC loaded (replica)** | `design/gain-boost/folded_cascode_gb_ac.asc` | realistic $A$, $A\beta$, BW, PM | **D1**, settling cross-check |
 | **D. Transient settling** | `simulations/transient/…` (Phase-2 legacy; real bench Phase 5) | accuracy $A(t)$/$A\beta(t)$, $\tau$ | **D1** (rows 4–7), **D4** plot |
 | **E. Noise** | `simulations/noise/…` (Phase-2 legacy; real bench Phase 5) | integrated $V_{n,amp}$, SNR | **D1** (rows 11–12), **D5** plot |
 
 > **Phase-2 legacy benches.** The `simulations/{ac,transient,noise}/*_baseline.asc` files are
 > Phase-2 (ideal-CMFB) leftovers, kept for reference only and **marked on-sheet** — do not use
-> them for Phase-3+ results. The current AC/op benches are the real-SC-CMFB, verified
-> `design/cmfb/folded_cascode_cmfb{,_ac}.asc`; the **real-CMFB noise and settling-transient
-> benches are built in Phase 5** on the Phase-4 booster circuit (rows D/E still point at the
-> legacy `.asc` until then). The `V(Voutp2,Voutn2)` artifact warning in §C below still applies
+> them for Phase-3+ results. The current AC/op benches are the **Phase-4 canonical** (real
+> SC-CMFB **+ real gain-boosters**) `design/gain-boost/folded_cascode_gb{,_ac}.asc`
+> (`design/cmfb/…` is now the Phase-3 milestone, `design/core-amp/…` the Phase-2 milestone);
+> the **real noise and settling-transient benches are built in Phase 5** on this gb circuit
+> (rows D/E still point at the legacy `.asc` until then). The `V(Voutp2,Voutn2)` artifact warning in §C below still applies
 > (the current AC bench carries the same loaded replica).
 
 ---

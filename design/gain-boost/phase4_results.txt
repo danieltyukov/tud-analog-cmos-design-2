@@ -1,0 +1,80 @@
+EE4525 Phase 4 - Real Gain-Boosters - verified results (2026-06-28)
+============================================================================
+Entry state: design/cmfb/folded_cascode_cmfb.asc (folded-cascode core, real
+SC-CMFB, NMOS-only input, IDEAL gain-boost E2/E3 (PMOS) + E5/E6 (NMOS), Aadd=100).
+This phase replaced the ideal VCVS boosters with REAL cascode booster aux-amps.
+The E4/E7 ideal reference buffers and E15 input-buffer ref are subsumed/left per
+the Phase-5 bias question; the 4:1 caps, SC-CMFB and NMOS-only input are unchanged.
+
+SCHEMATICS (design/gain-boost/)
+  folded_cascode_gb.asc       .op        - core + SC-CMFB + REAL boosters BA,BB (headline D2/D3)
+  folded_cascode_gb_ac.asc    .ac        - unloaded copy REAL boosters; loaded replica kept ideal
+                                           (Voutp2 artifact, not used). A0/GBW/PM from V(voutp)-V(voutn).
+  folded_cascode_gb_tran.asc  .tran 1us  - CM-step stability / doublet sanity check
+  extract_gb.py / gen_boosters.py / integrate_boosters.py - extraction + drawn-symbol generator + region-clear/insert
+
+BOOSTER TOPOLOGY (Binkley Fig.7 template; both are differential folded cascodes + ref-pinned CMFB)
+  BA  NMOS-cascode booster  (in-signal-path)  : PMOS input pair, folds DOWN, drives Vnl/Vnr (gates
+       of Mn8.2/Mn6.2). Senses the NMOS cascode SOURCE nodes Vgnp/Vgnn (CM ~0.18 V, low -> PMOS input).
+  BB  PMOS-cascode booster  (off-path)        : NMOS input pair, folds UP, drives Vpr/Vpl (gates of
+       Mp2.2/Mp4.2). Senses PMOS cascode SOURCE nodes Vgpn/Vgpp (CM ~1.55 V, high -> NMOS input).
+  Each booster output common-mode is pinned to the cascode-gate bias (Vcn for BA, Vcp for BB) by a
+  small reference-pinned CMFB (NMOS diff pair vs Vcn/Vcp + PMOS mirror, drives the output pull device).
+  Bias reuses existing rails: Vbp/Vbn (tail+source currents), Vcn/Vcp (booster cascode gates).
+  CM-sense: 100 M� resistors average the two outputs -> Vcmoa/Vcmob -> CMFB diff-pair input.
+
+  >>> WHY ref-pinned CMFB (not self-biased): a self-biased CMFB lands the cascode-gate CM where the
+  pull device happens to source the branch current. For BB that landed Vpr at 566 mV (vs Vcp 873),
+  which pulled the PMOS cascode source to 1365 mV and BALLOONED the main-amp branch current
+  177->256 uA -> I(Vdd) 1.768 mA (BREACH). Pinning the gate CM to Vcn/Vcp restores the cascode
+  sources to ~ideal (Vgnp 172 mV, Vgpn 1553 mV) and the main amp to its 1.547 mA bias. <<<
+
+DEVICE SIZING (W=1u unless noted; m = parallel count; integer M)
+  BA: Mta(tail) pch l=.18 m=3 ; MiA/MiB(in) pch l=.18 m=2 ; Mb1/Mb2(sink) nch l=.18 m=1 ;
+      Mc1/Mc2(casc) nch l=.30 m=2 ; Ms1/Ms2(pull-up,CMFB) pch l=.50 m=1 ; Rcm1a/Rcm2a 100Meg ;
+      CMFB Mcmt(tail) nch l=.18 m=1, Mcm1/Mcm2(pair) nch l=.18 m=1, Mcmp1/Mcmp2(mirror) pch l=.18 m=1
+  BB (mirror): Mtb(tail) nch m=1 ; MiP1/MiP2(in) nch m=2 ; Mbb1/Mbb2(top src) pch m=3 ;
+      Mcb1/Mcb2(casc) pch l=.30 m=2 ; Msb1/Msb2(pull-down,CMFB) nch l=.50 m=1 ; Rcmb1/2 100Meg ;
+      CMFB Mcmt_b nch m=1, Mcm1_b/Mcm2_b nch m=1, Mcmp1_b/Mcmp2_b pch m=1
+
+ACHIEVED (verified on the DRAWN schematics; the .net is electrically IDENTICAL to the iterated design)
+  metric                  spec / target        achieved          note
+  A0 (open-loop diff)     >= 78 dB             101.27 dB         REAL boosters; un-boosted core = 55.8 dB,
+                                                                 so the boosters add +45.5 dB. 78 dB held w/ 23 dB margin.
+  Amp GBW = f_u/beta      ~ 264 MHz            261.9 MHz         beta=1/5, f_u(|A.b|=1)=52.4 MHz
+  GBW (|A|=1)             ~ 264 MHz            251.6 MHz
+  Phase margin            >= 60               85.9             single dominant pole; booster doublet beyond w_u
+  I(Vdd) (amps only)      < 1.7 mA             1.658 mA          boosters add +111 uA (BA ~50, BB ~60); 42 uA headroom
+  Power (amps only)       < 3 mW               2.985 mW          = I(Vdd) x 1.8
+  Output CM               0.900 V              0.906 V           SC-CMFB unregressed (Phase-3 was 0.900)
+  cascode sources         ~ideal               Vgnp 172, Vgpn 1553 mV (ideal 179/1567) -> bias preserved
+  all transistors sat.    yes, Vds>Vdsat       yes (incl. all 28 booster FETs) - margins per 03
+  closed-loop stable      yes                  yes: CM-step transient DIFF |max| = 6e-5 mV (boosters
+                                               orthogonal to CM), CM recovery monotone -> no doublet ring
+
+BOOSTER LOOP / DOUBLET
+  BA local boost gain  Vnl/Vgnp = 120 (41.6 dB); holds the cascode source to ~0.02 % of the output swing.
+  Booster UGF ~ gm_in/(2.pi.C_gate) ~ 0.5 GHz (gm_in ~ 97 uS, C_gate ~ 30 fF) -> FASTER than the Binkley
+  0.8.w_u(211 MHz)/0.4.w_u(106 MHz) targets. Faster is conservative here: it pushes the booster pole-zero
+  DOUBLET well BEYOND w_u (52.9 MHz loop crossover / 264 MHz GBW), so it does not create a slow settling
+  tail. Confirmed by the clean single-pole AC (PM 85.9, no peaking) and the monotone CM recovery.
+  Full high-accuracy settling closure (T38.6-T30, 0.05% in 25 ns) is Phase 5.
+
+POWER-CEILING WATCH (carry-forward)
+  Pre-Phase-4: 1.547 mA. Post-Phase-4: 1.658 mA (+111 uA boosters) = 97.5 % of the 1.7 mA / 3 mW ceiling.
+  42 uA headroom remains. Current-reuse (Phase 5) halves the input-branch current (the dominant term)
+  and creates ample margin; it is in any case mandatory for FoM.
+
+SCHEMATIC HYGIENE
+  Both boosters are REAL drawn symbols (pmos4/nmos4/res), joined by WIRES; net-label FLAGs only for the
+  sheet-spanning rails (Vdd/0/Vbp/Vbn/Vcn/Vcp), the main-amp interface nets (Vnl/Vnr/Vgnp/Vgnn/Vpr/Vpl/
+  Vgpn/Vgpp) and the block-spanning pull-up control net (Vcmfba / Vcmfbb) - exactly the way the main amp
+  distributes Vcn/Vbcm. The CM-sense resistors are drawn as a real WIRED series divider
+  (Vnl-Rcm1-centre-Rcm2-Vnr) with the centre tap wired straight into the CMFB gate (only the Vnl/Vnr
+  sense-ends flagged); titles are font-5 in a clear top strip; boxes enclose all rails/flags (no spill).
+  Verified: 0 floating nodes in all three benches; drawn netlist electrically IDENTICAL to the iterated design. The ideal VCVS E2-E7 + their test-block wiring/labels/rectangles
+  were deleted (no orphan gaps); stale .param Aadd pruned from the single-copy files (kept in gb_ac for the
+  ideal loaded replica). Blocks relabelled "NMOS-Cascode Booster (real)" / "PMOS-Cascode Booster (real)".
+
+FIGURES
+  report/figures/folded_cascode_gb.svg/.png - full Phase-4 amplifier schematic (real boosters)

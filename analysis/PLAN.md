@@ -108,9 +108,23 @@ Part of the settled architecture (need 78 dB single-stage) — see `02_topology_
 > (`00` Phase-2 note). Read A₀/GBW/PM from the unloaded `V(Voutp)−V(Voutn)` + Python,
 > never the `Voutp2` `.meas` (`09` §C). Keep total booster bias $\le\sim150\,\mu$A (ceiling).
 
-- [ ] Design **real NMOS-cascode booster** first, keep PMOS ideal (Binkley: $0.8\,\omega_u$/70°)
-- [ ] Then **real PMOS-cascode booster** (off-path one $0.4\,\omega_u$/60°; cascode-source pole $\ge 2.6\,\omega_u$)
-- [ ] Watch booster-induced doublets in settling (keep the doublet beyond $\omega_u$)
+- [x] Design **real NMOS-cascode booster** (PMOS-input fold + ref-pinned CMFB), PMOS kept ideal first → verified
+- [x] Then **real PMOS-cascode booster** (NMOS-input fold + ref-pinned CMFB); both real → **$A_0$ 101.3 dB**
+- [x] Watched booster doublet: UGF ~0.5 GHz (>0.8$\omega_u$ target) pushes the doublet **beyond $\omega_u$**; clean single-pole AC (PM 85.9°) + monotone CM-step recovery → no slow tail
+
+## Phase 4 — Gain-boosting — DONE 2026-06-28
+
+Replaced ideal VCVS boosters (`E2/E3` PMOS, `E5/E6` NMOS, `Aadd=100`) with **two REAL
+differential folded-cascode booster aux-amps + reference-pinned CMFB** (`design/gain-boost/`,
+`10_gain_booster_design.md`, `00_spec_table.md` Phase-4 block, results
+`design/gain-boost/phase4_results.txt`). Booster A = PMOS-input (in-path NMOS cascode);
+Booster B = NMOS-input (off-path PMOS cascode). Real SC-CMFB + NMOS-only input unchanged.
+
+- [x] **$A_0 = 101.27$ dB** (≥78 ✓, +23 dB margin) — the genuine real-booster test; un-boosted core 55.8 dB → boosters add +45.5 dB
+- [x] GBW 261.9 MHz (≈264), PM 85.9° (≥60) — differential response not degraded
+- [x] **$I(V_{dd}) = 1.658$ mA / 2.985 mW** (<1.7 mA / 3 mW ✓) — boosters add +111 µA, lean Binkley-min bias
+- [x] All 28 booster FETs saturated; cascode sources held ~ideal (172 / 1553 mV); CMFB unregressed (CM 0.906 V, CM-step stable, Δdiff≈0)
+- [x] Drawn as REAL component symbols (`pmos4/nmos4/res` + wires), ideal VCVS deleted, blocks relabelled, rendered to `report/figures/folded_cascode_gb.svg`
 
 ## Phase 5 — Noise + settling closure (week 6, by 2026-06-20)
 
@@ -140,10 +154,10 @@ Part of the settled architecture (need 78 dB single-stage) — see `02_topology_
 
 | Risk | Mitigation |
 |------|------------|
-| **Power ceiling breached in Phase 3–4 (LIVE).** Core already at 1.55 mA / 2.78 mW (93 % of ceiling); boosters add ~60–250 µA | Pure SC-CMFB (~0 µA) — **Phase-3 confirmed: I(Vdd) still 1.547 mA, 0 added**; lean Binkley-min booster bias next; re-measure I(Vdd) per block; pull current-reuse forward if breached |
+| **Power ceiling (LIVE, razor-thin).** Core 1.55 mA; boosters add current | SC-CMFB 0 µA (Ph-3) + **lean ref-pinned boosters +111 µA (Ph-4 measured) → 1.658 mA / 2.985 mW, still < 1.7 mA / 3 mW** but only 42 µA headroom. Current-reuse (Ph-5) halves the input branch → restores margin (mandatory for FoM anyway). *Lesson:* a **self-biased** booster CMFB mis-lands the cascode-gate CM and balloons the main-amp current to 1.768 mA (breach) — **ref-pinned CMFB** is required, see `10`. |
 | **CMFB unstable / kicks CM during settle** (was a Phase-3 risk) | **RESOLVED Phase 3:** SC-CMFB stable (overshoot +0.26 mV), CM-loop $\tau$=4.15 ns ≈ diff settling; continuous $C_C$ path keeps CM loop ~ diff GBW |
-| **FoM 168.8 dB < 170 pass line (LIVE).** Pre-closure at Phase-2 power | Current-reuse now **mandatory** (FoM ∝ P): 2.78 mW → ~0.3 mW target lifts FoM → ~178 dB (`00` FoM block) |
-| Single-stage A₀ < 78 dB | Switch to gain-boosting (Phase 4); un-boosted ~50–55 dB, boost must add ≥25 dB (in reach) |
+| **FoM 168.5 dB < 170 pass line (LIVE).** Pre-closure at **Phase-4** power (2.985 mW) | Current-reuse now **mandatory** (FoM ∝ P): 2.985 mW → ~0.3 mW target lifts FoM → ~178 dB (`00` FoM block) |
+| Single-stage A₀ < 78 dB | ✅ **RESOLVED Phase 4:** real boosters lift un-boosted 55.8 dB → **101.3 dB** (+45.5 dB); 78 dB held with 23 dB margin |
 | Settling τ > 3.3 ns at affordable power | Increase I_D in input pair / shorten L cascodes (Ph-2: 3.01 ns met at 12.2 mS) |
 | Noise dominated by kT/C, can't lift SNR | Increase C_in (re-sim power) |
 | CMFB unstable | ✅ resolved Phase 3 (SC-CMFB, stable; see row above) |
