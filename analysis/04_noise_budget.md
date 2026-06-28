@@ -94,16 +94,29 @@ $$\mathrm{NEF} = V_{n,in,rms}\sqrt{\frac{2\,I_{tot}}{\pi\,U_T\cdot 4kT\cdot \mat
   with $V_{n,in,rms}$ the input-referred integrated noise, $I_{tot}$ the total
   amplifier current, $U_T = kT/q$, and $\mathrm{BW}$ the noise bandwidth.
 
-## Combined budget (template)
+## Combined budget — FROZEN (Phase 1, 2026-06-28)
 
-Pick $V_{out,se} \to V_{sig,rms,diff} \to V_{n,tot,max}$, then split:
+Computed + cross-checked in `phase1_budget.m` (figure
+`../report/figures/phase1_noise_budget.png`). Chain:
+$V_{out,se} \to V_{sig,rms,diff} \to V_{n,tot,max}$, then 50/50 split:
 
-$$V_{n,kT/C,target} = \frac{V_{n,tot,max}}{\sqrt{2}} \quad\text{(50\% power split)}$$
+| Step | Value |
+|---|---|
+| Output swing | single-ended $\pm0.45\,\mathrm{V}$, differential $1.8\,\mathrm{V_{pp}}$ |
+| $V_{sig,rms,diff}=V_{diff,amp}/\sqrt2$ | $0.636\,\mathrm{V}$ |
+| $V_{n,tot,max}=V_{sig,rms}/\mathrm{SNR}_{lin}$ ($\mathrm{SNR}_{lin}=1995$) | $319\,\mu V_{rms}$ |
+| $V_{n,kT/C,target}=V_{n,amp,target}=V_{n,tot,max}/\sqrt2$ (50 %) | $225\,\mu V_{rms}$ each |
+| $C_{in,min}$ from $V_{n,kT/C,target}$ via $2(1/\beta)^2kT/C_{in}$ | $4.07\,\mathrm{pF}$ |
+| **Frozen $C_{in}=5\,\mathrm{pF}$** ($C_{fb}=1.25$, $C_{load}=5$) | $\Rightarrow V_{n,kT/C}=204\,\mu V_{rms}$ (margin) |
+| Bult unified cross-check $\sqrt{2(kT/C_{fb})(\mathrm{Gain}+1)}$ | $182\,\mu V_{rms}$ (same order) |
+| Remaining amplifier-noise target $V_{n,amp}$ | $\le 225\,\mu V_{rms}$ (sets $g_{m,in}$, Phase 2) |
 
-$$V_{n,amp,target} = \frac{V_{n,tot,max}}{\sqrt{2}}$$
+$$V_{n,kT/C,target} = \frac{V_{n,tot,max}}{\sqrt{2}}\quad(\text{50\% split}) \;\Rightarrow\; C_{in}=\frac{2(1/\beta)^2\,kT}{V_{n,kT/C,target}^2}$$
 
-Solve $V_{n,kT/C,target} \to C_{in}$.
-Solve $V_{n,amp,target} \to g_{m,in}$ (couples to GBW from §03).
+Solved: $C_{in}=5\,\mathrm{pF}$ (rounded up from $4.07\,\mathrm{pF}$ for margin).
+$V_{n,amp,target}=225\,\mu V_{rms}$ is the budget the **amplifier thermal + $1/f$
+noise** (sized in Phase 2 via $g_{m,in}$, coupled to GBW $\approx242\,\mathrm{MHz}$
+from `01` §0/§3) must come in under — verified by the `.noise` sim in Phase 5.
 
 ## Deliverable-1 terms 10 / 11 / 12 — what each number is
 

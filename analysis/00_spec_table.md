@@ -12,30 +12,34 @@ do not copy them). Note: the PDF table prints row 22 as $10\log_{10}$ **without*
 the minus sign — the 21 Jun TA clarification adds it, so we use $-10\log_{10}$
 (positive dB). See `07_lecturer_clarifications.md` §4.2.
 
+**Achieved column legend:** **bold** = frozen Phase-1 design choice (won't change
+in sim); *italic* = simulation/closure result, pending later phases, shown with a
+Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
+
 | #  | Design Item                              | Unit       | Spec                | Achieved |
 |----|------------------------------------------|------------|---------------------|----------|
-| 1  | SNR                                      | dB         | **66**              |          |
-| 2  | $A\beta_{settle}$ (loop setting)         | dB         | **66**              |          |
-| 3  | $A_{settle}$ (amplifier settling)        | dB         | **> 78**            |          |
-| 4  | $T_{settle}$ (to required accuracy)      | ns         | **25**              |          |
-| 5  | $T_{30\,\mathrm{dB}}$                    | ns         | ---                 |          |
-| 6  | $T_{38.6\,\mathrm{dB}}$                  | ns         | ---                 |          |
-| 7  | $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ | ns | ---            |          |
-| 8  | Power dissipation (amplifiers only)      | mW         | **< 3**, low as poss|          |
-| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | **< 1.7**, low as poss |       |
-| 10 | Total effective $kT/C$ noise at output   | µV$_{rms}$ | free                |          |
-| 11 | Total integrated amplifier noise         | µV$_{rms}$ | free                |          |
-| 12 | Total integrated noise (10 kHz–100 GHz)  | µV$_{rms}$ | free                |          |
-| 13 | Input step voltage                       | mV         | **$V_{out}/4$**     |          |
-| 14 | Output step voltage                      | V          | **free** (you choose) |        |
-| 15 | $C_{in}$                                 | pF         | ---                 |          |
-| 16 | $C_{fb}$                                 | pF         | ---                 |          |
-| 17 | $C_{load}$                               | pF         | **= $C_{in}$**      |          |
-| 18 | $C_{CM}$                                 | pF         | ---                 |          |
-| 19 | $R_{fb}$                                 | GΩ         | big                 |          |
-| 20 | $C_{big}$                                | nF         | big                 |          |
-| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   |          |
-| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          |          |
+| 1  | SNR                                      | dB         | **66**              | *TBD (≥66)* |
+| 2  | $A\beta_{settle}$ (loop setting)         | dB         | **66**              | *TBD (≥66)* |
+| 3  | $A_{settle}$ (amplifier settling)        | dB         | **> 78**            | *TBD (>78)* |
+| 4  | $T_{settle}$ (to required accuracy)      | ns         | **25**              | **25** |
+| 5  | $T_{30\,\mathrm{dB}}$                    | ns         | ---                 | *TBD* |
+| 6  | $T_{38.6\,\mathrm{dB}}$                  | ns         | ---                 | *TBD* |
+| 7  | $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ | ns | ---            | *TBD (~3.0)* |
+| 8  | Power dissipation (amplifiers only)      | mW         | **< 3**, low as poss| *TBD (0.30–1.27)* |
+| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | **< 1.7**, low as poss | *TBD (0.16–0.70)* |
+| 10 | Total effective $kT/C$ noise at output   | µV$_{rms}$ | free                | **204** (hand-calc) |
+| 11 | Total integrated amplifier noise         | µV$_{rms}$ | free                | *TBD (≤225)* |
+| 12 | Total integrated noise (10 kHz–100 GHz)  | µV$_{rms}$ | free                | *TBD (≤319)* |
+| 13 | Input step voltage                       | mV         | **$V_{out}/4$**     | **225** |
+| 14 | Output step voltage                      | V          | **free** (you choose) | **0.9** (diff; ±0.45 V se) |
+| 15 | $C_{in}$                                 | pF         | ---                 | **5** |
+| 16 | $C_{fb}$                                 | pF         | ---                 | **1.25** |
+| 17 | $C_{load}$                               | pF         | **= $C_{in}$**      | **5** |
+| 18 | $C_{CM}$                                 | pF         | ---                 | *TBD (~0.5, Ph3)* |
+| 19 | $R_{fb}$                                 | GΩ         | big                 | **1** ($R_{fb}/R_{in}=4$) |
+| 20 | $C_{big}$                                | nF         | big                 | **1** |
+| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | *TBD (~1.5e-18)* |
+| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | *TBD (~178)* |
 
 ## Deliverable-1 clarifications (TA announcements — see `07_lecturer_clarifications.md`)
 

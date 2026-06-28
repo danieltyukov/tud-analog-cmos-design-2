@@ -9,6 +9,13 @@
 *~
 *.fft
 
+# LaTeX report build artifacts (regenerable from report.tex)
+report/report.pdf
+report/*.aux
+report/*.log
+report/*.toc
+report/*.out
+
 # OS / editor
 .DS_Store
 Thumbs.db

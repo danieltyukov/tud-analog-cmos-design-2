@@ -2,6 +2,41 @@
 
 Goal: turn the PDF requirements into design-time numbers (gain, $\beta$, settling $\tau$, noise, power) before sizing transistors.
 
+## 0. Phase-1 FROZEN values (2026-06-28) ⭐
+
+All numbers below are computed + cross-checked in **`phase1_budget.m`** (run it to
+regenerate; results in `phase1_results.txt`, figures in
+`../report/figures/phase1_*.png`). These are **frozen** inputs to Phase 2 sizing —
+the architecture and $C_{in}{:}C_{fb}=4{:}1$ ratio were already settled (§1, `02`).
+
+| Quantity | Frozen value | Source / note |
+|---|---|---|
+| $V_{dd}$, output CM | $1.8\,\mathrm{V}$, $0.9\,\mathrm{V}$ | single rail (`07` §5.1), mid-rail |
+| Output swing (single-ended) | $\pm 0.45\,\mathrm{V}$ ($0.45$–$1.35\,\mathrm{V}$) | the one Phase-1 DOF; telescopic-headroom-safe, Ryu-backed |
+| Output swing (differential) | $1.8\,\mathrm{V_{pp}}$ ($V_{out,step}=0.9\,\mathrm{V}$) | $=2\times$ se; row 14 |
+| Input step (row 13) | $V_{out}/4 = 0.225\,\mathrm{V}$ | residue gain $=4$ |
+| $V_{sig,rms,diff}$ | $0.636\,\mathrm{V}$ | $=V_{diff,amp}/\sqrt2$ |
+| $\eta_{vol}=V_{sig,pp,se}/V_{dd}$ | $0.50$ | (`08` first-cut used optimistic $0.7$) |
+| $V_{n,tot}$ ceiling | $319\,\mu V_{rms}$ | $=V_{sig,rms}/\mathrm{SNR}_{lin}$, $\mathrm{SNR}_{lin}=1995$ |
+| Noise split (50/50) | $225\,\mu V_{rms}$ each | kT/C share + amplifier share |
+| **$C_{in}$** | **$5\,\mathrm{pF}$** | $\ge C_{in,min}=4.07\,\mathrm{pF}$; gives $kT/C=204\,\mu V$ (margin) |
+| **$C_{fb}$** | **$1.25\,\mathrm{pF}$** | $=C_{in}/4$ |
+| **$C_{load}$** | **$5\,\mathrm{pF}$** | $=C_{in}$ (row 17) |
+| $\tau_{cl}$ ceiling / design | $3.29 / 3.0\,\mathrm{ns}$ | $N_{settle}=\ln(1995)=7.60$; 3.0 ns leaves slew/parasitic margin |
+| loop $f_u$ / amp GBW | $48.4 / 242\,\mathrm{MHz}$ | $\mathrm{GBW}=f_u/\beta$ |
+| $g_{m,in}$ first-cut | $\approx 10\,\mathrm{mS}$ | $=C_{L,eff}/(\beta\,\tau)$, $C_{L,eff}=6\,\mathrm{pF}$ |
+| Input-stage current | $0.42$–$0.67\,\mathrm{mA}$ (reuse) | $g_m/I_D=15$–$24$; $0.83$–$1.33\,\mathrm{mA}$ without reuse |
+| $P_{system}$ floor | $0.169\,\mathrm{mW}$ | implementation-independent (`08` §2) |
+| Predicted $P$ (top-down / bottom-up) | $0.30 / 1.27\,\mathrm{mW}$ | both $<3\,\mathrm{mW}$; optimise toward floor in Phase 5 |
+| Predicted FoM (floor / TD / BU) | $180.6 / 178.2 / 172.2\,\mathrm{dB}$ | all $>170\,\mathrm{dB}$ pass |
+
+> **Reconciling the two power estimates.** Top-down (Bult, `08`) assumes the
+> efficiency knobs are *realised* ($\eta_{cur}=0.5$ etc.) → $0.30\,\mathrm{mW}$.
+> Bottom-up uses the rigorous loop $g_m=C_{L,eff}/(\beta\tau)=10\,\mathrm{mS}$ at
+> moderate WI → $1.27\,\mathrm{mW}$. The honest first-cut sits between; **Phase 5
+> power optimisation** (deeper WI, current reuse, clean loads, swing) drives it
+> toward the top-down number. Both pass the $3\,\mathrm{mW}$ ceiling with room.
+
 ## 1. Closed-loop gain $G_{cl}$ and feedback factor $\beta$
 
 **Final decision (2026-06-28): $C_{in} : C_{fb} = 4 : 1$.** Driven by the defining
@@ -111,9 +146,9 @@ Best designs drop below $0.3\,\mathrm{mW}$. Use this as the optimization target 
 | CMFB | EE4520 used **ideal** | **must redesign** in transistors |
 | Gain-boosters (NMOS, PMOS) | EE4520 used **ideal** | **must redesign** if used |
 
-## To do before sizing
+## To do before sizing — DONE (Phase 1, see §0)
 
-- [ ] Pick $V_{out,se}$ (e.g., $\pm 0.9\,\mathrm{V}$ around $0.9\,\mathrm{V}$ CM)
-- [ ] Compute $V_{sig,rms,diff}$ and the noise budget
-- [ ] Choose initial $C_{in} / C_{fb}$ satisfying ratio $3{:}1$ and noise budget
-- [ ] Cross-check $C_{load} = C_{in}$ fits in the loaded GBW spec
+- [x] Pick $V_{out,se}$ → $\pm 0.45\,\mathrm{V}$ around $0.9\,\mathrm{V}$ CM (§0)
+- [x] Compute $V_{sig,rms,diff}=0.636\,\mathrm{V}$ and the noise budget ($319\,\mu V$ ceiling, 50/50 split)
+- [x] Choose $C_{in}/C_{fb}=5/1.25\,\mathrm{pF}$ satisfying ratio $4{:}1$ and noise budget
+- [x] Cross-check $C_{load}=C_{in}=5\,\mathrm{pF}$; $g_{m,in}\approx10\,\mathrm{mS}$ gives $\tau_{cl}=3\,\mathrm{ns}<3.29\,\mathrm{ns}$ at GBW $242\,\mathrm{MHz}$

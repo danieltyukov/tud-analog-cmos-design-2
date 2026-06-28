@@ -106,17 +106,28 @@ and how **this project's** chosen levers move each one:
 ## 5. Predicted amplifier power (pre-sizing estimate)
 
 With first-cut efficiency guesses for the target architecture (single-stage
-gain-boosted cascode + current-reuse input + SC-CMFB) — **refine after sizing:**
+gain-boosted cascode + current-reuse input + SC-CMFB) — **refine after sizing**
+(computed in `phase1_budget.m`):
 
-| $\eta_{gm}$ | NEF | $\eta_{cur}$ | $\eta_{vol}^2$ | $\Rightarrow F_{circuit}$ | $\Rightarrow P_{supply}$ |
-|---:|---:|---:|---:|---:|---:|
-| $0.6$ | $1.5$ | $0.5$ | $0.49$ | $38.8$ | $\approx 0.15\,\mathrm{mW}$ |
+| Case | $\eta_{gm}$ | NEF | $\eta_{cur}$ | $\eta_{vol}^2$ | $\Rightarrow F_{circuit}$ | $\Rightarrow P_{supply}$ | FoM$_{dB}$ |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| optimistic (orig.) | $0.6$ | $1.5$ | $0.5$ | $0.49$ | $38.8$ | $\approx 0.15\,\mathrm{mW}$ | $181$ |
+| **Phase-1 frozen** | $0.6$ | $1.5$ | $0.5$ | $\mathbf{0.25}$ | $\mathbf{76.0}$ | $\mathbf{0.30\,mW}$ | $\mathbf{178}$ |
 
-$$P_{supply} = 0.169\,\mathrm{mW}\cdot\frac{38.8}{43.5} \approx \mathbf{0.15\,mW}$$
+The Phase-1 row uses the **frozen output swing** $\eta_{vol}=0.50$
+($V_{sig,pp,se}=0.9\,\mathrm{V}$ on $1.8\,\mathrm{V}$; `01` §0) — the original
+$\eta_{vol}=0.7$ was optimistic for a telescopic+current-reuse stack on $1.8\,\mathrm{V}$.
 
-Comfortably under the $3\,\mathrm{mW}$ ceiling and consistent with the "best
-designs drop below $0.3\,\mathrm{mW}$" note in `01` §5. This is the number to beat
-when the real sizing lands; track the achieved $P$ against it in `00` row 8.
+$$P_{supply} = 0.169\,\mathrm{mW}\cdot\frac{76.0}{43.5} \approx \mathbf{0.30\,mW}$$
+
+Comfortably under the $3\,\mathrm{mW}$ ceiling and at the "best designs drop below
+$0.3\,\mathrm{mW}$" boundary (`01` §5). A **bottom-up** cross-check (rigorous loop
+$g_m=C_{L,eff}/(\beta\tau)=10\,\mathrm{mS}$ at moderate WI, input current
+$0.42$–$0.67\,\mathrm{mA}$ with reuse + ~30 % overhead) lands at $\approx1.27\,\mathrm{mW}$
+($\mathrm{FoM}=172\,\mathrm{dB}$) — the un-optimised first cut. Both bracket the
+truth; **Phase 5** optimisation (deeper WI $\to\eta_{gm}$, current reuse
+$\to\eta_{cur}$, more swing $\to\eta_{vol}$) drives $P$ toward the top-down
+$0.30\,\mathrm{mW}$. Track achieved $P$ against this in `00` row 8.
 
 ---
 
@@ -143,10 +154,14 @@ clock rate, or settling time. So:
 - The FoM is won purely by **clean loads (low NEF), WI bias (high $\eta_{gm}$),
   current reuse (high $\eta_{cur}$), and full swing (high $\eta_{vol}$).**
 
-Plugging the §5 estimates: $\mathrm{FoM}_{lin}\approx7.8\times10^{-19}\,\mathrm{J}
+Plugging the **Phase-1 frozen** estimates ($\eta_{vol}^2=0.25$):
+$\mathrm{FoM}_{lin}\approx1.53\times10^{-18}\,\mathrm{J}
 \Rightarrow \mathrm{FoM}_{dB}=-10\log_{10}(\mathrm{FoM}_{lin})\approx
-\mathbf{181\,dB}$ — above the $>170\,\mathrm{dB}$ pass target (`07` §5.4) and in
-line with the EE4520 baseline of $175.2\,\mathrm{dB}$ (`../from-ee4520/README.md`).
+\mathbf{178\,dB}$ — above the $>170\,\mathrm{dB}$ pass target (`07` §5.4) and
+ahead of the EE4520 baseline of $175.2\,\mathrm{dB}$ (`../from-ee4520/README.md`).
+(The original optimistic $\eta_{vol}=0.7$ gave $181\,\mathrm{dB}$; the frozen swing
+trades $3\,\mathrm{dB}$ of FoM for telescopic headroom safety.) The graded-FoM
+sweep vs swing is `../report/figures/phase1_fom_power.png`.
 
 > **Factor-of-2 caveat.** The lecture's "project working forms" (summary slide)
 > carry an extra factor of $2$ versus the $F_{circuit}$-chain above, from the

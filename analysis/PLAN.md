@@ -25,14 +25,21 @@ Today: **2026-05-09** | Due: **Sun 28 Jun 2026, 23:59** → ~7 weeks.
 - [x] Switch active schematics to the **$1/f$-noise** model `log018.l` (off `logic018 no1of.l`) — `models/README.md`
 - [x] Transcribe TA clarifications → `07_lecturer_clarifications.md`
 
-## Phase 1 — Specs & budget (week 1, by 2026-05-16)
+## Phase 1 — Specs & budget (week 1, by 2026-05-16) — DONE 2026-06-28
 
-- [ ] Fill `analysis/00_spec_table.md` target column
-- [ ] Pick V_out swing → finalise noise budget in `04_noise_budget.md`
-- [ ] Solve C_in from kT/C share → freeze C_in, C_fb, C_load
-- [ ] Solve g_m,in from GBW → freeze first-cut bias current
-- [ ] Topology decision in `02_topology_choice.md`
-- [ ] Compute $P_{system}$ floor + first-cut $F_{circuit}$/FoM in `08_power_prediction.md` (target check before sizing)
+All numbers computed + cross-checked in `phase1_budget.m` (→ `phase1_results.txt`,
+figures `../report/figures/phase1_*.png`). Frozen table in `01` §0.
+
+- [x] Fill `analysis/00_spec_table.md` design-time column (frozen choices + predictions)
+- [x] Pick V_out swing (single-ended $\pm0.45\,\mathrm{V}$, diff $1.8\,\mathrm{V_{pp}}$, $\eta_{vol}=0.5$) → noise budget finalised in `04`
+- [x] Solve C_in from kT/C share → **C_in = 5 pF, C_fb = 1.25 pF, C_load = 5 pF** (kT/C = 204 µV, margin)
+- [x] Solve g_m,in from GBW → **g_m ≈ 10 mS**, input current 0.42–0.67 mA (reuse) → first-cut bias
+- [x] Topology decision in `02_topology_choice.md` (already settled: GB-cascode + current-reuse + SC-CMFB)
+- [x] $P_{system}$ floor = **0.169 mW**; first-cut $F_{circuit}=76$, **P ≈ 0.30 mW (TD) / 1.27 mW (BU)**, **FoM ≈ 178 dB** — all pass (`08` §5)
+
+**Phase-2 entry conditions met:** caps frozen, $g_m$/current first-cut set,
+GBW ($242\,\mathrm{MHz}$) and $\tau$ ($3.0\,\mathrm{ns}$) targets known. Next: size
+the folded-cascode core (`03`) to $A_0\ge78\,\mathrm{dB}$ at this GBW with ideal CMFB.
 
 ## Phase 2 — Core amplifier sizing (weeks 2–3, by 2026-05-30)
 

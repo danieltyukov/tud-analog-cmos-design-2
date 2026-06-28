@@ -1,0 +1,44 @@
+======================================================================
+ EE4525 Phase 1 - Specs & budget (FROZEN design-time numbers)
+======================================================================
+-- Settling --------------------------------------------------------
+  SNRlin            = 1995.3
+  N_settle=ln(SNR)  = 7.599 e-folds
+  tau_cl ceiling    = 3.290 ns   (=25ns/N_settle)
+  tau_cl design tgt = 3.000 ns   (margin for slew+parasitics)
+  loop f_u          = 48.4 MHz
+  amp GBW (=fu/beta)= 241.9 MHz
+-- Output swing (single Phase-1 DOF) -------------------------------
+  output CM         = 0.90 V
+  single-ended swing= +/-0.45 V  (0.45..1.35 V), se pp = 0.90 V
+  differential swing= +/-0.90 V  (diff pp = 1.80 V)
+  Vsig_rms,diff     = 0.636 V
+  eta_vol (se pp/Vdd)= 0.500   (08 first-cut used 0.7-optimistic)
+-- Noise budget ----------------------------------------------------
+  Vn_tot max        = 319.0 uV   (=Vsig_rms/SNRlin)
+  Vn_kTC target(50%)= 225.5 uV
+  Vn_amp target(50%)= 225.5 uV
+-- Capacitors (FROZEN) ---------------------------------------------
+  Cin_min for split = 4.07 pF
+  Cin               = 5.00 pF  (frozen, margin over min)
+  Cfb               = 1.250 pF  (Cin/4)
+  Cload             = 5.00 pF  (=Cin)
+  -> Vn_kTC achieved= 203.5 uV  (< 225.5 uV target, OK)
+  -> Bult x-check   = 182.0 uV  (2*kT/Cfb*(Gain+1), same order)
+-- First-cut gm + bias current -------------------------------------
+  CLeff (out node)  = 6.00 pF
+  gm_req (loop)     = 10.00 mS   (=CLeff/(beta*tau))
+  gm  (Bult x-check)= 6.67 mS
+  Iin w/ reuse      = 417 .. 667 uA  (gm/ID 15..24)
+  Iin w/o reuse     = 833 .. 1333 uA  (reuse ~halves it)
+-- Power / FoM (first-cut) -----------------------------------------
+  P_system floor    = 0.169 mW   (32 kT Fclk Areq^2 SNR^2)
+  F_supply          = 43.5
+  F_circuit         = 76.0   (eta_gm=0.6 NEF=1.5 eta_cur=0.5 eta_vol^2=0.250)
+  P top-down        = 0.295 mW  (Idd=164 uA)
+  P bottom-up x-chk = 1.267 mW  (Idd=704 uA, input+30%)
+  FoM_dB @ floor    = 180.6 dB
+  FoM_dB @ top-down = 178.2 dB   (identity: 178.2 dB)
+  FoM_dB @ bottom-up= 172.2 dB
+  pass needs > 170 dB and < 3 mW: true
+======================================================================
