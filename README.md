@@ -40,13 +40,15 @@ spec/rules ─► design derivations ─► sizing ─► simulate ─► extrac
 
 ## Current state
 
-**Phases 1–4 done** (`PLAN.md`). Phase 1 specs/budget frozen; Phase 2 folded-cascode
+**Phases 1–5 done** (`PLAN.md`). Phase 1 specs/budget frozen; Phase 2 folded-cascode
 core sized (ideal CMFB + ideal gain-boost); Phase 3 swapped in a **real switched-capacitor
-CMFB** (`design/cmfb/`, `analysis/05`); Phase 4 swapped in **two real folded-cascode
-gain-boosters + reference-pinned CMFB** (`design/gain-boost/`, `analysis/10`) — the genuine
-78 dB test: **A₀ 101.3 dB · GBW 262 MHz · PM 85.9° · I(Vdd) 1.658 mA / 2.985 mW** (real
-boosters add +111 µA, all 28 booster FETs saturated, CMFB unregressed). Next: Phase 5
-current-reuse + noise/settling closure, Phase 6 report. The β/gain question is **resolved**:
+CMFB** (`design/cmfb/`); Phase 4 swapped in **two real folded-cascode gain-boosters**
+(`design/gain-boost/`); **Phase 5 migrated the input to complementary current-reuse**
+(`design/current-reuse/`, `phase5_results.txt`): top PMOS sources re-wired as a PMOS input
+pair → $g_m=g_{mN}+g_{mP}$. **A₀ 106.7 dB · GBW 272 MHz · PM 88.0° · I(Vdd) 1.135 mA / 2.04 mW
+(−32 %) · SNR 66.8 dB · FoM 170.5 dB (>170 PASS)**. One honest near-miss: the 25 ns settling
+lands A 77.2 / Aβ 62.7 dB (reaches 78/66 at ~26.5 ns) — Class-A slew + booster-doublet limited.
+Next: Phase 6 report. The β/gain question is **resolved**:
 $C_{in}{:}C_{fb} = 4{:}1$ (residue gain $= C_{in}/C_{fb} = 4$; loop
 $\beta = C_{fb}/(C_{in}+C_{fb}) = 1/5$, noise gain 5) — see `analysis/01` §1.
 

@@ -151,9 +151,24 @@ $kT/C$ section above (this repo's form is $2(1/\beta)^2\,kT/C_{in}$) rather than
 copying the `10`. Equivalently, add the hand-computed term-10 number to the
 term-11 number per the combination above.
 
-## Acceptance checks (post-simulation)
+## Phase-5 noise closure (2026-06-28) — measured, PASS
 
-- [ ] LTSpice `.noise` integrated 10 kHz–100 GHz on **differential output** (not single-ended)
-- [ ] Add $kT/C$ analytically
-- [ ] Compute $\mathrm{SNR} = 20 \log_{10}(V_{sig,rms,diff} / V_{n,tot,rms})$
-- [ ] $\mathrm{SNR} \geq 66\,\mathrm{dB}$
+`.noise V(Voutp,Voutn)` on the closed-loop current-reuse amp
+(`design/current-reuse/folded_cascode_cr_noise.asc`, `log018.l` 1/f from 10 kHz), integrated
+10 kHz–100 GHz:
+
+| term | quantity | value |
+|---|---|---|
+| 11 | $V_{n,amp}$ (simulated, amp + boosters) | **209.5 µV** (≤ 225 budget) |
+| 10 | $V_{n,kT/C}=\sqrt{2(1/\beta)^2 kT/C_{in}}$, $C_{in}=5$ pF | **203.5 µV** (hand) |
+| 12 | $V_{n,tot}=\sqrt{V_{n,amp}^2+V_{n,kT/C}^2}$ | **292 µV** |
+
+$\mathrm{SNR}=20\log_{10}(0.636/292\,\mu\mathrm{V})=\mathbf{66.8\,dB}\ge 66$ ✓. The current-reuse
+high input $g_m$ keeps the amplifier-noise share at ≈ the $kT/C$ level (the targeted 50/50 split).
+Dominant noise devices: the input pair (`Mn3.2`/`Mp1.2`) and the NMOS sinks (`Mn5.2`/`Mn7.2`).
+Figure `../report/figures/cr_d5_noise.png`. (The ideal sim-aid CMFB helper is noiseless → the
+switched-cap CMFB noise is correctly excluded, consistent with the TA's term-10 $kT/C$ scope.)
+
+- [x] `.noise` integrated 10 kHz–100 GHz on **differential output** → 209.5 µV
+- [x] Add $kT/C$ analytically → 204 µV
+- [x] $\mathrm{SNR}=66.8$ dB ≥ 66 ✓

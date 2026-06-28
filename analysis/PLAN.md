@@ -126,15 +126,26 @@ Booster B = NMOS-input (off-path PMOS cascode). Real SC-CMFB + NMOS-only input u
 - [x] All 28 booster FETs saturated; cascode sources held ~ideal (172 / 1553 mV); CMFB unregressed (CM 0.906 V, CM-step stable, Δdiff≈0)
 - [x] Drawn as REAL component symbols (`pmos4/nmos4/res` + wires), ideal VCVS deleted, blocks relabelled, rendered to `report/figures/folded_cascode_gb.svg`
 
-## Phase 5 — Noise + settling closure (week 6, by 2026-06-20)
+## Phase 5 — Noise + settling closure — DONE 2026-06-28 (one honest near-miss)
 
-- [ ] Differential noise sim, integrate 10 kHz–100 GHz
-- [ ] Add kT/C analytically → check SNR ≥ 66 dB
-- [ ] Transient settling: τ from T₃₈.₆dB − T₃₀dB
-- [ ] Confirm 25 ns / 78 dB / 66 dB simultaneously
-- [ ] **Migrate input to current-reuse** (complementary NMOS + PMOS) for ~2× $g_m/\mu$A — the main power lever (`02_topology_choice.md`, Ryu 2007)
-- [ ] Power optimisation pass (current scale-down where slack exists) — guide the pass with the four live FoM knobs ($\eta_{gm},\mathrm{NEF},\eta_{cur},\eta_{vol}$) in `08_power_prediction.md` §6
-- [ ] **Candidate knob (from Ph-2):** raise input-pair $g_m/I_D$ from **20.4 → ~24** (weaker inversion) at the same $g_{m,in}=12.2\,\mathrm{mS}$ → $I_{tail}$ 1.20 mA → 1.02 mA, saving **~0.18 mA / ~0.32 mW**. *Gate:* the wider input device drops $f_T$ (Ph-2 $f_T\approx3.7\,\mathrm{GHz}=14\times\mathrm{GBW}$); at $g_m/I_D=24$ verify $f_T$ stays $\gtrsim10\times\mathrm{GBW}$ (~2.6 GHz) and PM/settling don't degrade. Complementary to (not a substitute for) current-reuse.
+Files: `design/current-reuse/folded_cascode_cr{,_ac,_tran,_noise}.asc`, `phase5_results.txt`;
+results in `00_spec_table.md` Phase-5 block. **FoM 170.5 dB (PASS)**; only the 25 ns settling
+falls ~3 dB short (reaches 78/66 dB at ~26.5 ns).
+
+- [x] **Migrate input to current-reuse** (complementary NMOS + PMOS): top PMOS `Mp1.2/Mp3.2`
+  re-wired as a PMOS input pair (gate `Vip/Vin`) → $g_m=g_{mN}+g_{mP}=12.45$ mS on one branch.
+  PMOS in moderate inversion ($V_{sg}=0.6$, input CM = 1.2 V). **A₀ 106.7 dB · GBW 272 MHz · PM 88.0°.**
+- [x] Power optimisation: **I(Vdd) 1.658 → 1.135 mA, P 2.985 → 2.04 mW (−32 %)** — the current-reuse
+  is the lever (input branch ≈halved). $g_m/I_D$-knob (20.4→24) **not needed** — FoM already > 170.
+- [x] Differential noise sim, integrate 10 kHz–100 GHz → $V_{n,amp}=209.5\,\mu$V; +kT/C 204 µV →
+  $V_{n,tot}=292\,\mu$V → **SNR 66.8 dB ≥ 66 ✓**.
+- [x] Transient settling bench (closed-loop diff step, real SC-CMFB CM verified separately):
+  $\tau=T_{38.6}-T_{30}=3.29$ ns → **FoM 170.5 dB > 170 ✓**.
+- [~] Confirm 25 ns / 78 dB / 66 dB simultaneously — **NEAR-MISS**: A 77.2 / Aβ 62.7 dB at 25 ns;
+  full 78/66 at ~26.5 ns. The output is **slew-limited** ($I_{cas}/C_L=27$ V/µs, ~15 ns slew) +
+  a residual **gain-booster doublet** (managed by 2× booster bias; lever sweep showed $I_{cas}$↑ and
+  $C$↓ both *worsen* it via cascode cap). Full closure → Class-AB output / decoupled sink-cascode
+  sizing (documented in `phase5_results.txt` §5, not taken). Reported honestly, not faked.
 
 ## Phase 6 — Report & submission (week 7, by 2026-06-28)
 
@@ -156,9 +167,9 @@ Booster B = NMOS-input (off-path PMOS cascode). Real SC-CMFB + NMOS-only input u
 |------|------------|
 | **Power ceiling (LIVE, razor-thin).** Core 1.55 mA; boosters add current | SC-CMFB 0 µA (Ph-3) + **lean ref-pinned boosters +111 µA (Ph-4 measured) → 1.658 mA / 2.985 mW, still < 1.7 mA / 3 mW** but only 42 µA headroom. Current-reuse (Ph-5) halves the input branch → restores margin (mandatory for FoM anyway). *Lesson:* a **self-biased** booster CMFB mis-lands the cascode-gate CM and balloons the main-amp current to 1.768 mA (breach) — **ref-pinned CMFB** is required, see `10`. |
 | **CMFB unstable / kicks CM during settle** (was a Phase-3 risk) | **RESOLVED Phase 3:** SC-CMFB stable (overshoot +0.26 mV), CM-loop $\tau$=4.15 ns ≈ diff settling; continuous $C_C$ path keeps CM loop ~ diff GBW |
-| **FoM 168.5 dB < 170 pass line (LIVE).** Pre-closure at **Phase-4** power (2.985 mW) | Current-reuse now **mandatory** (FoM ∝ P): 2.985 mW → ~0.3 mW target lifts FoM → ~178 dB (`00` FoM block) |
+| **FoM 168.5 dB < 170 pass line.** Pre-closure at Phase-4 power | ✅ **RESOLVED Phase 5:** current-reuse cut power 2.985 → **2.04 mW**; closure FoM (measured τ 3.29 ns, SNR 66.8) = **170.5 dB > 170 PASS** (`00` Ph-5 block). Did not reach the ~0.3 mW floor (slew binds, below). |
 | Single-stage A₀ < 78 dB | ✅ **RESOLVED Phase 4:** real boosters lift un-boosted 55.8 dB → **101.3 dB** (+45.5 dB); 78 dB held with 23 dB margin |
-| Settling τ > 3.3 ns at affordable power | Increase I_D in input pair / shorten L cascodes (Ph-2: 3.01 ns met at 12.2 mS) |
+| **25 ns settling slew-limited (LIVE, Phase-5 finding).** Class-A folded output slews at $I_{cas}/C_L$=27 V/µs; ~15 ns of the 25 ns budget is slew + a residual gain-booster doublet → A 77.2 / Aβ 62.7 dB at 25 ns (full 78/66 at ~26.5 ns) | Boosters set to 2× bias (doublet beyond $\omega_u$); $I_{cas}$↑ and $C$↓ both *worsen* it (added cascode cap re-opens the doublet). **Not fully closed** — needs Class-AB output or decoupled sink/cascode sizing (`phase5_results.txt` §4–5). FoM/SNR/power still pass. |
 | Noise dominated by kT/C, can't lift SNR | Increase C_in (re-sim power) |
 | CMFB unstable | ✅ resolved Phase 3 (SC-CMFB, stable; see row above) |
 | Power > 3 mW after meeting specs | Lower (g_m/I_D) on tails, raise (g_m/I_D) on input |

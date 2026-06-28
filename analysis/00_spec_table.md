@@ -18,18 +18,18 @@ Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
 
 | #  | Design Item                              | Unit       | Spec                | Achieved |
 |----|------------------------------------------|------------|---------------------|----------|
-| 1  | SNR                                      | dB         | **66**              | *TBD (≥66)* |
-| 2  | $A\beta_{settle}$ (loop setting)         | dB         | **66**              | *TBD (≥66)* |
-| 3  | $A_{settle}$ (amplifier settling)        | dB         | **> 78**            | *101.3 static ($A_0$, Ph-4 real boosters); 25 ns transient confirm Ph-5* |
-| 4  | $T_{settle}$ (to required accuracy)      | ns         | **25**              | **25** |
-| 5  | $T_{30\,\mathrm{dB}}$                    | ns         | ---                 | *TBD* |
-| 6  | $T_{38.6\,\mathrm{dB}}$                  | ns         | ---                 | *TBD* |
-| 7  | $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ | ns | ---            | *TBD (~3.0)* |
-| 8  | Power dissipation (amplifiers only)      | mW         | **< 3**, low as poss| *2.985 (Ph-4 pre-reuse) ⚠; ↓ with current-reuse (Ph-5); Ph-1 pred 0.30–1.27* |
-| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | **< 1.7**, low as poss | *1.658 (Ph-4 pre-reuse); ↓ with current-reuse (Ph-5); Ph-1 pred 0.16–0.70* |
+| 1  | SNR                                      | dB         | **66**              | **66.8** ✓ (Ph-5) |
+| 2  | $A\beta_{settle}$ (loop setting)         | dB         | **66**              | *62.7 @ 25 ns ⚠ (reaches 66 @ ~26.5 ns)* |
+| 3  | $A_{settle}$ (amplifier settling)        | dB         | **> 78**            | *106.7 static ($A_0$); 77.2 @ 25 ns transient ⚠ (reaches 78 @ ~26.5 ns)* |
+| 4  | $T_{settle}$ (to required accuracy)      | ns         | **25**              | *~26.5 (slew+doublet limited)* |
+| 5  | $T_{30\,\mathrm{dB}}$                    | ns         | ---                 | *9.4 (after step)* |
+| 6  | $T_{38.6\,\mathrm{dB}}$                  | ns         | ---                 | *12.2 (after step)* |
+| 7  | $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ | ns | ---            | **3.29** (Ph-5 transient) |
+| 8  | Power dissipation (amplifiers only)      | mW         | **< 3**, low as poss| **2.04** ✓ (Ph-5 current-reuse; −32% vs Ph-4 2.985) |
+| 9  | $I(V_{dd})$ (amps only, no biasing)      | mA         | **< 1.7**, low as poss | **1.135** ✓ (Ph-5; −31% vs Ph-4 1.658) |
 | 10 | Total effective $kT/C$ noise at output   | µV$_{rms}$ | free                | **204** (hand-calc) |
-| 11 | Total integrated amplifier noise         | µV$_{rms}$ | free                | *TBD (≤225)* |
-| 12 | Total integrated noise (10 kHz–100 GHz)  | µV$_{rms}$ | free                | *TBD (≤319)* |
+| 11 | Total integrated amplifier noise         | µV$_{rms}$ | free                | **209.5** (Ph-5 sim, ≤225) |
+| 12 | Total integrated noise (10 kHz–100 GHz)  | µV$_{rms}$ | free                | **292** (Ph-5; $\sqrt{209.5^2+204^2}$) |
 | 13 | Input step voltage                       | mV         | **$V_{out}/4$**     | **225** |
 | 14 | Output step voltage                      | V          | **free** (you choose) | **0.9** (diff; ±0.45 V se) |
 | 15 | $C_{in}$                                 | pF         | ---                 | **5** |
@@ -38,8 +38,8 @@ Phase-1 *prediction* in parentheses. Predictions from `phase1_budget.m`.
 | 18 | $C_{CM}$                                 | pF         | ---                 | **0.5** (switched; +1.25 hold $C_C$/side, Ph3) |
 | 19 | $R_{fb}$                                 | GΩ         | big                 | **400** ($R_{in}=100$; $R_{fb}/R_{in}=4$; sim-only bias R) |
 | 20 | $C_{big}$                                | nF         | big                 | **1** (supply decoup.; ideal rail → non-critical, excl. $\leq$1000 pF) |
-| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | *Ph-4 pre-closure **1.42e-17** (final TBD, Ph-1 pred 1.5e-18)* |
-| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | *Ph-4 pre-closure **168.5** ⚠ <170 (final TBD, Ph-1 pred 178)* |
+| 21 | $\mathrm{FoM}_{lin} = 2\pi \cdot P \cdot \tau / \mathrm{SNR}_{lin}^2$ | J |   | **8.91e-18** (Ph-5 closure: measured $\tau$, SNR) |
+| 22 | $\mathrm{FoM}_{dB} = \mathbf{-}10\log_{10}(\mathrm{FoM}_{lin})$ (positive) | dB |          | **170.5** ✓ >170 (Ph-5; was 168.5 Ph-4) |
 
 ## Phase-2 design-verification results (2026-06-28, ideal CMFB + ideal gain-boost)
 
@@ -136,6 +136,40 @@ beyond $\omega_u$ (clean single-pole AC, monotone CM recovery) → no slow settl
 > of the 1.7 mA / 3 mW ceiling — only **42 µA** headroom. Current-reuse (Phase 5) halves the
 > input-branch current (dominant term) and opens ample margin; it is in any case mandatory
 > for FoM. Lean Binkley-min booster bias kept the adder to +111 µA (vs the ~150 µA budget).
+
+## Phase-5 results (2026-06-28, current-reuse + settling/noise/power closure)
+
+The NMOS-only input was made **complementary current-reuse** (Ryu 2007): the two top PMOS
+current sources `Mp1.2/Mp3.2` are re-wired as a **PMOS input pair** (gate = `Vip/Vin`) sharing
+the same input as the NMOS pair `Mn3.2/Mn4.2` at the fold nodes — $g_m = g_{mN}+g_{mP}$ on one
+current path. PMOS biased in moderate inversion ($V_{sg}=0.6$ V, $g_m/I_D=12$) via input CM = 1.2 V.
+Gain-boosters scaled **2×** the Phase-4 bias to push the booster pole–zero doublet beyond $\omega_u$.
+Files: `design/current-reuse/folded_cascode_cr{,_ac,_tran,_noise}.asc`, `phase5_results.txt`.
+
+| Metric | Phase-4 (NMOS-only) | **Phase-5 (current-reuse)** | Spec |
+|---|---|---|---|
+| $A_0$ (open-loop diff) | 101.3 dB | **106.7 dB** | ≥78 ✓ |
+| GBW ($f_u/\beta$) | 262 MHz | **272 MHz** | ≈264 ✓ |
+| PM | 85.9° | **88.0°** | ≥60 ✓ |
+| $I(V_{dd})$ / Power | 1.658 mA / 2.985 mW | **1.135 mA / 2.04 mW** | <1.7 mA / <3 mW ✓ (−32 %) |
+| $g_{m,n}+g_{m,p}$ | 12.2 mS (N only) | **6.79 + 5.66 = 12.45 mS** | — |
+| $V_{n,amp}$ / SNR | — | **209.5 µV / 66.8 dB** | SNR ≥66 ✓ |
+| $\tau$ (transient $T_{38.6}-T_{30}$) | 3.0 (AC proxy) | **3.29 ns** | — |
+| **FoM** | 168.5 dB ⚠ | **170.5 dB** | >170 ✓ |
+| Settling A / Aβ @ 25 ns | (not tested) | **77.2 / 62.7 dB** ⚠ | 78 / 66 — reaches at ~26.5 ns |
+
+> **FoM margin is thin (honest).** FoM = 170.5 dB uses the **achieved** SNR = 66.8 dB. At the
+> spec-minimum SNR = 66 dB the same $P\tau$ gives FoM = **169.7 dB** ($<170$). So the >170 pass is
+> **real but relies on the 0.8 dB SNR margin** (amplifier noise 209.5 µV came in under the 225 µV
+> budget). It does NOT rely on over-designing speed/SNR — the FoM is invariant to that (`08` §6).
+
+**Honest near-miss:** every spec passes **except** the 25 ns settling, which lands ~3 dB short on
+loop accuracy at 25 ns and reaches 78/66 dB at **~26.5 ns** (6 % over). Root cause: the Class-A
+folded output slews at $I_{cas}/C_L=27$ V/µs (≈15 ns of the budget is slew) plus the residual
+gain-booster doublet — confirmed by an exhaustive lever sweep ($I_{cas}$↑ and $C$↓ both *worsen* it
+via added cascode cap; boosters optimal at 2×, 2.5× rings). Full closure needs a Class-AB output or
+decoupled sink/cascode sizing (documented, not taken). Figures: `../report/figures/cr_d4_settling.png`,
+`cr_d5_noise.png`, `folded_cascode_cr.svg`.
 
 ## Deliverable-1 clarifications (TA announcements — see `07_lecturer_clarifications.md`)
 

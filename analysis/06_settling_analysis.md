@@ -31,7 +31,14 @@ TA clarification (`07_lecturer_clarifications.md` §2): a two-stage amplifier ma
 | 25 ns  | $A\beta \geq 66\,\mathrm{dB}$ |
 |        | $A_{settle} \geq 78\,\mathrm{dB}$ |
 
-Both must be true at $t = 25\,\mathrm{ns}$. The amplifier curve $A(t)$ sits $20\log_{10}(C_{in}/C_{fb}) = 12\,\mathrm{dB}$ above the loop curve $A\beta(t)$ — the plot labels this gap "$1/\beta$", but it is the **closed-loop gain** $C_{in}/C_{fb}=4$ (the true loop $\beta = 1/5$; see `01_specs_and_budget.md` §1).
+Both must be true at $t = 25\,\mathrm{ns}$. The amplifier curve $A(t)$ sits a **fixed
+$20\log_{10}(1/\beta) = 20\log_{10}(5) = 14\,\mathrm{dB}$** above the loop curve $A\beta(t)$.
+The gap is the **loop attenuation / noise gain** $1/\beta = 1 + C_{in}/C_{fb} = 5$
+($\beta = C_{fb}/(C_{in}+C_{fb}) = 1/5$) — **not** the residue gain $C_{in}/C_{fb}=4$ ($=12\,\mathrm{dB}$).
+Derivation: at the step instant the virtual-ground error is $\mathrm{vg}_{peak}=\Delta V\,C_{in}/(C_{in}+C_{fb})$
+while $V_{out,max}=\Delta V\,C_{in}/C_{fb}$, so the offset $=20\log_{10}(V_{out,max}/\mathrm{vg}_{peak})
+=20\log_{10}(1+C_{in}/C_{fb})=14\,\mathrm{dB}$. Phase-5 measured this offset at $14.5\,\mathrm{dB}$
+(the input-pair parasitics raise $1/\beta$ slightly above ideal — see `01_specs_and_budget.md` §1).
 
 ## Simulation setup
 
@@ -90,14 +97,14 @@ Vertical lines at $25\,\mathrm{ns}$; horizontal lines at $78\,\mathrm{dB}$ and $
 
 The accuracy expression measured at the summing node behaves as the **amplifier**
 curve $A(t)$. To get the **loop** curve $A\beta(t)$ that "starts at exactly 0 dB",
-don't just assume $1/\beta = 12\,\mathrm{dB}$ — **measure your actual offset and
+don't just assume $1/\beta = 14\,\mathrm{dB}$ — **measure your actual offset and
 subtract it**:
 
 1. At $t = 0$ the raw expression evaluates to a small non-zero value set by the
    input capacitive divider plus input-pair parasitics — typically
-   $\approx 12\text{–}16\,\mathrm{dB}$, a little **above** the ideal
-   $1/\beta = 12\,\mathrm{dB}$. A peer's working netlist measured
-   $13.6534471512\,\mathrm{dB}$.
+   $\approx 14\text{–}16\,\mathrm{dB}$, a little **above** the ideal
+   $1/\beta = 20\log_{10}(5) = 14\,\mathrm{dB}$. This design's Phase-5 bench measured
+   $14.5\,\mathrm{dB}$ (a peer's differently-ratioed netlist measured $13.65\,\mathrm{dB}$).
 2. Subtract that constant inside the expression (the `OFFSET` in the `.meas`
    block above). Now $A\beta(t)$ starts at $0\,\mathrm{dB}$ and
    $A(t) = A\beta(t) + \text{OFFSET}$ sits the offset above it.
@@ -126,9 +133,31 @@ $\approx 110\,\mathrm{dB}$ by $90\,\mathrm{ns}$) because of slow leakage / CM
 drift through $R_{fb}$. **Read the spec at the $25\,\mathrm{ns}$ line** and use
 `RISE=1` (first crossing) in the `.meas`; ignore the post-settle droop.
 
-## To do
+## Phase-5 closure result (2026-06-28) — measured, honest
 
-- [ ] Build behavioural source for `accuracy_dB`
-- [ ] Confirm $V_{out,max}$ definition matches PDF (fixed, not $V(t)$)
-- [ ] Tune sizing in `03_sizing_calcs.md` until $T_{settle} \leq 25\,\mathrm{ns}$ at $78\,\mathrm{dB}$ / $66\,\mathrm{dB}$
-- [ ] Capture $\tau$ from `.meas`, log into deliverable table (#7)
+Closed-loop differential-step bench `design/current-reuse/folded_cascode_cr_tran.asc`
+(step at the amplify-phase start, $V_{out,max}=0.9$ V, $\mathrm{vg}=V(\mathrm{vip})-V(\mathrm{vin})$,
+offset $1/\beta=14.5\,\mathrm{dB}$). At the verified op point (vg 1.2 V, out-CM 0.9 V, I(Vdd) 1.135 mA):
+
+| quantity | value | spec |
+|---|---|---|
+| $A(25\,\mathrm{ns})$ | **77.2 dB** | $\ge 78$ ⚠ |
+| $A\beta(25\,\mathrm{ns})$ | **62.7 dB** | $\ge 66$ ⚠ (binding) |
+| $T_{30}$ / $T_{38.69}$ (after step) | 9.4 / 12.2 ns | — |
+| $\tau = T_{38.69}-T_{30}$ | **3.29 ns** | (→ FoM) |
+
+**The amplifier reaches 78 dB / 66 dB at ~26.5 ns — ~1.5 ns (6 %) past the 25 ns window.**
+Root cause: the **Class-A folded output is slew-limited** ($\mathrm{SR}=I_{cas}/C_L=136\,\mu\mathrm{A}/5\,\mathrm{pF}=27\,\mathrm{V/\mu s}$),
+so ~15 ns of the budget is spent slewing the 0.45 V/side step, leaving only ~3 $\tau$ of linear
+settle (→ 77 dB, not the 80.5 dB needed for $A\beta=66$). A residual **gain-booster pole–zero
+doublet** is the second limiter — managed by scaling the booster bias 2× (doublet beyond $\omega_u$,
+Binkley). Exhaustive lever sweep: raising $I_{cas}$ for faster slew **back-fires** (bigger output
+devices add cascode cap that re-opens the doublet); reducing $C$ lowers PM. Full closure would need a
+**Class-AB output stage** (decouples slew current from quiescent) or **separate sink-vs-cascode
+sizing** — documented in `../design/current-reuse/phase5_results.txt` §5, not taken (FoM/SNR/power
+all already pass). Figure `../report/figures/cr_d4_settling.png`.
+
+- [x] Behavioural-free accuracy via `.meas`/Python on `V(vip)-V(vin)`
+- [x] $V_{out,max}=0.9$ V fixed (matches the chosen output step)
+- [x] $\tau$ captured (3.29 ns) → D1 row 7
+- [~] $T_{settle}\le25$ ns at 78/66 — near-miss (26.5 ns); slew+doublet limited (above)
