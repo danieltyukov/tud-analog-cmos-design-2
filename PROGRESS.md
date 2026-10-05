@@ -179,6 +179,10 @@ continuous-time CMFB (2 MΩ ∥ $C_{CM}$ sense, PMOS diff pair vs vcmr, mirror i
 - Housekeeping: a watcher loop of mine (`while pgrep -f "ropt.py cr_r1"`) never ended because pgrep matched its
   own command line; killed. Lesson: use `pgrep -f "[r]opt.py"` style patterns.
 
+- Report prose rewritten with the humanizer skill (D1 notes, D6 text, short explanation): first-person student voice,
+  shorter sentences, no enumerated lists or stacked parentheticals; every macro, number and verified claim unchanged.
+  FoM proportionality moved to a displayed equation (removed an overfull line). 8 pages, no ??, check_done DONE.
+
 ## Failed approaches (do not retry without a new reason)
 
 - Optimising the global bias unit Ib with fixed cascode-bias diodes: shifts vcn/vcp, devices leave saturation.
