@@ -241,10 +241,10 @@ def main(argv=None) -> int:
     ap.add_argument("--publish", action="store_true", help="write report/generated/*.tex and report figures")
     a = ap.parse_args(argv)
     tag = a.tag or time.strftime("run_%m%d_%H%M%S")
-    s = evaluate(Path(a.tran).resolve(), Path(a.noise).resolve(), tag, plots=not a.no_plots)
+    s = evaluate(lt.guard(a.tran), lt.guard(a.noise), tag, plots=not a.no_plots)
     print_summary(s)
     if a.publish:
-        net = Path(a.tran).resolve()
+        net = lt.guard(a.tran)
         net = net.with_suffix(".net") if net.suffix.lower() == ".asc" else net
         publish(s, net)
         print("published -> report/generated/{results,opvals}.tex, report/figures/d4_*, d5_*")

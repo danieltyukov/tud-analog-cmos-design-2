@@ -17,10 +17,9 @@ description: Builds and reviews the EE4525 8-page LaTeX report (report/main.tex)
 ## Build and look
 
 ```bash
-cd report && latexmk main.tex          # latexmkrc: pdflatex, halt on error, copies build/main.pdf -> main.pdf
-pdfinfo main.pdf | grep Pages          # must be 8
-pdftoppm -r 70 -png main.pdf ../results/pages/p   # then Read each PNG and look at it
-grep -E "Overfull|undefined|Warning" build/main.log | head
+uv run tools/report.py build     # latexmk in report/ (halts on error), then the info check below
+uv run tools/report.py info      # page count (must be 8), LaTeX warnings, unresolved ?? and TODO
+uv run tools/report.py pages     # results/pages/p-<n>.png: Read each one and look at it
 ```
 Unresolved values render as red `??`; `tools/check_done.py` rejects them and any `TODO` text.
 
@@ -56,6 +55,6 @@ with its definition (`\resNEF`); how it is biased (separate Vddb, mirrors, decou
 
 ## Review loop
 
-1. Build, render pages, look at every page yourself.
+1. `uv run tools/report.py build` and `pages`, then look at every page yourself.
 2. Run the `report-reviewer` agent; fix every correctness finding; rebuild.
 3. `uv run tools/check_done.py`.

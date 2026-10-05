@@ -444,6 +444,11 @@ def main(argv=None) -> int:
     p.add_argument("--cin", required=True, help="e.g. 3.24p")
     p.add_argument("--vn-amp", help="integrated amplifier noise, e.g. 326u")
     a = ap.parse_args(argv)
+    from lt import guard  # repo/scratch-only file access (tools run auto-approved)
+
+    for k in ("raw", "net", "plot", "json"):
+        if getattr(a, k, None):
+            setattr(a, k, str(guard(getattr(a, k))))
     if a.cmd == "tran":
         m = tran_metrics(a.raw, a.net, vg=tuple(a.vg.split(",")), out=tuple(a.out.split(",")),
                          supply=a.supply, vout_step=a.vout_step, tstep=a.tstep)

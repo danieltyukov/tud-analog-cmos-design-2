@@ -34,6 +34,37 @@ LTSPICE_EXE = os.environ.get(
 XVII_LIB = r"C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l"
 DISPLAY_NUM = os.environ.get("EE4525_XVFB", "87")
 REPO = Path(__file__).resolve().parent.parent
+# Tools run auto-approved by the agent harness, so they only touch files in the repo or the
+# Claude scratch area, and refuse netlists that include files from anywhere else.
+ALLOWED_ROOTS = [REPO, Path(f"/tmp/claude-{os.getuid()}")]
+# LTspice's own library trees in the Wine prefix (XVII itself adds Documents\...\standard.mos)
+LT_LIB_RE = re.compile(r"^c:\\(program files\\ltc\\ltspicexvii|users\\[^\\]+\\documents\\ltspicexvii)\\lib\\")
+
+
+def guard(path: str | Path) -> Path:
+    """Resolve a path and refuse anything outside the repo / Claude scratch directory."""
+    rp = Path(path).resolve()
+    if not any(rp.is_relative_to(r) for r in ALLOWED_ROOTS):
+        raise SystemExit(f"refusing path outside the repo or Claude scratch dir: {rp}")
+    return rp
+
+
+def check_netlist_paths(text: str, base: Path) -> None:
+    """Every .include/.inc/.lib must point into the repo, the scratch dir, or LTspice's own lib/."""
+    for line in text.splitlines():
+        m = re.match(r"(?i)^\s*\.(?:include|inc|lib)\s+(?:'([^']+)'|\"([^\"]+)\"|(\S+))", line)
+        if not m:
+            continue
+        target = next(g for g in m.groups() if g)
+        low = target.lower()
+        if re.match(r"^[a-z]:\\", low):
+            if LT_LIB_RE.match(low) and ".." not in low:
+                continue
+            if low.startswith("z:\\"):
+                guard("/" + target[3:].replace("\\", "/"))
+                continue
+            raise SystemExit(f"refusing include outside LTspice lib/: {target}")
+        guard(base / target)
 
 # ----------------------------------------------------------------------------- display
 
@@ -153,7 +184,7 @@ def inline_includes(text: str, base: Path) -> str:
     for line in text.splitlines():
         m = re.match(r"(?i)^\.inc(?:lude)?\s+[\"']?([^\"']+?)[\"']?\s*$", line.strip())
         if m and (base / m.group(1)).exists():
-            inc = base / m.group(1)
+            inc = guard(base / m.group(1))
             out.append(f"* ---- begin {m.group(1)} ----")
             out.append(inline_includes(read_text(inc), inc.parent).rstrip("\n"))
             out.append(f"* ---- end {m.group(1)} ----")
@@ -163,7 +194,7 @@ def inline_includes(text: str, base: Path) -> str:
 
 
 def netlist(asc: Path, timeout: float = 60) -> Path:
-    asc = asc.resolve()
+    asc = guard(asc)
     proc = _wine(["-netlist", winpath(asc)], asc.parent, timeout)
     net = asc.with_suffix(".net")
     if not net.exists():
@@ -259,13 +290,14 @@ def log_issues(log: str) -> tuple[list[str], list[str]]:
 
 def run(path: str | Path, timeout: float = 300, op: bool = False, keep_raw: bool = True) -> dict:
     """Run an .asc/.net/.cir in LTspice XVII batch mode. Returns a compact result dict."""
-    path = Path(path).resolve()
+    path = guard(path)
     t0 = time.time()
     if path.suffix.lower() == ".asc":
         net = netlist(path)
     else:
         net = path
         net.write_text(fix_netlist(read_text(net)))
+    check_netlist_paths(read_text(net), net.parent)
     if op:
         net = make_op_netlist(net)
     for ext in (".log", ".raw", ".op.raw"):
@@ -341,7 +373,7 @@ def set_params(text: str, values: dict[str, str]) -> str:
 def sweep(path: str | Path, grid: dict[str, list[str]], jobs: int = 12, tag: str | None = None,
           keep_raw: bool = False, timeout: float = 300) -> list[dict]:
     """Cartesian sweep of .param overrides, run in parallel. Each point gets its own folder."""
-    path = Path(path).resolve()
+    path = guard(path)
     base = netlist(path) if path.suffix.lower() == ".asc" else path
     text = fix_netlist(inline_includes(read_text(base), base.parent))
     tag = tag or f"{path.stem}_{time.strftime('%H%M%S')}"
@@ -437,7 +469,7 @@ def main(argv=None) -> int:
         print(netlist(Path(a.file)))
         return 0
     if a.cmd == "inline":
-        f = Path(a.file).resolve()
+        f = guard(a.file)
         sys.stdout.write(inline_includes(read_text(f), f.parent))
         return 0
     if a.cmd == "run":

@@ -151,7 +151,9 @@ def main(argv=None) -> int:
     ap.add_argument("file")
     ap.add_argument("--no-netlist", action="store_true", help="skip LTspice netlisting (text checks only)")
     a = ap.parse_args(argv)
-    f = Path(a.file)
+    from lt import guard
+
+    f = guard(a.file)
     errs, warns, info = [], [], []
     if f.suffix.lower() == ".asc":
         e, w = lint_asc_text(f.read_text(errors="replace"))

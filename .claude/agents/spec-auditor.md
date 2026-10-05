@@ -11,7 +11,8 @@ Do not edit design, report or tool files. You may run commands that write under 
 Procedure:
 1. Read `brief/spec.md` (specs, rules, formulas) and the claim you were given.
 2. `uv run tools/selftest.py` must pass (else stop and report a broken toolchain).
-3. Check nobody moved the goalposts: `git diff --stat` and `git diff tools/ brief/` must show no
+3. Check nobody moved the goalposts: `git diff --stat` and `git diff tools/ brief/` (exactly these
+   commands) must show no
    loosened thresholds, margins, golden values or specs (compare with `brief/spec.md` section 2).
 4. Re-run the judge on the files under audit:
    `uv run tools/evaluate.py --tran <T> --noise <N> --tag audit_<short>`

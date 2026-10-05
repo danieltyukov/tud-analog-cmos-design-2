@@ -28,7 +28,7 @@ def main(argv=None) -> int:
     ap.add_argument("file")
     ap.add_argument("-j", "--jobs", type=int, default=12)
     a = ap.parse_args(argv)
-    f = Path(a.file).resolve()
+    f = lt.guard(a.file)
     base = lt.netlist(f) if f.suffix.lower() == ".asc" else f
     text = lt.fix_netlist(lt.inline_includes(lt.read_text(base), base.parent))
     if not re.search(r"(?i)\btrise\s*=", text):

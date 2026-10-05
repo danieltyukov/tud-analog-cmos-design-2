@@ -76,12 +76,12 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     def text(f):
-        f = Path(f)
+        f = lt.guard(f)
         f = lt.netlist(f) if f.suffix.lower() == ".asc" else f.resolve()
         return lt.inline_includes(lt.read_text(f), f.parent)
 
     tran_text, noise_text = lt.fix_netlist(text(a.tran)), lt.fix_netlist(text(a.noise))
-    space = json.loads(Path(a.space).read_text())
+    space = json.loads(lt.guard(a.space).read_text())
     root = lt.REPO / "results" / "opt"
     root.mkdir(parents=True, exist_ok=True)
     lt.ensure_display()

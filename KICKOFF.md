@@ -9,10 +9,14 @@ agents, hooks), `.mcp.json` (the `ltspice-asc` schematic server).
 ```bash
 cd ~/workspace/tud/tud-analog-cmos-design-2
 touch .claude/autorun.on        # optional: Stop hook keeps the agent working until tools/check_done.py passes
-claude --permission-mode auto   # or plain `claude`; approve the project MCP server `ltspice-asc` once
+claude --dangerously-skip-permissions   # full permission: no approval prompts at all
 ```
 
-Remove `.claude/autorun.on` (or press Esc) to let it stop. The agent stops on its own when it writes
+You granted the agent full permission, so it runs without approval prompts. The deny rules in
+`.claude/settings.json` (legacy/, example/, the selftest golden values, path traversal, the MCP
+`run_code` tool) and the tools' repo-only file sandbox remain as guardrails. If Claude Code asks once to
+trust the project MCP server `ltspice-asc`, approve it. Remove `.claude/autorun.on` (or press Esc) to
+let it stop. The agent stops on its own when it writes
 `BLOCKED: <question>` into PROGRESS.md, which is how it asks you for a decision.
 
 ## 2. First prompt (paste as is)

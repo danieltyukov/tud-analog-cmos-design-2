@@ -30,6 +30,7 @@ First session only, also read: `brief/spec.md`, `brief/lessons.md`, `brief/desig
 | `uv run tools/optimize.py --tran T --noise N --space S.json --study s1` | Optuna power minimisation with spec constraints |
 | `uv run tools/asc_lint.py F.asc` | rules + schematic hygiene |
 | `uv run tools/opvals.py F` | node voltages / branch currents as LaTeX macros for D2/D3 |
+| `uv run tools/report.py build` / `info` / `pages` | build the report, check 8 pages / ?? / TODO, render page PNGs |
 | `uv run tools/check_done.py` | definition of done for the whole task |
 
 MCP: `ltspice-asc` (project) `edit_schematic` + `verify_circuit` (equivalence vs a netlist, overlaps,
@@ -55,6 +56,10 @@ Agents: `spec-auditor` (before claiming any milestone), `report-reviewer` (befor
   claim PASS from `.meas` quick-looks, memory or estimates. Never type simulated numbers into the report.
 - **Do not move the goalposts:** never edit `brief/spec.md` specs, `tools/selftest.py` golden values, or the
   thresholds/margins in `tools/evaluate.py`, `robust.py`, `check_done.py` to make a design pass.
+  You have full permission to work without asking; if a tool is genuinely broken, fix it, log the change
+  and the reason in `PROGRESS.md`, and re-run `tools/selftest.py`. `spec-auditor` diffs `tools/` and `brief/`.
+- **Tool sandbox:** the tools only read/write inside the repo and the Claude scratch dir, and refuse netlist
+  includes from elsewhere (LTspice's own `lib/` excepted). Keep all work inside the repo.
 - **One change at a time**, then measure. Log every experiment (change, numbers, verdict) in `PROGRESS.md`;
   record dead ends under "Failed approaches" so later sessions do not retry them.
 - **Assignment rules** (`brief/spec.md` section 3): NMOS/PMOS/R/C only, real CMFB, single 1.8 V supply

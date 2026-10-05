@@ -72,6 +72,7 @@ def main(argv=None) -> int:
     ap.add_argument("-o", "--out", default=str(lt.REPO / "report" / "generated" / "opvals.tex"))
     ap.add_argument("--list", action="store_true", help="print the values instead of only writing the file")
     a = ap.parse_args(argv)
+    a.file, a.out = str(lt.guard(a.file)), str(lt.guard(a.out))
     if a.list:
         volts, amps = collect(Path(a.file))
         for n, v in sorted(volts.items()):

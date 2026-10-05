@@ -9,9 +9,8 @@ write it. Do not edit any file; you may write rendered pages under `results/page
 
 Procedure:
 1. Read `brief/spec.md` sections 4 to 6 and `brief/clarifications.md` (TA clarifications).
-2. `cd report && pdfinfo main.pdf` (must be 8 pages), then
-   `pdftoppm -r 80 -png main.pdf ../results/pages/p` and Read every page image. Judge what is
-   rendered, not the source.
+2. `uv run tools/report.py info` (must be 8 pages) and `uv run tools/report.py pages`, then Read
+   every image in `results/pages/`. Judge what is rendered, not the source.
 3. Check, page by page:
    - p1 title: name, student number 5714699, "EE4525 2026".
    - p2 D1: all 22 rows, correct units, values match `results/latest.json` (compare a few numbers), FoM
