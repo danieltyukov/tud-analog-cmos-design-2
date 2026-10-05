@@ -52,9 +52,16 @@ def guard(path: str | Path) -> Path:
 def check_netlist_paths(text: str, base: Path) -> None:
     """Every .include/.inc/.lib must point into the repo, the scratch dir, or LTspice's own lib/."""
     for line in text.splitlines():
-        m = re.match(r"(?i)^\s*\.(?:include|inc|lib)\s+(?:'([^']+)'|\"([^\"]+)\"|(\S+))", line)
-        if not m:
+        low_line = line.strip().lower()
+        if low_line.startswith(".wave"):
+            raise SystemExit(f"refusing .wave (writes files to arbitrary paths): {line.strip()[:80]}")
+        if not low_line.startswith((".inc", ".lib")):
             continue
+        # Parse leniently (no space needed after the keyword, quotes optional) so nothing LTspice
+        # would accept slips past; anything unparseable is refused rather than ignored.
+        m = re.match(r"(?i)^\s*\.(?:include|inc|library|lib)\s*(?:'([^']+)'|\"([^\"]+)\"|(\S+))", line)
+        if not m:
+            raise SystemExit(f"refusing unparseable include: {line.strip()[:80]}")
         target = next(g for g in m.groups() if g)
         low = target.lower()
         if re.match(r"^[a-z]:\\", low):
