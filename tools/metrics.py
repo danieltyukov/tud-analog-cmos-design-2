@@ -236,20 +236,28 @@ def plot_settling(m: dict, out: Path) -> None:
     import matplotlib.pyplot as plt
 
     t, A, Ab, t_step, t25 = m["_curves"]
-    s = t >= t_step
+    # start just after the input edge: at t_step itself the virtual-ground error is still zero and A sits on the
+    # 1 nV floor (a meaningless vertical spike at t = 0); Abeta is 0 dB from the first plotted sample
+    s = t > t_step + 0.06e-9
     x = (t[s] - t_step) * 1e9
+    sb = t >= t_step  # Abeta from the step itself: exactly 0 dB at t_step (output not yet moved)
+    xb = (t[sb] - t_step) * 1e9
     fig, ax = plt.subplots(figsize=(7.2, 4.2))
     ax.plot(x, A[s], color="tab:red", lw=1.2, label=r"$A$ (amplifier accuracy, virtual ground)")
-    ax.plot(x, Ab[s], color="tab:blue", lw=1.2, label=r"$A\beta$ (loop accuracy, output error)")
+    ax.plot(xb, Ab[sb], color="tab:blue", lw=1.2, label=r"$A\beta$ (loop accuracy, output error)")
     for tt, lvl in ((m["T30_ns"], 30.0), (m["T38p6_ns"], 38.6)):
         if math.isfinite(tt):
             ax.plot([tt], [lvl], "o", ms=3, color="tab:blue")
     if math.isfinite(m["tau_ns"]):
         ax.annotate(f"$\\tau$ = T$_{{38.6}}$ - T$_{{30}}$ = {m['tau_ns']:.3f} ns", (m["T30_ns"], 30),
-                    xytext=(m["T30_ns"] + 3, 20), fontsize=8, arrowprops=dict(arrowstyle="->", lw=0.6))
+                    xytext=(0.6, 52), fontsize=8, arrowprops=dict(arrowstyle="->", lw=0.6))
     ax.axvline(25, color="k", ls="--", lw=0.8)
+    ax.text(25.3, 2, "25 ns", fontsize=8)
     ax.axhline(SPEC["A"], color="tab:red", ls=":", lw=0.8)
     ax.axhline(SPEC["Abeta"], color="tab:blue", ls=":", lw=0.8)
+    xr = max(x.max(), 40)
+    ax.text(xr - 1, SPEC["A"] + 1, "A spec 78 dB", fontsize=7, color="tab:red", ha="right", va="bottom")
+    ax.text(xr - 1, SPEC["Abeta"] + 1, r"A$\beta$ spec 66 dB", fontsize=7, color="tab:blue", ha="right", va="bottom")
     ax.annotate(f"A = {m['A_at_25ns_dB']:.2f} dB", (25, m["A_at_25ns_dB"]), xytext=(27, m["A_at_25ns_dB"] + 6),
                 arrowprops=dict(arrowstyle="->", lw=0.6), fontsize=8)
     ax.annotate(f"A$\\beta$ = {m['Abeta_at_25ns_dB']:.2f} dB", (25, m["Abeta_at_25ns_dB"]),
@@ -257,7 +265,14 @@ def plot_settling(m: dict, out: Path) -> None:
     ax.set_xlabel("time after input step [ns]")
     ax.set_ylabel("accuracy [dB]")
     ax.set_xlim(0, max(x.max(), 40))
-    ax.set_ylim(-5, 140)  # zero-crossing spikes reach ~180 dB (1 nV floor); clip for readability
+    top = float(np.nanmax(A[s])) + 15
+    ax.set_ylim(-5, min(140.0, max(100.0, top)))  # zero-crossing spikes reach ~180 dB (1 nV floor); clip them
+    g = m.get("gap_dB", math.nan)
+    if math.isfinite(g):  # mark the 20log10(1/beta_actual) gap right after the step
+        x0 = 1.0
+        y0 = float(np.interp(x0, xb, Ab[sb]))
+        ax.annotate("", xy=(x0, y0 + g), xytext=(x0, y0), arrowprops=dict(arrowstyle="<->", lw=0.7))
+        ax.text(x0 + 0.4, y0 + g / 2, f"$20\\log_{{10}}(1/\\beta_{{act}})$ = {g:.2f} dB", fontsize=8, va="center")
     ax.grid(True, lw=0.3, alpha=0.6)
     ax.legend(loc="lower right", fontsize=8)
     ax.set_title(r"Settling accuracy, $20\log_{10}(V_{out,max}/(|V_{err}|+1\,\mathrm{nV}))$", fontsize=9)
@@ -324,7 +339,7 @@ def plot_noise(m: dict, out: Path) -> None:
     ax.set_title(f"Integrated amplifier noise 10 kHz to 100 GHz: {m['Vn_amp_uVrms']:.1f} $\\mu V_{{rms}}$", fontsize=9)
     h1, l1 = ax.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
-    ax.legend(h1 + h2, l1 + l2, loc="lower left", fontsize=8)
+    ax.legend(h1 + h2, l1 + l2, loc="center left", fontsize=8)  # the corners carry the curves
     fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out)

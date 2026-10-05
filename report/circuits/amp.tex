@@ -1,10 +1,83 @@
-% TODO(agent): replace with the real amplifier drawing (CircuiTikZ, readable, all nodes/branches tagged).
-% Example of the tagging pattern on a differential pair (names must match the LTspice netlist):
-\begin{circuitikz}[american]
-  \draw (0,0) node[nmos](M1){} (3,0) node[nmos, xscale=-1](M2){};
-  \draw (M1.S) -- ++(0,-0.5) coordinate(t) -| (M2.S);
-  \draw (t) node[below]{\Vtag{tail}};
-  \draw (M1.D) node[above]{\Vtag{von}\ \Itag{m1}};
-  \draw (M2.D) node[above]{\Vtag{vop}\ \Itag{m2}};
-  \draw (M1.G) node[left]{$v_{ip}$} (M2.G) node[right]{$v_{in}$};
+% Main amplifier (stage 1, stage 2, compensation, level shift). Used by D2 (\showIfalse) and D3 (\showItrue).
+% Node and device names are the LTspice names (lower case) of design/final/amp_tran.asc.
+% Bulks: NMOS to ground; input and CMFB pairs to their own source; all other PMOS to vdd.
+\begin{circuitikz}[american, scale=0.92]
+\small
+\def\xa{-1.8}\def\xb{1.8}\def\xoa{-7.6}\def\xob{7.6}\def\xla{-5.8}\def\xlb{5.8}
+\def\yv{-5.6}
+\coordinate (XLA) at (\xla,0); \coordinate (XLB) at (\xlb,0); \coordinate (XOA) at (\xoa,0); \coordinate (XOB) at (\xob,0);
+% ---------------------------------------------------------------- stage 1
+\draw (0,-1.0) node[pmos](Mtp){};
+\draw (Mtp.S) -- ++(0,0.25) node[vdd]{};
+\draw (Mtp.G) -- ++(-0.3,0) node[left]{$v_{bp}$\,\Vtag{vbp}};
+\draw (Mtp.D) -- (0,-2.0) coordinate(ntp);
+\draw (\xa,-2.0) -- (\xb,-2.0);
+\draw (\xa,-2.95) node[pmos](M1p){};
+\draw (\xb,-2.95) node[pmos,xscale=-1](M2p){};
+\draw (M1p.S) -- (\xa,-2.0) (M2p.S) -- (\xb,-2.0);
+\draw (M1p.G) -- ++(-0.3,0) node[left]{$v_{in}$};
+\draw (M2p.G) -- ++(0.3,0) node[right]{$v_{ip}$};
+\draw (\xa,-4.8) node[pmos](Mcp1){};
+\draw (\xb,-4.8) node[pmos,xscale=-1](Mcp2){};
+\draw (M1p.D) -- (Mcp1.S) coordinate[midway](nb1) (M2p.D) -- (Mcp2.S) coordinate[midway](nb2);
+\draw (Mcp1.G) -- ++(-0.3,0) node[left]{$v_{cp}$\,\Vtag{vcp}};
+\draw (Mcp2.G) -- ++(0.3,0) node[right]{$v_{cp}$\,\Vtag{vcp}};
+\draw (\xa,-6.6) node[nmos](Mcn1){};
+\draw (\xb,-6.6) node[nmos,xscale=-1](Mcn2){};
+\draw (Mcp1.D) -- (Mcn1.D) (Mcp2.D) -- (Mcn2.D);
+\draw (Mcn1.G) -- ++(-0.3,0) node[left]{$v_{cn}$\,\Vtag{vcn}};
+\draw (Mcn2.G) -- ++(0.3,0) node[right]{$v_{cn}$\,\Vtag{vcn}};
+\draw (\xa,-8.55) node[nmos](M1n){};
+\draw (\xb,-8.55) node[nmos,xscale=-1](M2n){};
+\draw (Mcn1.S) -- (M1n.D) coordinate[midway](na1) (Mcn2.S) -- (M2n.D) coordinate[midway](na2);
+\draw (M1n.G) -- ++(-0.3,0) node[left]{$v_{in}$\,\Vtag{vin}};
+\draw (M2n.G) -- ++(0.3,0) node[right]{$v_{ip}$\,\Vtag{vip}};
+\draw (M1n.S) -- (\xa,-9.55) -- (\xb,-9.55) -- (M2n.S);
+\draw (-0.75,-10.5) node[nmos](Mtn){};
+\draw (0.75,-10.5) node[nmos,xscale=-1](Mtc){};
+\draw (Mtn.D) |- (0,-9.55) coordinate(ntn) (Mtc.D) |- (0,-9.55);
+\draw (Mtn.S) node[ground]{} (Mtc.S) node[ground]{};
+\draw (Mtn.G) -- ++(-0.3,0) node[left]{$v_{bn}$\,\Vtag{vbn}};
+\draw (Mtc.G) -- ++(0.3,0) node[right]{$v_{cmfb}$\,\Vtag{vcmfb}};
+% v1 nodes and the damping capacitor between them
+\draw (\xa,\yv) coordinate(v1n) to[C, l_={$C_{1d}$}, *-*] (\xb,\yv) coordinate(v1p);
+% ---------------------------------------------------------------- stage 2, side A (left) and side B (right)
+\draw (\xoa,-1.0) node[pmos,xscale=-1](Mop1){};
+\draw (\xob,-1.0) node[pmos](Mop2){};
+\draw (Mop1.S) -- ++(0,0.25) node[vdd]{} (Mop2.S) -- ++(0,0.25) node[vdd]{};
+\draw (\xoa,-10.5) node[nmos,xscale=-1](Mon1){};
+\draw (\xob,-10.5) node[nmos](Mon2){};
+\draw (Mon1.S) node[ground]{} (Mon2.S) node[ground]{};
+\draw (Mop1.D) -- (Mon1.D) (Mop2.D) -- (Mon2.D);
+\draw (\xoa,\yv) node[circ]{} -- ++(-0.6,0) node[left]{$v_{on}$};
+\draw (\xob,\yv) node[circ]{} -- ++(0.6,0) node[right]{$v_{op}$};
+% level shift: Cls from v1 to the PMOS gate, Rb from the gate to vbo
+\draw (Mop1.G) -- (Mop1.G -| XLA) coordinate(gp1) to[C, l_={$C_{ls}$}] (\xla,-3.0) -- (\xla,\yv) -- (v1n);
+\draw (Mop2.G) -- (Mop2.G -| XLB) coordinate(gp2) to[C, l={$C_{ls}$}] (\xlb,-3.0) -- (\xlb,\yv) -- (v1p);
+\draw (gp1) node[circ]{} to[R, l_={$R_b$}] ++(0,1.25) node[above]{$v_{bo}$\,\Vtag{vbo}};
+\draw (gp2) node[circ]{} to[R, l={$R_b$}] ++(0,1.25) node[above]{$v_{bo}$\,\Vtag{vbo}};
+\draw (\xla,\yv) node[circ]{} |- (Mon1.G);
+\draw (\xlb,\yv) node[circ]{} |- (Mon2.G);
+% current-buffer compensation: output -> PMOS-cascode source (nb) and -> NMOS-cascode source (na)
+\draw (XOA |- nb1) node[circ]{} -- (-5.3,0|-nb1) to[C, l={$(1{-}f_{cc})C_c$}] (-4.1,0|-nb1) -- (nb1) node[circ]{};
+\draw (XOB |- nb2) node[circ]{} -- (5.3,0|-nb2) to[C, l_={$(1{-}f_{cc})C_c$}] (4.1,0|-nb2) -- (nb2) node[circ]{};
+\draw (XOA |- na1) node[circ]{} -- (-5.3,0|-na1) to[C, l={$f_{cc}C_c$}] (-4.1,0|-na1) -- (na1) node[circ]{};
+\draw (XOB |- na2) node[circ]{} -- (5.3,0|-na2) to[C, l_={$f_{cc}C_c$}] (4.1,0|-na2) -- (na2) node[circ]{};
+% ---------------------------------------------------------------- device names, currents (D3), node voltages (D2)
+\def\dl#1#2#3{\node[anchor=west,font=\scriptsize,align=left] at ($(#1.center)+(0.42,0.1)$) {#2\\\Itag{#3}};}
+\def\dr#1#2#3{\node[anchor=east,font=\scriptsize,align=right] at ($(#1.center)+(-0.42,0.1)$) {#2\\\Itag{#3}};}
+\dl{Mtp}{$M_{tp}$}{mtp} \dl{M1p}{$M_{1p}$}{m1p} \dr{M2p}{$M_{2p}$}{m2p}
+\dl{Mcp1}{$M_{cp1}$}{mcp1} \dr{Mcp2}{$M_{cp2}$}{mcp2} \dl{Mcn1}{$M_{cn1}$}{mcn1} \dr{Mcn2}{$M_{cn2}$}{mcn2}
+\dl{M1n}{$M_{1n}$}{m1n} \dr{M2n}{$M_{2n}$}{m2n}
+\node[anchor=north east,font=\scriptsize,align=right] at ($(Mtn.center)+(-0.35,-0.3)$) {$M_{tn}$\\\Itag{mtn}};
+\node[anchor=north west,font=\scriptsize,align=left] at ($(Mtc.center)+(0.35,-0.3)$) {$M_{tc}$\\\Itag{mtc}};
+\dr{Mop1}{$M_{op1}$}{mop1} \dl{Mop2}{$M_{op2}$}{mop2} \dr{Mon1}{$M_{on1}$}{mon1} \dl{Mon2}{$M_{on2}$}{mon2}
+\def\vt#1#2#3{\node[anchor=#2,font=\scriptsize] at (#1) {#3};}
+\vt{ntp}{south west}{$n_{tp}$\,\Vtag{ntp}} \vt{ntn}{north west}{$n_{tn}$\,\Vtag{ntn}}
+\vt{nb1}{south west}{\Vtag{nb1}} \vt{nb2}{south east}{\Vtag{nb2}}
+\vt{na1}{south west}{\Vtag{na1}} \vt{na2}{south east}{\Vtag{na2}}
+\vt{v1n}{north east}{$v_{1n}$\,\Vtag{v1n}} \vt{v1p}{north west}{$v_{1p}$\,\Vtag{v1p}}
+\vt{gp1}{south west}{$g_{p1}$\,\Vtag{gp1}} \vt{gp2}{south east}{$g_{p2}$\,\Vtag{gp2}}
+\node[font=\scriptsize,anchor=north east] at (\xoa-0.6,\yv) {\Vtag{von}};
+\node[font=\scriptsize,anchor=north west] at (\xob+0.6,\yv) {\Vtag{vop}};
 \end{circuitikz}

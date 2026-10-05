@@ -1,0 +1,29 @@
+* EE4525 noise bench: same fixed test circuit as bench_tran.cir, differential output noise.
+* Keep every .param identical to bench_tran.cir (or move shared params into amp.inc).
+* Rin/Rfb are noiseless (FAQ). kT/C is added by tools/metrics.py (42 kT/Cin, differential).
+.lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
+.param VDD=1.8 VCM=0.9 VCMI=0.9
+.param Cin=1.616p Cfb={Cin/4} Cload={Cin} Rin=100Meg Rfb={4*Rin}
+.param VoutStep=1.4 VinStep={VoutStep/4}
+
+Vdd vdd 0 {VDD}
+Vddb vddb 0 {VDD}
+Vcmr vcmr 0 {VCM}
+Vinp inp 0 {VCMI} AC 0.5
+Vinn inn 0 {VCMI} AC -0.5
+Cin1 inp vin {Cin}
+Rin1 inp vin {Rin} noiseless
+Cin2 inn vip {Cin}
+Rin2 inn vip {Rin} noiseless
+Cfb1 vop vin {Cfb}
+Rfb1 vop vin {Rfb} noiseless
+Cfb2 von vip {Cfb}
+Rfb2 von vip {Rfb} noiseless
+Cload1 vop 0 {Cload}
+Cload2 von 0 {Cload}
+
+.include amp.inc
+
+.noise V(von,vop) Vinp dec 100 10k 100G
+.meas noise Vn_amp INTEG V(onoise) FROM=10k TO=100G
+.end

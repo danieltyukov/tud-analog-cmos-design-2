@@ -59,7 +59,9 @@ def violations(r: dict) -> list[float]:
         return [100.0] * 7
     c = [78.3 - r["A25"], 66.3 - r["Ab25"], 78.0 - r["Afloor"], 66.0 - r["Abfloor"], r["Ts"] - 24.8,
          25.0 - r["peak"], 66.05 - r["SNR"]]
-    return [x if math.isfinite(x) else 100.0 for x in c]
+    # -inf means satisfied by infinite margin (no ringing peak at all: first peak = inf, as in
+    # evaluate.py); NaN or +inf stay violations.
+    return [x if math.isfinite(x) else (-100.0 if x == -math.inf else 100.0) for x in c]
 
 
 def main(argv=None) -> int:

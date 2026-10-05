@@ -1,0 +1,39 @@
+* EE4525 loop-gain bench (design aid only, not a deliverable): differential loop gain T = A*beta
+* with the real feedback network, loads and CMFB in place. Middlebrook series voltage injection:
+* a 0 V source with AC drive sits between each summing node (sin/sip) and amplifier input
+* (vin/vip), so DC stays exactly closed. Valid because the summing-node impedance (Cin+Cfb, pF)
+* is far below the gate impedance (input Cgg, sub-pF); error of order Cgg/(Cin+Cfb).
+* (A 1 TH / 1 TF break was tried: LTspice then lands the .op in a wrong state.)
+* T = -V(sin,sip)/V(vin,vip). Gates: fc within 10 % of target, PM 72 to 78 deg, A0*beta.
+.lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
+.param VDD=1.8 VCM=0.9 VCMI=0.9
+.param Cin=1.616p Cfb={Cin/4} Cload={Cin} Rin=100Meg Rfb={4*Rin}
+* Vext: differential output offset at which the loop is linearised (0 = quiescent, +-VoutStep = settled extremes)
+.param Vext=0
+
+Vdd vdd 0 {VDD}
+Vddb vddb 0 {VDD}
+Vcmr vcmr 0 {VCM}
+Vinp inp 0 {VCMI-Vext/8}
+Vinn inn 0 {VCMI+Vext/8}
+Cin1 inp sin {Cin}
+Rin1 inp sin {Rin} noiseless
+Cin2 inn sip {Cin}
+Rin2 inn sip {Rin} noiseless
+Cfb1 vop sin {Cfb}
+Rfb1 vop sin {Rfb} noiseless
+Cfb2 von sip {Cfb}
+Rfb2 von sip {Rfb} noiseless
+Cload1 vop 0 {Cload}
+Cload2 von 0 {Cload}
+Vt1 vin sin 0 AC 0.5
+Vt2 vip sip 0 AC -0.5
+
+.include amp.inc
+
+.ac dec 100 1 10G
+* Loop metrics: uv run tools/metrics.py loop <this>.raw --plot <out>.pdf  (T0, fc, PM, GM).
+* Do not use db()/ph() of complex expressions in .meas: XVII prints db() of a complex value
+* converted to dB a second time (80.65 dB showed up as 38.13).
+.meas ac fc WHEN mag(V(sin,sip)/V(vin,vip))=1 FALL=1
+.end
