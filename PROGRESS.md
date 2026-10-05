@@ -169,6 +169,16 @@ continuous-time CMFB (2 MΩ ∥ $C_{CM}$ sense, PMOS diff pair vs vcmr, mirror i
   3 decimals so D1 arithmetic closes (TOOL CHANGE evaluate.py publish format, selftest OK).
   Power trajectory: 0.428 (v01) → 0.348 (single pair, 1.4 V) → 0.285 (CR) → 0.2499 (v11) → 0.2437 (v12) → 0.2375 mW.
 
+- Portability: the .asc used an absolute LTspice XVII model path. Now `.lib 'log018.l' TT` with
+  design/final/log018.l next to the sheets; that copy is the lecturer's file with its 20 internal
+  self-includes (absolute LTspice IV path) made relative, model parameters unchanged (diff: include lines only).
+  XVII needs the single quotes (unquoted, it read "log018.l TT" as the file name). Proven by running LTspice
+  directly (no tool path rewriting) on a relocated uniquely named copy and on the final sheets in a fresh folder:
+  A25 81.5866, Ab25 66.7564, P 0.2375 mW, Vn_amp 360.3 µV. Re-verified (equivalent, lint clean), evaluate --tag final
+  --publish ALL PASS (0.2375 mW), robust PASS, report rebuilt, report/5714699.pdf refreshed. README rewritten.
+- Housekeeping: a watcher loop of mine (`while pgrep -f "ropt.py cr_r1"`) never ended because pgrep matched its
+  own command line; killed. Lesson: use `pgrep -f "[r]opt.py"` style patterns.
+
 ## Failed approaches (do not retry without a new reason)
 
 - Optimising the global bias unit Ib with fixed cascode-bias diodes: shifts vcn/vcp, devices leave saturation.

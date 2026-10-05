@@ -338,7 +338,7 @@ def build(analysis: str) -> str:
         s.flag(cl["B"], "0"); s.flag((1520, y0), out)
 
     # ======================================================================= directives box
-    dirs = [".lib 'C:\\Program Files\\LTC\\LTspiceXVII\\lib\\cmp\\log018.l' TT"]
+    dirs = [".lib 'log018.l' TT"]  # portable: design/final/log018.l (relative self-includes) sits next to the schematics
     bench = WORK / ("bench_tran.cir" if analysis == "tran" else "bench_noise.cir")
     tran_params = params(WORK / "bench_tran.cir")
     if analysis == "noise":  # only what the noise sheet uses (the input sources need tstep, trise, VinStep)
