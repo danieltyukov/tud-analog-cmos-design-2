@@ -2,12 +2,16 @@
   "mcpServers": {
     "ltspice-asc": {
       "command": "xvfb-run",
-      "args": ["-a", "${HOME}/.local/bin/ltspice-mcp"],
+      "args": [
+        "-a",
+        "${HOME}/.local/bin/ltspice-mcp"
+      ],
       "env": {
         "LTSPICE_MCP_RUN_CODE": "false",
         "LTSPICE_MCP_SIMULATOR": "ltspice",
         "LTSPICE_MCP_ALLOWED_PATHS": "${HOME}/workspace/tud/tud-analog-cmos-design-2",
-        "LTSPICE_MCP_WORKING_DIR": "${HOME}/workspace/tud/tud-analog-cmos-design-2"
+        "LTSPICE_MCP_WORKING_DIR": "${HOME}/workspace/tud/tud-analog-cmos-design-2",
+        "LTSPICE_MCP_ENABLED_SIMULATORS": "ltspice"
       }
     }
   }

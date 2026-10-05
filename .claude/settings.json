@@ -2,23 +2,18 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Bash(uv run *)",
-      "Bash(uv sync*)",
-      "Bash(latexmk *)",
-      "Bash(pdflatex *)",
+      "Bash(uv run tools/*)",
+      "Bash(uv sync)",
+      "Bash(latexmk main.tex)",
       "Bash(pdfinfo *)",
       "Bash(pdftoppm *)",
       "Bash(pdftotext *)",
-      "Bash(make *)",
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
       "Bash(ls *)",
       "Bash(mkdir *)",
-      "Bash(cp *)",
       "mcp__ltspice",
-      "mcp__spicelib",
-      "mcp__matlab",
       "mcp__ltspice-asc"
     ],
     "ask": [
@@ -31,26 +26,47 @@
       "Edit(./brief/assignment.pdf)",
       "Edit(./brief/faq.txt)",
       "Edit(./brief/clarifications.md)",
-      "Edit(./tools/selftest.py)"
+      "Edit(./tools/selftest.py)",
+      "Bash(uv run *..*)",
+      "mcp__ltspice-asc__run_code"
     ]
   },
-  "enabledMcpjsonServers": ["ltspice-asc"],
+  "enabledMcpjsonServers": [
+    "ltspice-asc"
+  ],
   "hooks": {
     "SessionStart": [
       {
         "matcher": "startup|resume|clear|compact",
-        "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-brief.sh" }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-brief.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit|mcp__ltspice-asc__edit_schematic|mcp__ltspice__write_schematic|mcp__ltspice__modify_component",
-        "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit-asc.sh", "timeout": 60 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit-asc.sh",
+            "timeout": 60
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-gate.sh", "timeout": 120 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-gate.sh",
+            "timeout": 120
+          }
+        ]
       }
     ]
   }

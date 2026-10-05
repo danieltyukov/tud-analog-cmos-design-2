@@ -18,8 +18,9 @@ description: Draws or edits the deliverable LTspice .asc schematics for EE4525 w
 
 ## Procedure
 
-1. Start only from a netlist that passes `tools/evaluate.py` (`design/work/`). That netlist (with
-   `amp.inc` inlined: `uv run python -c "import sys; sys.path.insert(0,'tools'); import lt, pathlib as p; f=p.Path('design/work/bench_tran.cir'); print(lt.inline_includes(f.read_text(), f.parent))" > design/final/reference_tran.cir`)
+1. Start only from a netlist that passes `tools/evaluate.py` (`design/work/`). Write the
+   equivalence reference with `amp.inc` inlined:
+   `uv run tools/lt.py inline design/work/bench_tran.cir > design/final/reference_tran.cir`; it
    is the equivalence reference.
 2. Plan the layout on paper: block columns left to right (bias, stage 1, stage 2 + compensation,
    CMFB, test bench), 16-unit grid, 200+ units of clearance between blocks, directives box at the bottom.

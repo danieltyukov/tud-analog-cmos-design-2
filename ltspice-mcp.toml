@@ -8,7 +8,7 @@ default = "ltspice"
 
 # Allowlist of simulators to expose, e.g. ["ltspice", "ngspice"].
 # Empty = auto-detect every supported simulator.
-enabled = []
+enabled = ["ltspice"]  # LTspice only: ngspice decks can run shell commands via .control
 
 # Explicit path to simulator executable (overrides auto-detection)
 # Leave empty for auto-detection

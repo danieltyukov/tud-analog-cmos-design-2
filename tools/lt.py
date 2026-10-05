@@ -6,6 +6,7 @@ CLI (run from the repo root with `uv run`):
   uv run tools/lt.py op   FILE                 # device table: Id, Vds, Vdsat, margin, gm/Id, Cgg
   uv run tools/lt.py sweep FILE --set Wn=50u,58u --set Cc=600f,720f [-j 16] [--csv OUT]
   uv run tools/lt.py netlist FILE.asc          # .asc -> .net only
+  uv run tools/lt.py inline FILE.cir > OUT.cir # .include files inlined (equivalence reference for .asc)
 
 Output is compact by design: never print raw waveforms into the agent context.
 Library use: `from lt import run, sweep, op_table` (tools/ is on sys.path when run as script).
@@ -21,6 +22,7 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -36,33 +38,64 @@ REPO = Path(__file__).resolve().parent.parent
 # ----------------------------------------------------------------------------- display
 
 
+_DISPLAY: str | None = None
+_DISPLAY_LOCK = threading.Lock()
+
+
+def _display_state(n: int) -> str:
+    """'ours' (live Xvfb started by this user), 'free', or 'foreign' (another user's or unreadable).
+
+    /tmp lock files are shared between users: only trust a lock we own, and only clean up our own
+    stale locks, so another account's X server can never receive our Wine processes.
+    """
+    lock = Path(f"/tmp/.X{n}-lock")
+    try:
+        st = lock.stat()
+    except FileNotFoundError:
+        return "free"
+    if st.st_uid != os.getuid():
+        return "foreign"
+    try:
+        os.kill(int(lock.read_text().strip()), 0)
+        return "ours"
+    except (ValueError, ProcessLookupError):
+        lock.unlink(missing_ok=True)
+        return "free"
+    except PermissionError:
+        return "foreign"
+
+
 def ensure_display() -> str:
-    """Return a usable X display for Wine. Starts one shared Xvfb (:87) if needed.
+    """Return a usable X display for Wine. Starts one shared, user-owned Xvfb (from :87) if needed.
 
     LTspice under Wine silently writes no output without a display, even in -b mode.
     One persistent Xvfb lets many parallel runs share it (8 runs in about 6 s).
     """
+    global _DISPLAY
     if os.environ.get("EE4525_DISPLAY"):
         return os.environ["EE4525_DISPLAY"]
-    lock = Path(f"/tmp/.X{DISPLAY_NUM}-lock")
-    if lock.exists():
-        try:
-            pid = int(lock.read_text().strip())
-            os.kill(pid, 0)
-            return f":{DISPLAY_NUM}"
-        except (ValueError, ProcessLookupError, PermissionError):
-            lock.unlink(missing_ok=True)
-    subprocess.Popen(
-        ["Xvfb", f":{DISPLAY_NUM}", "-screen", "0", "1024x768x24", "-nolisten", "tcp"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        start_new_session=True,
-    )
-    for _ in range(50):
-        if lock.exists():
-            break
-        time.sleep(0.1)
-    return f":{DISPLAY_NUM}"
+    with _DISPLAY_LOCK:
+        if _DISPLAY and _display_state(int(_DISPLAY[1:])) == "ours":
+            return _DISPLAY
+        base = int(DISPLAY_NUM)
+        for n in range(base, base + 20):
+            state = _display_state(n)
+            if state == "ours":
+                _DISPLAY = f":{n}"
+                return _DISPLAY
+            if state == "free":
+                subprocess.Popen(
+                    ["Xvfb", f":{n}", "-screen", "0", "1024x768x24", "-nolisten", "tcp"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                )
+                for _ in range(50):
+                    if _display_state(n) == "ours":
+                        _DISPLAY = f":{n}"
+                        return _DISPLAY
+                    time.sleep(0.1)
+        raise RuntimeError(f"no usable X display in :{base}..:{base + 19} (set EE4525_DISPLAY)")
 
 
 def _wine(args: list[str], cwd: Path, timeout: float) -> subprocess.CompletedProcess:
@@ -389,6 +422,8 @@ def main(argv=None) -> int:
     p.add_argument("--warn-mv", type=float, default=50.0)
     p = sub.add_parser("netlist")
     p.add_argument("file")
+    p = sub.add_parser("inline")
+    p.add_argument("file")
     p = sub.add_parser("sweep")
     p.add_argument("file")
     p.add_argument("--set", action="append", required=True, help="NAME=v1,v2,...")
@@ -400,6 +435,10 @@ def main(argv=None) -> int:
 
     if a.cmd == "netlist":
         print(netlist(Path(a.file)))
+        return 0
+    if a.cmd == "inline":
+        f = Path(a.file).resolve()
+        sys.stdout.write(inline_includes(read_text(f), f.parent))
         return 0
     if a.cmd == "run":
         r = run(a.file, op=a.op)
