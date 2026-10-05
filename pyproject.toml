@@ -1,0 +1,15 @@
+[project]
+name = "ee4525-resit"
+version = "0.1.0"
+description = "EE4525 residue amplifier resit: LTspice automation, metrics, spec checks, report figures"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "spicelib>=1.4",
+    "optuna>=4.0",
+]
+
+[tool.uv]
+package = false

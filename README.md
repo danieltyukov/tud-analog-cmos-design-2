@@ -1,59 +1,30 @@
-# EE4525 2025–2026 — A Residue Amplifier for a Pipeline ADC
+# EE4525 2025-2026 resit: a residue amplifier for a pipeline ADC
 
-Design of a fully-differential switched-capacitor residue amplifier in 0.18 µm
-CMOS, 1.8 V. **Due: Sun 28 Jun 2026, 23:59.** Specs (common to all): SNR ≥ 66 dB,
-$A_{settle}$ > 78 dB, $A\beta$ settle ≥ 66 dB in **25 ns**, **lowest power = the
-grade** (< 3 mW to pass, best < 0.3 mW), FoM > 170 dB.
+Fully differential switched-capacitor residue amplifier (gain 4) in 0.18 µm CMOS, 1.8 V, LTspice.
+Specs: SNR ≥ 66 dB, Aβ ≥ 66 dB and A > 78 dB at 25 ns, FoM > 170 dB; **the grade is set by the lowest
+power that meets them all** (< 3 mW to pass, best designs < 0.3 mW). Resit deadline **Sun 8 Nov 2026, 23:59**.
 
-**Architecture (settled):** single-stage **gain-boosted cascode** + **current-reuse**
-complementary input + **real switched-capacitor CMFB** — see `analysis/02`.
+| Attempt | Result |
+|---|---|
+| 1 (June 2026, `legacy/attempt-1-2026-06/`) | 2.04 mW, settling missed at 25 ns, **3.5 (fail)** |
+| reference (`example/`, a friend's design) | 1.24 mW, all specs met, 7.5 |
+| resit (this repo) | in progress; see `PROGRESS.md` |
 
-## How the docs fit together (the execution flow)
+## How this repo is set up
 
-```
-spec/rules ─► design derivations ─► sizing ─► simulate ─► extract figures ─► report
-   00,07         01,02,04,08          03      09 runbook     report/         report/
-```
+The resit is run by a Claude Code agent with a purpose-built harness. To start it, follow `KICKOFF.md`.
 
-### Where everything is
+| Path | What |
+|---|---|
+| `CLAUDE.md` | agent instructions: mission, start ritual, tools, workflow, hard rules |
+| `PROGRESS.md` | live state, plan with gates, experiment log, failed approaches |
+| `brief/` | assignment PDF, FAQ, TA clarifications, distilled `spec.md`, `lessons.md`, `design-strategy.md` |
+| `tools/` | Python (uv) tooling around LTspice XVII: runner, metrics, judge, robustness, optimizer, gm/ID, lint, report macros |
+| `design/` | bench templates, netlist work area, final drawn `.asc` |
+| `report/` | 8-page LaTeX report in the compulsory structure, values generated from simulation |
+| `.claude/` | project settings (permissions, hooks), skills, subagents |
+| `.mcp.json` | `ltspice-asc` MCP server for drawing and verifying `.asc` schematics |
+| `reference/` | EE4520 artefacts (FoM baseline for Deliverable 6, bias block) and papers |
+| `models/` | `log018.l` (with 1/f noise, mandatory) |
 
-| Area | File(s) | Purpose |
-|---|---|---|
-| **Plan / steps** | `analysis/PLAN.md` | phased schedule (Phase 0–6), risk log |
-| **Spec & results to match** | `analysis/00_spec_table.md` | the 22-row Deliverable-1 table (specs + achieved) |
-| | `analysis/07_lecturer_clarifications.md` | all TA clarifications (1/f model, ringing, FoM, single rail, submission) |
-| **Design derivations** | `analysis/01_specs_and_budget.md` | β, $A_0$, τ, noise budget, power feel |
-| | `analysis/02_topology_choice.md` | **architecture decision + EE4520→EE4525 build plan** |
-| | `analysis/03_sizing_calcs.md` | $g_m/I_D$ sizing method + template |
-| | `analysis/04_noise_budget.md` | thermal + 1/f + kT/C, NEF, terms 10/11/12 |
-| | `analysis/05_cmfb_design.md` | CMFB (real SC-CMFB chosen) |
-| | `analysis/06_settling_analysis.md` | τ, settling accuracy, D4 plot rules |
-| | `analysis/08_power_prediction.md` | top-down power/FoM floor (Bult method) + the 4 grade knobs |
-| **Simulations** | `analysis/09_simulation_runbook.md` | **every sim to run, its `.meas`, what it produces** |
-| **Report & figures** | `report/README.md` | **every deliverable → figure → how to extract it** |
-| **Tooling** | `LTSPICE_TOOLCHAIN.md` | LTspice/ngspice/MATLAB MCPs, schematic renderer, gotchas |
-| **Model** | `models/README.md` | `log018.l` (1/f) — required; not `logic018 no1of.l` |
-| **Literature** | `reserach-papers/README.md` | Binkley (booster sizing) + Ryu (current-reuse) design rules |
-| **Prior course** | `from-ee4520/README.md` | reused EE4520 artefacts + the Deliverable-7 baseline (FoM 175.2 dB) |
-| **Working schematics** | `design/`, `simulations/` | core + biasing + AC/transient/noise testbenches |
-| **Experiments** | `experiments/` | toolchain/edit sandboxes |
-
-## Current state
-
-**Phases 1–5 done** (`PLAN.md`). Phase 1 specs/budget frozen; Phase 2 folded-cascode
-core sized (ideal CMFB + ideal gain-boost); Phase 3 swapped in a **real switched-capacitor
-CMFB** (`design/cmfb/`); Phase 4 swapped in **two real folded-cascode gain-boosters**
-(`design/gain-boost/`); **Phase 5 migrated the input to complementary current-reuse**
-(`design/current-reuse/`, `phase5_results.txt`): top PMOS sources re-wired as a PMOS input
-pair → $g_m=g_{mN}+g_{mP}$. **A₀ 106.7 dB · GBW 272 MHz · PM 88.0° · I(Vdd) 1.135 mA / 2.04 mW
-(−32 %) · SNR 66.8 dB · FoM 170.5 dB (>170 PASS)**. One honest near-miss: the 25 ns settling
-lands A 77.2 / Aβ 62.7 dB (reaches 78/66 at ~26.5 ns) — Class-A slew + booster-doublet limited.
-Next: Phase 6 report. The β/gain question is **resolved**:
-$C_{in}{:}C_{fb} = 4{:}1$ (residue gain $= C_{in}/C_{fb} = 4$; loop
-$\beta = C_{fb}/(C_{in}+C_{fb}) = 1/5$, noise gain 5) — see `analysis/01` §1.
-
-## To execute (short version)
-
-1. `PLAN.md` Phase 1 — freeze swing, $C_{in}/C_{fb}/C_{load}$, first-cut $g_m$/current.
-2. Phases 2–5 — size core, drop in real CMFB → real boosters → current-reuse; run sims (`09`) after each change.
-3. Phase 6 — extract figures + fill the table (`report/README.md`), write up, submit.
+Toolchain check: `uv run tools/selftest.py` re-measures the passing example and must match its report.

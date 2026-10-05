@@ -1,0 +1,141 @@
+% EE4525 2026 resit report. COMPULSORY STRUCTURE: exactly 8 pages, one item per page, this order.
+% Every number comes from generated/*.tex (tools/evaluate.py --publish, tools/opvals.py).
+% Never type a simulated number by hand. Build: latexmk (see report/README.md).
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.8cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,graphicx,float}
+\usepackage[table]{xcolor}
+\usepackage[font=small]{caption}
+\usepackage{circuitikz}
+\usetikzlibrary{calc,positioning}
+\usepackage[hidelinks]{hyperref}
+\pagestyle{plain}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\IfFileExists{generated/results.tex}{\input{generated/results.tex}}{\input{placeholders.tex}}
+\IfFileExists{generated/opvals.tex}{\input{generated/opvals.tex}}{%
+  \providecommand{\opV}[1]{\textcolor{red}{\textbf{??}}}\providecommand{\opI}[1]{\textcolor{red}{\textbf{??}}}}
+\input{circuits/style.tex}
+
+\begin{document}
+
+%% ---------------------------------------------------------------- page 1: title
+\begin{titlepage}
+  \centering
+  \vspace*{5cm}
+  {\Large Delft University of Technology\par}
+  \vspace{1.5cm}
+  {\huge\bfseries Analogue CMOS Design II\par}
+  \vspace{0.4cm}
+  {\Large A Residue Amplifier for a Pipeline ADC\par}
+  \vspace{0.4cm}
+  {\Large EE4525 2026\par}
+  \vspace{2cm}
+  {\Large Daniel Tyukov\par}
+  {\large Student number: 5714699\par}
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+%% ---------------------------------------------------------------- page 2: D1
+\section*{Deliverable 1: Table of Results}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{r l c c r}
+\toprule
+Item & Design item & Unit & Spec. & Achieved \\
+\midrule
+1  & SNR & dB & 66 & \resSNR \\
+2  & $A\beta_{settle}$ (loop settling) & dB & 66 & \resAbeta \\
+3  & $A_{settle}$ (amplifier settling) & dB & $>78$ & \resA \\
+4  & $T_{settle}$ (settling time to required accuracy) & ns & 25 & \resTsettle \\
+5  & $T_{30\,\mathrm{dB}}$ & ns & -- & \resTthirty \\
+6  & $T_{38.6\,\mathrm{dB}}$ & ns & -- & \resTthirtyeight \\
+7  & $\tau = T_{38.6\,\mathrm{dB}} - T_{30\,\mathrm{dB}}$ & ns & -- & \resTau \\
+8  & Power dissipation (amplifiers only) & mW & $<3$, as low as possible & \resPower \\
+9  & $I(V_{dd})$ (amplifiers only, no biasing) & mA & $<1.7$, as low as possible & \resIdd \\
+10 & Total effective $kT/C$ noise at output & $\mu$V$_{rms}$ & free & \resKTC \\
+11 & Total integrated amplifier noise & $\mu$V$_{rms}$ & free & \resVnAmp \\
+12 & Total integrated noise (10\,kHz to 100\,GHz) & $\mu$V$_{rms}$ & free & \resVnTot \\
+13 & Input step voltage & mV & Output/4 & \resVin \\
+14 & Output step voltage & V & free & \resVout \\
+15 & $C_{in}$ & pF & -- & \resCin \\
+16 & $C_{fb}$ & pF & -- & \resCfb \\
+17 & $C_{load}$ & pF & $= C_{in}$ & \resCload \\
+18 & $C_{CM}$ & pF & -- & \resCCM \\
+19 & $R_{fb}$ & G$\Omega$ & big & \resRbig \\
+20 & $C_{big}$ & nF & big & \resCbig \\
+21 & $\mathrm{FoM_{lin}} = 2\pi \cdot \mathrm{Power}\cdot\tau/\mathrm{SNR_{lin}}^2$ & J & -- & $\resFoMlin$ \\
+22 & $\mathrm{FoM_{dB}} = -10\log_{10}(\mathrm{FoM_{lin}})$ & dB & -- & \resFoMdB \\
+\bottomrule
+\end{tabular}
+\end{table}
+% TODO(agent): 2 to 4 short lines under the table: power = 1.8 V x average I(Vdd) over the stated
+% window, differential step definitions, kT/C formula used (42 kT/Cin), Rin/Rfb noiseless.
+\clearpage
+
+%% ---------------------------------------------------------------- page 3: D2
+\section*{Deliverable 2: Schematic with Node Voltages}
+\showIfalse
+\begin{figure}[H]\centering
+\input{circuits/amp.tex}
+\caption{Amplifier with DC node voltages (operating point, no input step).}
+\end{figure}
+% TODO(agent): CMFB (and any other sub-block) as a second, smaller figure on THIS page.
+\clearpage
+
+%% ---------------------------------------------------------------- page 4: D3
+\section*{Deliverable 3: Schematic with Branch Currents}
+\showItrue
+\begin{figure}[H]\centering
+\input{circuits/amp.tex}
+\caption{Amplifier with DC branch currents.}
+\end{figure}
+% TODO(agent): CMFB branch currents as a second figure on THIS page.
+\clearpage
+
+%% ---------------------------------------------------------------- page 5: D4
+\section*{Deliverable 4: Plot of Settling Behaviour}
+\begin{figure}[H]\centering
+\IfFileExists{figures/d4_settling.pdf}{\includegraphics[width=\linewidth]{figures/d4_settling.pdf}}{\textcolor{red}{\textbf{?? missing figures/d4\_settling.pdf}}}
+\caption{Settling accuracy versus time after the input step: $A$ (red, from the virtual-ground error)
+and $A\beta$ (blue, from the output error, starting at 0\,dB). At 25\,ns: $A = \resA$\,dB,
+$A\beta = \resAbeta$\,dB.}
+\end{figure}
+\clearpage
+
+%% ---------------------------------------------------------------- page 6: D5
+\section*{Deliverable 5: Plot of Noise Density Showing Integrated Noise}
+\begin{figure}[H]\centering
+\IfFileExists{figures/d5_noise.pdf}{\includegraphics[width=\linewidth]{figures/d5_noise.pdf}}{\textcolor{red}{\textbf{?? missing figures/d5\_noise.pdf}}}
+\caption{Differential output noise density from 10\,kHz to 100\,GHz and its running integral. Integrated
+amplifier noise $\resVnAmp\,\mu$V$_{rms}$; with $kT/C$ ($\resKTC\,\mu$V$_{rms}$) the total is
+$\resVnTot\,\mu$V$_{rms}$, SNR $= \resSNR$\,dB.}
+\end{figure}
+\clearpage
+
+%% ---------------------------------------------------------------- page 7: D6
+\section*{Deliverable 6: Difference in FoM between EE4520 and EE4525}
+% TODO(agent): step-by-step. FoM_lin formula; EE4525 numbers (macros); EE4520 numbers
+% (P 0.1119 mW, tau 497.4 ns, SNR 80.85 dB, FoM 175.20 dB, from reference/ee4520/); ratio factor by
+% factor (P, tau, SNR^2); physical causes (real CMFB and stages vs ideal blocks, 1/f model,
+% kT/C added, speed-driven vs noise-driven design). Use \resFoMdB and \resFoMEEtwenty.
+TODO
+\clearpage
+
+%% ---------------------------------------------------------------- page 8: short explanation
+\section*{Short Explanation}
+% TODO(agent), at most one page:
+%  - every feature of the D4 plot: start values (Abeta 0 dB; A at 20log(1/beta_act)), the gap and
+%    beta actual (\resBetaActual) vs ideal (\resBetaIdeal) with the C_p mechanism, slewing segment,
+%    linear segment slope <-> tau, spikes = error zero crossings (first after 25 ns: \resFirstPeak ns),
+%    floor = static A0*beta
+%  - why this architecture, including the CMFB
+%  - sizing for noise (incl. 1/f) and settling; output swing and capacitor sizing
+%  - dominant noise devices and NEF (\resNEF, state the definition)
+%  - how the amplifier is biased (separate Vddb, decoupling)
+TODO
+\end{document}

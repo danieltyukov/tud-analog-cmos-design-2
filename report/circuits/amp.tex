@@ -1,0 +1,10 @@
+% TODO(agent): replace with the real amplifier drawing (CircuiTikZ, readable, all nodes/branches tagged).
+% Example of the tagging pattern on a differential pair (names must match the LTspice netlist):
+\begin{circuitikz}[american]
+  \draw (0,0) node[nmos](M1){} (3,0) node[nmos, xscale=-1](M2){};
+  \draw (M1.S) -- ++(0,-0.5) coordinate(t) -| (M2.S);
+  \draw (t) node[below]{\Vtag{tail}};
+  \draw (M1.D) node[above]{\Vtag{von}\ \Itag{m1}};
+  \draw (M2.D) node[above]{\Vtag{vop}\ \Itag{m2}};
+  \draw (M1.G) node[left]{$v_{ip}$} (M2.G) node[right]{$v_{in}$};
+\end{circuitikz}

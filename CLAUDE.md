@@ -1,108 +1,80 @@
-# Project-local conventions for tud-analog-cmos-design-2
+# EE4525 resit: residue amplifier at minimum power (agent instructions)
 
-These rules **override** the parent `/home/danieltyukov/workspace/tud/CLAUDE.md` for this
-directory only.
+**Mission.** Design from scratch a fully differential switched-capacitor residue amplifier
+(0.18 µm CMOS, `log018.l`, 1.8 V, LTspice) that meets every spec in `brief/spec.md` at the
+**lowest possible power**, then write the 8-page report. Deadline **Sun 8 Nov 2026 23:59**.
+**Power is the grade.** Attempt 1 failed (3.5: missed settling at 2.04 mW). A friend passed with
+7.5 at 1.24 mW. Target: every check PASS at **≤ 0.6 mW**, stretch ≤ 0.45 mW (`brief/design-strategy.md`).
 
-## Circuit simulation toolchain
+## Start of every session (in this order)
 
-The full verified design→verify→simulate→extract→iterate workflow (which MCP for
-what, the `.asc`→SVG/PNG schematic renderer, gotchas) is in
-[`LTSPICE_TOOLCHAIN.md`](LTSPICE_TOOLCHAIN.md). This project uses **`ltspice`**
-(Wine) + **`spicelib`** (ngspice) for simulation and **`matlab`** (R2025b) for
-post-processing/report math — **not** SLiCAP. Always use the `log018.l` model
-(with $1/f$ noise), never `logic018 no1of.l` (`models/README.md`).
+1. Read `PROGRESS.md` (current state, plan, last log entries, failed approaches).
+2. `uv run tools/selftest.py` (10 s). If it fails, fix the toolchain before anything else.
+3. Do the next unchecked step of the plan in `PROGRESS.md`.
 
-## LTspice `.asc` schematic hygiene (MANDATORY — applies to every phase/agent)
+First session only, also read: `brief/spec.md`, `brief/lessons.md`, `brief/design-strategy.md`,
+`example/README.md`. Do not browse `legacy/` unless a lesson points there. Never `Read` `.raw` files.
 
-The `.asc` is read by a human and a grader and is forked by later phases. It must
-**always be a complete, honest schematic of exactly what was simulated** — never a
-course-template file with bolt-on text and leftover labels.
+## Tools (run from the repo root; outputs are compact by design)
 
-1. **Real drawn components, NOT text-directive elements.** Every circuit *element*
-   — transistor, R, C, switch, source, VCVS — must be a **drawn symbol**. Do **NOT**
-   add circuit elements as SPICE netlist text lines (e.g. `S1p ap Voutp phi2 0 SWCM`,
-   `Cs1 ap bp {Ccm}`, `Ehelp …`, `Vphi1 …`). This holds for every phase: SC-CMFB
-   switches/caps/clocks (Phase 3), gain-boosters (Phase 4), current-reuse devices
-   (Phase 5). *Text directives are allowed ONLY for non-element items:* `.lib`,
-   `.include`, `.model`, `.param`, `.op`, `.ac`, `.tran`, `.meas`, `.option`.
+| Command | Purpose |
+|---|---|
+| `uv run tools/selftest.py` | toolchain regression vs the passing example |
+| `uv run tools/lt.py run F [--op]` / `op F` | run LTspice XVII headless; `.meas` table; device op table (Id, Vds, Vdsat, margin, gm/ID, Cgg) |
+| `uv run tools/lt.py sweep F --set K=a,b --set J=c,d -j 16` | parallel `.param` sweep (8 runs in about 6 s) |
+| `uv run tools/gmid.py table nch --L 0.36u` / `size pch --L 0.25u --gmid 16 --id 70u` | gm/ID sizing from LTspice tables (`build` regenerates) |
+| `uv run tools/metrics.py budget --vout 1.2 --cin 1.8p` | kT/C, allowed amplifier noise for SNR 66 dB |
+| `uv run tools/metrics.py loop RAW --plot X.pdf` | loop gain T0, fc, PM, GM from `bench_loop.cir` |
+| `uv run tools/evaluate.py --tran T --noise N --tag vNN` | **the judge**: 22-row table, PASS/FAIL, hints, history |
+| `uv run tools/robust.py T` | settling under edge rate / polarity / reltol variants |
+| `uv run tools/optimize.py --tran T --noise N --space S.json --study s1` | Optuna power minimisation with spec constraints |
+| `uv run tools/asc_lint.py F.asc` | rules + schematic hygiene |
+| `uv run tools/opvals.py F` | node voltages / branch currents as LaTeX macros for D2/D3 |
+| `uv run tools/check_done.py` | definition of done for the whole task |
 
-2. **Connect components with drawn WIRES, not net-label flags.** Pins that connect must
-   be joined by actual `WIRE` segments so the schematic *looks* connected. Net-label
-   `FLAG`s are allowed **only** for nets that genuinely span the sheet (supply rails,
-   clock lines, shared far-apart I/O like `Voutp`/`Vbcm`) — **never** as a substitute
-   for wiring up a local cluster of parts. A field of floating symbols each tagged with
-   a net name (e.g. three switches + a cap all labelled `ap` with no wire between them)
-   is **not acceptable** — draw the wire.
+MCP: `ltspice-asc` (project) `edit_schematic` + `verify_circuit` (equivalence vs a netlist, overlaps,
+wires through bodies, label-only nets, renders); `ltspice` (user) `render_schematic`, `plot_simulation`;
+`matlab` for extra math. Skills: `ltspice-loop`, `draw-asc`, `report-latex`, `sizing`.
+Agents: `spec-auditor` (before claiming any milestone), `report-reviewer` (before declaring the report done).
 
-3. **All directives live INSIDE the one "Parameters, Simulations & Measurements" box.**
-   Every `.param`/`.model`/`.lib`/`.op`/`.ac`/`.tran`/`.meas`/`.option` goes inside that
-   single titled boundary box, consolidated — **not** in a floating block elsewhere on
-   the sheet. When you add new params/models (e.g. `Ccm`, `Cchold`, `Rhelp`,
-   `.model SWCM`), put them *in the box* alongside the existing ones; when something is
-   superseded, **remove the old line from the box**.
+## Workflow
 
-4. **Lay it out cleanly — match the existing blocks, no overlaps, stay inside the box.**
-   Mirror the course template's style: each functional block sits inside its own titled
-   rectangle (Biasing, Decoupling, etc.). Newly drawn circuitry must **(a)** NOT overlap
-   any other symbol, wire, or text — give parts room; **(b)** stay **inside** its
-   designated boundary rectangle — if the block grows, **enlarge the rectangle** rather
-   than letting symbols/wires spill outside it; **(c)** use the **same title font size
-   and style** as the other block titles, with the title fitting inside its box. Match
-   the spacing/alignment of the existing blocks so the sheet reads consistently. Before
-   finishing, scan the render for overlaps and out-of-box elements and fix them.
+1. **Budget on paper** (swing, Cin, Cc, fc, A0, currents) with `metrics.py budget` + `gmid.py`; log it.
+2. **Netlist first.** Work in `design/work/` from `design/templates/` (`bench_tran.cir`,
+   `bench_noise.cir`, `bench_loop.cir` include one `amp.inc`). Iterate with `lt.py`, sweeps, loop bench.
+3. **Gates in order:** `.op` (every FET saturated, CM on target, both step polarities) → loop
+   (fc, PM, A0β) → `evaluate.py` (all PASS) → `robust.py`.
+4. **Power descent** with sweeps / `optimize.py` until the first margin hits its floor.
+5. **Draw the final `.asc`** in `design/final/` with `ltspice-asc` (`draw-asc` skill), prove it
+   equivalent to the netlist with `verify_circuit`, then `evaluate.py --publish` and `robust.py` **on the `.asc`**.
+6. **Report** (`report-latex` skill), then `report-reviewer` and `spec-auditor`, then `check_done.py`.
 
-5. **Keep it updated — no stale anything.** When you replace an ideal block with a
-   real one: **delete the old symbols** (no orphan gaps where a part was removed),
-   **relabel the block** to what it now is (never an "Ideal CMFB" caption over a real
-   SC-CMFB), and **prune stale `.param`/`.meas`** that no longer apply (e.g. artifact
-   `Voutp2` measurements, superseded sizing). The file must show the *current* values
-   and *current* topology so the reader can see exactly what was calculated — never
-   leftover parameters or simulations from the course template.
+## Hard rules
 
-6. **Verify after every change.** Re-run the sim and `render_schematic` (white bg) and
-   confirm the verified numbers still hold. The clean report figure is still CircuiTikZ
-   (below), but the `.asc` itself must also be complete and current.
+- **Evidence only.** Every spec number you state comes from `tools/evaluate.py` (quote its line). Never
+  claim PASS from `.meas` quick-looks, memory or estimates. Never type simulated numbers into the report.
+- **Do not move the goalposts:** never edit `brief/spec.md` specs, `tools/selftest.py` golden values, or the
+  thresholds/margins in `tools/evaluate.py`, `robust.py`, `check_done.py` to make a design pass.
+- **One change at a time**, then measure. Log every experiment (change, numbers, verdict) in `PROGRESS.md`;
+  record dead ends under "Failed approaches" so later sessions do not retry them.
+- **Assignment rules** (`brief/spec.md` section 3): NMOS/PMOS/R/C only, real CMFB, single 1.8 V supply
+  for all amplifier blocks, bias block on `Vddb`, integer `m`, NMOS bulk to ground, `log018.l` TT only.
+- **Schematic hygiene (user rule, every `.asc`):** (1) every element is a drawn symbol, never a SPICE
+  text line (no E/B probes typed as directives); (2) pins joined by drawn wires, net-label flags only for
+  sheet-spanning nets (rails, vcmr, outputs, bias lines); (3) all directives inside one titled
+  "Parameters, Simulations & Measurements" box; (4) titled block rectangles, no overlaps, nothing outside
+  its box; (5) no stale symbols, labels, params or `.meas`; (6) re-verify after every change.
+- **Report:** exactly 8 pages in the compulsory order (`brief/spec.md` section 5). No contents page, no appendices.
+- **Git:** never commit or push unless the user asks.
+- **Writing:** no emojis, no em/en dashes, plain direct prose. LaTeX math (`$...$`) in markdown here.
+- **Context hygiene:** never print waveforms or whole logs; use the tools' summaries. Keep `PROGRESS.md`
+  "Current state" short and current (it is re-injected after compaction).
+- Blocked on a decision only the user can make: write `BLOCKED: <question>` in the PROGRESS.md
+  "Current state" and stop. Do not submit anything; the user submits the form.
 
-## Math notation
+## Layout
 
-Use **LaTeX math** in all markdown files in this project (NOT the parent's Unicode rule).
-
-- Inline: `$\beta = C_{fb}/(C_{in}+C_{fb})$`
-- Display: `$$\tau \leq \frac{T_{settle}}{\ln(10^{A\beta/20})}$$`
-- GitHub renders both natively via MathJax — no plugin needed.
-- Use `\mathrm{dB}`, `\mathrm{ns}` etc. for units; never italic.
-- Use `\,` for thin space between number and unit: `$25\,\mathrm{ns}$`.
-
-## Circuit diagrams
-
-Use **CircuiTikZ** source compiled to SVG.
-
-1. Source goes in `circuits/<name>.tex`, one circuit per file.
-2. Each `.tex` includes the shared preamble: `\input{header.tex}` (relative).
-3. Run `make` in `circuits/` to compile every changed `.tex` to a sibling `.svg`.
-4. Reference from markdown:
-
-   ```markdown
-   ![Biasing block](../circuits/biasing_block.svg)
-   ```
-
-5. `circuits/build/`, `*.aux`, `*.log`, `*.pdf` are gitignored. Commit only `.tex` + `.svg`.
-
-## Why this stack
-
-- **CircuiTikZ** is the academic standard for analog/MOS schematics; output is publication
-  grade and the source is plain text (clean diffs).
-- **SVG** embeds in any markdown viewer (GitHub, VS Code preview, pandoc) and stays crisp at
-  any zoom.
-- **LaTeX math** in markdown works on GitHub natively (MathJax) and in every modern previewer.
-
-## Build dependencies (already present on this machine)
-
-`pdflatex` (TeXLive 2023) · `circuitikz.sty` · `pdftocairo` (poppler) · `inkscape` (fallback)
-
-## Editing workflow
-
-1. Edit `circuits/foo.tex`.
-2. `cd circuits && make` (only rebuilds changed files).
-3. Reference `../circuits/foo.svg` from any `.md` in `analysis/` or `report/`.
-4. Commit `foo.tex` and `foo.svg` together.
+`brief/` assignment, spec, clarifications, lessons, strategy (read-only sources) · `design/templates/`
+benches · `design/work/` iteration · `design/final/` drawn deliverable `.asc` · `tools/` Python tooling
+(uv project) · `results/` generated (gitignored) · `report/` LaTeX · `example/` passing reference ·
+`reference/ee4520/` prior course (D6 baseline, bias block) · `models/` `log018.l` · `legacy/` attempt 1 (frozen).
