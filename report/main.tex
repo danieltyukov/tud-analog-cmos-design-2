@@ -87,13 +87,16 @@ Item & Design item & Unit & Spec. & Achieved \\
 \end{tabular}
 \end{table}
 \small
-Both steps are differential: $\resVin$\,mV in, $\fpeval{round(\resVout,2)}$\,V peak out, so each output swings
-$0.9 \pm \fpeval{\resVout/2}$\,V. I report power as 1.8\,V times the larger of two averages of $I(V_{dd})$: the quiescent
+Both steps are differential: $\resVin$\,mV in (input sources at \pVcmi\,V common mode; with $R_{in}$, $R_{fb}$ and the
+\xVcm\,V output common mode the summing nodes sit at \opV{vin}), $\fpeval{round(\resVout,3)}$\,V peak out, so each output swings $\xVcm \pm \fpeval{\resVout/2}$\,V. I report power as 1.8\,V times the larger of two averages of $I(V_{dd})$: the quiescent
 one and the one over the 25\,ns after the step. The second is higher here (\xIwin\,$\mu$A against \xIq\,$\mu$A) because
 the class-AB output takes the load charge from $V_{dd}$ during the step. The bias block runs from its own $V_{ddb}$ and is
 not counted. The $kT/C$ noise is $v_{n}^2 = 42\,kT/C_{in}$ (differential, from $C_{in}$, $C_{fb}$ and $C_{load}$ only,
 $T = 300.15$\,K). The amplifier noise is the \texttt{.noise} result for $V(v_{on},v_{op})$ integrated from 10\,kHz to
-100\,GHz, with $R_{in} = 100$\,M$\Omega$ and $R_{fb} = 400$\,M$\Omega$ set \texttt{noiseless} as the FAQ allows. $C_{CM}$
+100\,GHz, with $R_{in} = \dd[0]{\resRbig*1e3/4}$\,M$\Omega$ and $R_{fb} = \dd[0]{\resRbig*1e3}$\,M$\Omega$ set \texttt{noiseless}
+as the FAQ allows (their corner with $C_{fb}$ is \dd[0]{1/(2*pi*\resRbig*1e9*\resCfb*1e-12)}\,Hz). The
+SNR is $20\log_{10}\!\big((V_{out,step}/\sqrt{2})/v_{n,tot}\big) = 20\log_{10}\!\big((\resVout\,\mathrm{V}/\sqrt{2})/\resVnTot\,\mu\mathrm{V}\big)
+= \resSNR$\,dB, with $v_{n,tot} = \sqrt{\resKTC^2 + \resVnAmp^2}\,\mu$V. $C_{CM}$
 is the CMFB sense capacitor on each side, in parallel with a 2\,M$\Omega$ resistor. $\tau$ is one $e$-fold (8.6\,dB) of the
 $A\beta$ curve.
 \normalsize
@@ -105,8 +108,8 @@ $A\beta$ curve.
 \begin{figure}[H]\centering
 \resizebox{\linewidth}{!}{\input{circuits/amp.tex}}
 \caption{Amplifier core (stage 1, class-AB stage 2, current-buffer compensation) with DC node voltages
-(operating point, no input step). $V_{DD} = 1.8$\,V. Bulks: NMOS to ground, input and CMFB pairs to their
-own source, other PMOS to $V_{DD}$.}
+(operating point, no input step). $V_{DD} = 1.8$\,V. $C_c = \pCc$\,pF ($f_{cc} = \pFcc$), $C_{ls} = \pCls$\,pF,
+$R_b = \pRb$\,M$\Omega$. Bulks: NMOS to ground, input and CMFB pairs to their own source, other PMOS to $V_{DD}$.}
 \end{figure}
 \vspace{-4mm}
 \begin{figure}[H]\centering
@@ -176,6 +179,7 @@ integrated amplifier noise (76.93\,$\mu$V), with no $kT/C$, and its report put t
 $\mathrm{FoM_{lin}}$: 175.20\,dB, or \dd{\eFoM{\eSNR}}\,dB with the achieved SNR. EE4525 does include $kT/C$. The same rule
 applied to the EE4520 network, $v_n^2 = 2kT(C_{in}/C_{fb}^2 + 1/C_{fb} + 1/C_{load})$, adds \dd[0]{\eKTC*1e6}\,$\mu$V. That
 brings its SNR down to \dd{\eSNRll}\,dB and its FoM to \dd{\eFoM{\eSNRll}}\,dB, which is the value I compare against.
+(Against the 175.20\,dB in my EE4520 report the headline difference is $+\dd{\resFoMdB-175.20}$\,dB.)
 
 \begin{table}[H]\centering
 \renewcommand{\arraystretch}{1.15}
@@ -200,7 +204,7 @@ average).
 \textbf{Step 2, time constant ($+\dd{-10*\lgt{\resTau/\eTau}}$\,dB).} $\tau$ is $\dd[0]{\eTau/\resTau}\times$ shorter, so
 the energy spent per time constant, $P\tau$, falls from \dd[1]{\ePow*\eTau}\,pJ to \dd[3]{\resPower*\xTauExact}\,pJ.
 
-\textbf{Step 3, SNR ($\dd{\resSNR-\eSNRll}$\,dB).} Only 66\,dB is needed, so the capacitors are about ten times smaller
+\textbf{Step 3, SNR ($\dd{\resSNR-\eSNRll}$\,dB).} Only 66\,dB is needed, so the capacitors are about \dd[0]{18/\resCin} times smaller
 ($C_{in} = \resCin$\,pF) and the SNR is lower.
 
 \textbf{Why the FoM ends up higher.} Take $P \propto I$, $\tau \propto C_{L,eff}/(\beta g_m)$ and, for $kT/C$-limited
@@ -210,78 +214,95 @@ sampling, $\mathrm{SNR_{lin}}^2 \propto V_{sig}^2 C_{in}/(N_{net}kT)$. The capac
 \]
 The SNR target itself does not
 move the FoM, so the like-for-like gain of $+\dd{\resFoMdB-\eFoM{\eSNRll}}$\,dB has to come either from the test circuit or
-from the amplifier. The test circuit explains most of it. The gain-4 network has a $kT/C$ noise gain
+from the amplifier. The test circuit explains about half of it. The gain-4 network has a $kT/C$ noise gain
 $N_{net} = 2(G^2+G+1)$ of 42 instead of 146 $kT/C_{in}$ ($\dd{10*\lgt{146/42}}$\,dB), an ideal feedback factor of 0.2
 instead of $1/9$ ($\dd{10*\lgt{0.2*9}}$\,dB), and a slightly worse $C_{L,eff}/C_{in}$ of 1.20 instead of 1.11
-($\dd{-10*\lgt{1.2/(1+1/9)}}$\,dB). My larger swing (\dd[1]{\resVout}\,V against 1.2\,V) adds
-$\dd{20*\lgt{\resVout/1.2}}$\,dB. The $\tau$ definition is worth another $\dd{10*\lgt{\xTauTail/\xTauExact}}$\,dB: here
-$T_{30}$ to $T_{38.6}$ lands in the fast stretch right after slewing, while the small-signal tail decays with
-$\tau \approx \xTauTail$\,ns, and EE4520 measured $\tau$ in its linear tail. What remains,
-$\dd{\resFoMdB-\eFoM{\eSNRll} - 10*\lgt{146/42} - 10*\lgt{0.2*9} + 10*\lgt{1.2/(1+1/9)} - 20*\lgt{\resVout/1.2} - 10*\lgt{\xTauTail/\xTauExact}}$\,dB,
+($\dd{-10*\lgt{1.2/(1+1/9)}}$\,dB). My larger swing (\dd[3]{\resVout}\,V against 1.2\,V) adds
+$\dd{20*\lgt{\resVout/1.2}}$\,dB. The $\tau$ definition works the other way: EE4520 measured $\tau$ from 40 to
+48.69\,dB, which on this curve gives \xTauMid\,ns, so the official 30 to 38.6\,dB $\tau$ costs this design
+$\dd{10*\lgt{\xTauExact/\xTauMid}}$\,dB (with the EE4520 definition its FoM would be
+$\dd{\resFoMdB+10*\lgt{\xTauExact/\xTauMid}}$\,dB). What remains,
+$\dd{\resFoMdB-\eFoM{\eSNRll} - 10*\lgt{146/42} - 10*\lgt{0.2*9} + 10*\lgt{1.2/(1+1/9)} - 20*\lgt{\resVout/1.2} - 10*\lgt{\xTauMid/\xTauExact}}$\,dB,
 is the circuit itself ($I/g_m$ and noise factor). Most of it comes from the complementary input pair, which gives twice
 the $g_m$ per ampere and has no load devices adding noise. Current-buffer compensation and the class-AB output help as
-well, with fast non-dominant poles and slewing current that is not paid for in quiescent current. Against that, the real
+well, with fast non-dominant poles and output slewing current that is not paid for in output quiescent current. Against that, the real
 CMFB costs \opI{mct}, the 1/f noise now in the model takes \xFlickShare\,\% of the amplifier noise power, and the slewing
 charge is counted in the 25\,ns power window.
 \clearpage
 
 %% ---------------------------------------------------------------- page 8: short explanation
 \section*{Short Explanation}
-\small
+\small\setlength{\parskip}{2pt}
 \textbf{Settling plot (D4).} At the step the output has not moved yet, so $A\beta$ starts at 0\,dB. The virtual-ground
 error starts at $\beta_{act}V_{out,step}$, which puts $A$ \resGapdB\,dB higher. The input edge also couples through $C_{fb}$
 and $C_c$ and first kicks the output \xKick\,mV the wrong way, so $A\beta$ dips to $\xAbDip$\,dB before it rises. The gap is
 larger than the ideal 13.98\,dB, as it should be: the input pair adds $C_p \approx \xCp$\,fF at the summing node, so
-$\beta_{act} = C_{fb}/(C_{in}+C_{fb}+C_p) = \resBetaActual$ sits below $C_{fb}/(C_{in}+C_{fb}) = \resBetaIdeal$.
+$1/\beta_{act} = (C_{in}+C_{fb}+C_p)/C_{fb} = \dd{1/\resBetaActual}$ is higher than $1/\beta_{ideal} = 5$
+($\beta_{act} = \resBetaActual$). A parasitic at the summing node can only add to this divider, so the ``higher'' of
+the TA note applies to the $1/\beta$ gap.
 At first both curves rise slowly. The input error ($\approx\dd{\resBetaActual*\resVout}$\,V) is beyond the linear range of
-the input pairs, so stage 1 pushes its full tail current into $C_c$ and the outputs slew. Once the loop leaves slewing both
-curves climb steeply. $T_{30}$ and $T_{38.6}$ fall in this stretch, so $\tau = \resTau$\,ns describes the fast transition.
-The small-signal tail after it is slower ($\tau \approx \xTauTail$\,ns, fitted from 16 to 24\,ns), though still faster than
-$1/(2\pi f_c) = \dd{1e3/(2*pi*\xFc)}$\,ns: with $\xPM^\circ$ of phase margin the non-dominant poles push the dominant
-closed-loop pole above $f_c$. Finally the curves level off at floors set by the loop gain at the settled
+the input pairs, so stage 1 pushes its full tail current into $C_c$ and each output slews at up to about
+$2I_D/C_c = \dd[0]{2*\xIdIn/\pCc}$\,V/$\mu$s. Once the loop leaves slewing both curves climb steeply. $T_{30}$ and $T_{38.6}$ fall in
+this stretch, so $\tau = \resTau$\,ns describes the fast transition, and from 40 to 48.69\,dB the error falls even
+faster ($\tau = \xTauMid$\,ns). That is quicker than the \xTauTwoPole\,ns of a two-pole loop with the measured $f_c$ and
+phase margin: the class-AB output is still relaxing from its
+slewing current there, so this stretch is large-signal recovery, not a small-signal pole. Near 21\,ns the curves bend
+and $A\beta$ gains only \dd[1]{\xAbFortyFive-\resAbeta}\,dB from 25 to 45\,ns. Most of the error left is the static floor; the part above it decays with an average
+$e$-fold time of about \xTauSlow\,ns and changes with the split $f_{cc}$ of $C_c$ and with $C_{ls}$, so it is a
+pole-zero doublet of the compensation network. Finally the curves level off at floors set by the loop gain at the settled
 $\pm\fpeval{\resVout/2}$\,V outputs ($A\beta$ \xAbEnd\,dB, $A$ \xAEnd\,dB at \xTend\,ns). These are above the DC $A_0\beta$
 there (\xTzeroExt\,dB; \xTzero\,dB balanced) because within the window the AC-coupled output PMOS adds its $g_m$. The gap
-grows from \resGapdB\,dB to $\dd{\resA-\resAbeta}$\,dB at 25\,ns and $\dd{\xAEnd-\xAbEnd}$\,dB at \xTend\,ns. At low
-frequency the input-device drains carry $v_1$ divided by the cascode gain; in the 1\,kHz loop bench they swing \xMillNa\
-(NMOS) and \xMillNb\ (PMOS) times the virtual-ground error, since the NMOS cascode has little gain at its small $V_{ds}$.
-In the slow tail $C_{gd}$ is therefore Miller-multiplied and the effective $C_p$ grows. The error never changes sign, so
-there is no ringing peak anywhere in the simulated window.
+grows from \resGapdB\,dB to $\dd{\resA-\resAbeta}$\,dB at 25\,ns and \xGapEnd\,dB at \xTend\,ns: at low frequency the
+input-device drains carry $v_1$ divided by the cascode gain (\xMillNa\ and \xMillNb\ times the virtual-ground error for
+the NMOS and PMOS pairs in the 1\,kHz loop bench), so $C_{gd}$ is Miller-multiplied and the effective $C_p$ grows as the
+error slows down. The error never changes sign, so there is no ringing peak anywhere in the simulated window.
 
-\textbf{Architecture and CMFB.} Two stages give enough gain without boosters, which would cost current. Stage 1 is a
-stacked complementary pair (a PMOS pair on a top tail, an NMOS pair on a bottom tail, both driven by the summing node) with
-PMOS and NMOS cascodes. The same current produces both $g_m$'s, so the stage needs half the current for its $g_{m1}$ and
+\textbf{Architecture and CMFB.} Two stages give enough gain without current-hungry boosters. Stage 1 is a
+stacked complementary pair with cascodes (Fig.~1). The same current produces both $g_m$'s, so the stage needs half the current for its $g_{m1}$ and
 has no load devices adding noise. Stage 2 is class-AB: $v_1$ drives the NMOS directly and the PMOS through $C_{ls}$, whose
-DC level comes from $v_{bo}$ through $R_b$, so slewing current is not limited by the quiescent current. For compensation I
+DC level comes from $v_{bo}$ through $R_b$, so the output slewing current is not limited by its quiescent current. For compensation I
 used current buffers, with $C_c$ split between the NMOS- and PMOS-cascode sources. There is no right-half-plane zero and no
 nulling resistor, and the output stage needs little current ($f_c = \xFc$\,MHz, PM $\xPM^\circ$). The CMFB is
 continuous-time. It senses the output CM with \pRcm\,M$\Omega \parallel C_{CM}$, compares it with $v_{cmr}$ in a PMOS pair
-and corrects part of the NMOS tail ($M_{tc}$) through a diode mirror. Its loop crosses over at \xCMfc\,MHz with
-\xCMpm$^\circ$ margin, the output CM sits at \xVcm\,V, and the CM bump during slewing is \xCMexc\,mV (\xCMexcTf\,mV at
-25\,ns). It needs no clocks, and the sense network is all it adds to the outputs.
+and corrects part of the NMOS tail ($M_{tc}$) through a diode mirror. The output CM sits at \xVcm\,V; during
+slewing it moves by at most \xCMexc\,mV and is back within \xCMexcTf\,mV at 25\,ns. It needs no clocks.
 
-\textbf{Sizing.} I fixed the swing first. The outputs hold $\pm\fpeval{\resVout/2}$\,V with every transistor saturated, so
-$V_{out,step} = \fpeval{round(\resVout,2)}$\,V; more swing collapses $A_0$ at the extremes. Of the noise power, $kT/C$
+\textbf{Sizing.} The swing is a sizing variable: at a fixed SNR, $C_{in} \propto 1/V_{out,step}^2$, so the load charge
+falls as $1/V_{out,step}$. I pushed it to $V_{out,step} = \fpeval{round(\resVout,3)}$\,V, where the outputs reach
+$\xVcm \pm \fpeval{round(\resVout/2,3)}$\,V and every transistor is still saturated in the operating point with the
+inputs at their final values, in both polarities (worst $\xStepDev$, \xStepMarg\,mV); a larger step drives that output
+NMOS into triode. Of the noise power, $kT/C$
 ($42kT/C_{in}$) is \dd[0]{100*\resKTC^2/(\resKTC^2+\resVnAmp^2)}\,\% and the amplifier
-\dd[0]{100*\resVnAmp^2/(\resKTC^2+\resVnAmp^2)}\,\%. The amplifier term is roughly $\alpha kT/C_c$, with
-$\alpha \approx 2\gamma(1+n)/\beta$ plus 1/f and cascode terms; $n$, the load-to-input $g_m$ ratio, is close to zero
-here. $C_{in} = \resCin$\,pF and $C_c = \pCc$\,pF trade noise against stage-1 current ($g_{m1} \propto C_c$ for a given
-$f_c$) and against slewing charge ($\propto C_{in}$), and I set them together with the bias currents in a constrained
-power minimisation. For settling, the input devices run at $g_m/I_D \approx \xGmIdN$ (\xIdIn\,$\mu$A each), which gives
-$g_{m1} = \xGmOne$\,mS per side and $f_c = \beta_{act} g_{m1}/(2\pi C_c) = \dd[1]{\resBetaActual*\xGmOne e-3/(2*pi*\pCc e-12)/1e6}$\,MHz.
-$C_{ls}$, $C_{1d}$ and the output quiescent current then set the damping, so the response is fast but never overshoots.
+\dd[0]{100*\resVnAmp^2/(\resKTC^2+\resVnAmp^2)}\,\%. The amplifier term is roughly $\alpha kT/C_c$ with
+$\alpha \approx 2\gamma(1+n)/\beta$ plus 1/f and cascode terms ($n$, the load-to-input $g_m$ ratio, is about 0 here). On paper, 66\,dB at $V_{out,step}/\sqrt{2}$ allows $\dd[0]{\resVout/sqrt(2)/10^(3.3)*1e6}$\,$\mu$V in total; with
+$42kT/C_{in} = \resKTC$\,$\mu$V that leaves $\dd[0]{sqrt((\resVout/sqrt(2)/10^(3.3)*1e6)^2-\resKTC^2)}$\,$\mu$V for the
+amplifier. For settling, slewing (above) takes most of the first 15\,ns: $A\beta$ reaches 30\,dB at
+$T_{30} = \fpeval{round(\resTthirty,1)}$\,ns, and the remaining \dd[1]{25-\resTthirty}\,ns must cover 36.3\,dB (to 66.3\,dB),
+4.2 $e$-folds of at most \dd[1]{(25-\resTthirty)/4.18}\,ns each on average. The small-signal loop alone is slower
+(\xTauTwoPole\,ns); the class-AB recovery after slewing closes the gap and reaches 66.3\,dB
+\dd[1]{\resTsettle-\resTthirty}\,ns after $T_{30}$. $C_{in} = \resCin$\,pF and
+$C_c = \pCc$\,pF trade noise against stage-1 current ($g_{m1} \propto C_c$ for a given $f_c$), slewing time
+($\propto C_c/I_D$) and load charge ($\propto C_{in}$); I set them with the bias currents in a constrained power minimisation. The input devices run at $g_m/I_D \approx \xGmIdN$ (NMOS) and \xGmIdP\ (PMOS), \xIdIn\,$\mu$A each, which gives
+$g_{m1} = \xGmOne$\,mS per side and $f_c \approx \beta_{act} g_{m1}/(2\pi C_c) = \dd[1]{\resBetaActual*\xGmOne e-3/(2*pi*\pCc e-12)/1e6}$\,MHz.
+$C_c$, $f_{cc}$ and the output quiescent current set the damping. The loop sits just on the overdamped side of
+critical damping; with $C_c$ or the output bias changed by $\pm 1\,\%$ it still meets every specification without
+overshoot. I set the input sources to \pVcmi\,V (the FAQ leaves the common mode free). Both
+pair sources follow the gates down: the NMOS input pair (its drain is held by the cascode) and the PMOS tail gain
+$V_{ds}$, the PMOS input pair and the NMOS tail lose it. The NMOS pair gains output resistance, which raised the settled
+accuracy in my sweeps; the PMOS input pair now has the smallest quiescent margin ($\xQDev$, \xQMarg\,mV).
 The 1/f noise is \xFlickShare\,\% of the amplifier noise power (\xFlickUV\,$\mu$V). In \texttt{log018.l} the NMOS flicker
-spectrum falls only as $1/f^{0.825}$ (PMOS $1/f^{1.25}$) and reaches well into the band, so I gave the NMOS inputs
-$L = 1\,\mu$m (\xFlickN\,$\mu$V each) and kept the PMOS inputs at 0.25\,$\mu$m (\xFlickP\,$\mu$V each) to limit $C_p$.
+spectrum falls only as $1/f^{0.825}$ (PMOS $1/f^{1.25}$) and reaches well into the band. With NOIMOD 1 the drain
+noise goes as $K_F I_D^{A_F}/(C_{ox}L^2 f^{E_F})$, so at a given current $L$ is the lever, and I gave the NMOS inputs
+$L = \pLin\,\mu$m (\xFlickN\,$\mu$V each) and kept the PMOS inputs at \pLip\,$\mu$m (\xFlickP\,$\mu$V each) to limit $C_p$.
 
 \textbf{Noise devices and NEF.} The four input transistors produce \xNinShare\,\% of the amplifier noise power
 ($M_{1n}$, $M_{2n}$: \xNinN\,$\mu$V each; $M_{1p}$, $M_{2p}$: \xNinP\,$\mu$V each). The cascodes come next (\xNcasN\ and
 \xNcasP\,$\mu$V). Using $v_{n,amp}^2 = \mathrm{NEF}\cdot 2kT/(\beta C_{L,eff})$ with
-$C_{L,eff} = C_{load} + (1-\beta)C_{fb} = \resCLeff$\,pF and $\beta = \resBetaIdeal$ gives NEF $= \resNEF$.
+$C_{L,eff} = C_{load} + (1-\beta)C_{fb} = \resCLeff$\,pF and $\beta = \resBetaIdeal$ gives NEF $\approx \dd[1]{\resNEF}$.
 
-\textbf{Biasing.} A separate block on $V_{ddb}$, not counted in the power, turns ideal reference currents into gate
-voltages. All the currents are fixed multiples of $I_b = \pIb\,\mu$A. The tails and the output PMOS are mirrored from
-diode-connected replicas with the same $L$, and the cascode gates $v_{cn}$ and $v_{cp}$ come from long-$L$ diodes. Every
-bias line is decoupled by $C_{big} = \resCbig$\,nF. The CMFB sets the rest of the NMOS tail. Power is 1.8\,V times the
-larger of the quiescent current and the average over the 25\,ns amplification window.
+\textbf{Biasing.} A separate block on $V_{ddb}$ (not counted in the power) turns ideal reference currents, all fixed
+multiples of $I_b = \pIb\,\mu$A, into gate voltages. The tails and the output PMOS mirror
+diode-connected replicas of the same $L$; $v_{cn}$ and $v_{cp}$ come from long-$L$ diodes. Every
+bias line is decoupled by $C_{big} = \resCbig$\,nF. The CMFB sets the rest of the NMOS tail.
 \normalsize
 \end{document}

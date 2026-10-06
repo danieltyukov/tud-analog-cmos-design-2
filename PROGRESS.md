@@ -2,12 +2,14 @@
 
 ## Current state
 
-Phase: DONE (P8). Final design v13 (CR topology: stacked complementary input, current-buffer compensation,
-class-AB output, CT CMFB; Ib 9.0u, ko 0.64, Vstep 1.4 V, Cin 1.66p). Drawn design/final/amp_{tran,noise}.asc
-(gen_asc.py; verify_circuit equivalent, 0 findings; lint clean). evaluate --tag final --publish on the .asc:
-ALL PASS, P 0.2375 mW (I(Vdd) 0.1320 mA), SNR 66.21, Aβ 66.76, A 81.59, Ts 24.48 ns, τ 1.792 ns, FoM 181.9 dB.
-robust PASS on the .asc (worst Aβ 66.69, Ts 24.52 ns). Report 8 pages, reviewed twice; spec-auditor PASS.
-Form values: results/latest.json (tag final).
+Phase: DONE (P8). Final design v18 (CR topology: stacked complementary input, current-buffer compensation,
+class-AB QFG output, CT CMFB; Ib 9.0u, tsc 0.686, ko 0.505, knr 0.60, VCMI 0.8107, Vstep 1.478 V, Cin 1.43p,
+Cc 0.389p, Cls 0.63p, Won 1.46u, Rin 125Meg). Drawn design/final/amp_{tran,noise}.asc (gen_asc.py; verify_circuit
+equivalent, 62 components, 0 findings; lint 0/0). evaluate --tag final --publish on the .asc: ALL PASS, P 0.1918 mW
+(I(Vdd) 0.10654 mA), SNR 66.08, Abeta 69.34, A 84.27, Ts 22.29 ns, tau 1.641 ns, FoM 183.12 dB, output CM 0.899 V.
+robust PASS (worst Abeta 69.32); ko and Cc +-1 % all pass; every FET saturated with the step applied (both
+polarities, worst 27 mV); loop T0 81.0 dB, fc 39.8 MHz, PM 78.4 deg. Report 8 pages (copy report/5714699.pdf).
+Form values: results/latest.json (tag final). Archives: design/work/archive_v13, archive_v14, archive_v15.
 
 ## Plan (tick a box only with tool evidence; add sub-steps as needed)
 
@@ -183,9 +185,179 @@ continuous-time CMFB (2 MΩ ∥ $C_{CM}$ sense, PMOS diff pair vs vcmr, mirror i
   shorter sentences, no enumerated lists or stacked parentheticals; every macro, number and verified claim unchanged.
   FoM proportionality moved to a displayed equation (removed an overfull line). 8 pages, no ??, check_done DONE.
 
+- 2026-10-06 LITERATURE (IEEE Xplore MCP, institutional sign-in): six full papers downloaded to reference/papers/
+  (Akter JSSC 2018 class-AB RA; Kim IEEE Access 2020 SRE class-AB OTA; Lopez-Martin JSSC 2005 super class-AB;
+  Hurst TCAS-I 2004 current-buffer Miller; Giustolisi TCAS-I 2021 settling design; Yavari TCAS-II 2005 slew rate).
+  Notes and applicability in reference/papers/NOTES-resit-2026-10.md. Verdict: split-capacitor biasing, SRE mirrors
+  and super class-AB inputs do not carry over (forbidden switches/split network, or net extra charge in the 25 ns
+  window, or headroom). Corrected diagnosis: v13 has no loop-gain shelf; alpha 13.9 vs 7.0 = BSIM3 noimod thermal
+  (gm+gmbs+gds) x1.35, noise bandwidth x1.2, flicker 8 %, cascodes 10 %. Proposed experiments: (1) lower input CM to
+  move PMOS-side headroom to the NMOS input/cascode, (2) capacitor-boosted NMOS tail unit, (3) cross-coupled gain pair.
+- Round 3b robust optimizer (13 knobs incl. Lin, Wcp, Won, Wop, Wctl, stage-1 current scale tsc; CM-excursion gate
+  as a constraint; ko +-4 %): 134/250 feasible, best #148 0.2277 mW (evaluate: ALL PASS, SNR 66.08, Abeta 67.32,
+  Ts 24.36 ns, min margin 33 mV). Pattern: tsc 0.94, ko 0.59, Wctl 2.05u, Lin 0.85u, Wop 15u, C1d -> 0.
+- Experiment 1 (input CM): on #148, VCMI 0.9 -> 0.85 with kcp 0.65: Abeta25 68.1 -> 72.3 dB, Ts 24.0 -> 22.4 ns,
+  same power and SNR (FAQ: common mode is free; in a real MDAC the summing-node CM is set during sampling).
+  VCMI 0.8 needs Wtn 6u (Wtn 4u collapses: NMOS tail in triode). Round 4 launched to convert the margin to power
+  (15 knobs incl. VCMI, Wtn, kcp; C1d removed).
+
+- Experiment 2 (capacitor-boosted NMOS tail unit Mtb: gate AC-coupled to ntn by Ctb, DC via Rtb 3Meg to vbn, fixed
+  tail current unchanged): Ctb 0/0.1/0.2/0.4p all give Abeta25 71.7 dB, Ts 22.6 ns, power +0.4 to +0.9 uW. No effect,
+  killed (design/work/cr4e2 kept as record).
+
+- Record restore: candidate evaluations (cand148/cand248 on scratch benches) overwrote results/latest.json; re-ran
+  evaluate --publish and robust on the unchanged final .asc (v13) while round 4 runs. gen_asc.py now supports the
+  stage-1 current scale (W={Wt*tsc}) and an optional C1d; output for v13 byte-identical.
+
+- Round 4 robust optimizer (15 knobs incl. VCMI, Wtn, kcp, C1d removed; CM-excursion gate; ko +-4 %): best #281,
+  rounded and ko re-centred at 0.55 so ko +-7 % passes. Promoted as v14 (Ib 9.0u, tsc 0.81, ko 0.55, VCMI 0.86,
+  Cin 1.67p, Cc 0.418p, Cls 0.76p, fcc 0.70). Drawn .asc regenerated (verify_circuit equivalent, 62 components,
+  0 findings; lint clean). evaluate --tag final --publish on the .asc: ALL PASS, P 0.2160 mW (I(Vdd) 0.1200 mA),
+  SNR 66.09, Abeta 69.51, A 84.28, Ts 23.33 ns, tau 1.740 ns, FoM 182.36 dB; robust PASS (worst Abeta 69.48).
+  Min saturation margin 22 -> 48 mV, CM excursion 49.8 -> 22.0 mV. Power -9 % vs v13. Report: C1d removed from the
+  D2/D3 drawing and text, input CM sentence added on page 8.
+- v14 output CM check: report_extra gives xVcm 0.941 V (v13: 0.903 V). The optimizer never constrained the static
+  output CM, and a high CM buys Abeta (knr 0.75 leaves the CMFB pair 41 mV off balance). Sweep knr on
+  design/work/cmfix: 0.60/0.64/0.68/0.75 -> Vcm 0.886/0.901/0.915/0.941 V, Abeta25 68.9/68.9/69.0/69.5, power
+  unchanged. knr 0.64 (v14b): evaluate ALL PASS, P 0.2160 mW, SNR 66.09, Abeta 68.93, Ts 23.60 ns, tau 1.749 ns;
+  robust PASS; ko 0.5115 / 0.5885 both ALL PASS (Ts 20.95 / 24.61 ns). ko sweep down: Abeta floor 74 dB at
+  ko 0.44 to 0.49 (power 0.2131 to 0.2144 mW), collapse below 0.40. Round 5 launched (static |Vcm - 0.9| <= 10 mV
+  as a constraint, knr free, ko +-7 %, ranges widened where v14 sat on an edge; design/work/cmfix/space_r5.json).
+- Record restore (again): the v14b candidate runs overwrote results/latest.json; re-published the unchanged v14
+  .asc (tag final: ALL PASS, 0.2160 mW, Ts 23.33 ns), robust PASS, report rebuilt. design/final is still v14
+  (knr 0.75, Vcm 0.941 V) until round 5 picks the CM-centred replacement.
+- Round 5 (results/ropt/cr_r5, 320 trials, 16 knobs incl. knr; static CM gate; ko +-7 %): 8 robust-feasible,
+  SNR binds (41 trials fail on SNR alone at 0.206 to 0.210 mW). Best #275 0.2140 mW (SNR 66.08, worst Abeta 66.9).
+  Rounded as v15 (design/work/r5): Lin 1.07u, Wtn 7.5u, Wcp 11.7u, Wcn 8u, Won 1.22u, Wop 12.75u, Wctl 1.85u,
+  Cc 0.413p, Cls 0.53p, fcc 0.72, tsc 0.82, ko 0.52, kcp 0.52, Cin 1.665p; knr 0.63 gave Vcm 0.8954 V, trimmed
+  to 0.64 -> 0.8989 V. Netlist: ALL PASS 0.2142 mW, SNR 66.08, Abeta 69.31, Ts 23.20 ns, min margin 52 mV;
+  robust PASS; ko 0.4836 / 0.5564 ALL PASS (Ts 18.44 / 24.55 ns); loop T0 79.8 dB, fc 43.5 MHz, PM 76.9 deg,
+  GM 19.3 dB. Promoted to design/work (v14 in archive_v14), .asc regenerated, verify_circuit equivalent
+  (62 components, 0 findings), lint clean. evaluate --tag final --publish on the .asc: ALL PASS, 0.2142 mW
+  (I(Vdd) 0.1190 mA), FoM 182.73 dB; robust PASS. report_extra: CM loop 15.5 MHz / 77 deg, CM excursion 21.8 mV,
+  output CM 0.899 V, CMFB pair 1.56 / 1.53 uA. Report rebuilt (8 pages). Power -9.8 % vs v13 (0.2375 mW).
+  Diminishing returns: round 5 gained 0.9 % over the CM-centred v14b; SNR (66.08 vs 66.05) binds everywhere.
+- report-reviewer on v15 (estimate 8.5 to 9.5, no correctness blockers). Fixed: SNR formula written out on p2;
+  beta stated as 1/beta_act 5.24 > 5 (TA wording); stale hand-typed L = 1 um replaced by macro \pLin (1.07);
+  input CM text now says sources at 0.86 V, summing nodes at \opV{vin}; input-CM physics corrected (NMOS pair gains
+  Vds, PMOS pair gives some up; margins 52 / 90 mV from lt.py op); paper noise and settling budget added on p8;
+  FoM with the tail tau and the +7.53 dB headline vs the EE4520 report added on p7; fc hand estimate marked;
+  Cc, fcc, Cls, Rb values in the D2 caption; gp and ntn labels moved off wires; CM-loop margin number dropped
+  (Middlebrook voltage break at the Mc3 diode node is not a low-impedance point) in favour of the transient CM
+  numbers. Format-only tool changes: tools/evaluate.py publish fmt item 16 (Cfb) 4g -> 5g so 0.41625 shows
+  Cin/Cfb = 4 exactly; tools/report_extra.py pKn 3 digits, new pLin/pLip macros. No threshold touched.
+- Helper benches design/work/amp_cmloop.inc and bench_cmloop.cir were stale (Ib 9.6u, VCMI 0.9); re-synced to
+  v15 from the report_extra copies (runs rc=0).
+- spec-auditor on v15: PASS (reproduced every number on the .asc, 0 unsaturated with the step applied at DC,
+  CMFB tracks vcmr 0.80 to 1.00 V within 1 mV, FAQ allows a free input CM, no threshold changes). Its note: the
+  Abeta slack (69.3 dB) is what pays for the self-imposed ko +-7 % guard; dropping the guard is worth at most
+  2.7 % (ko 0.48, Ib 8.6u: 0.2084 mW, fails at ko -7 %). Decision: keep the guard, stop the power descent here
+  (round 5 gained 0.9 %, guard-free headroom 2.7 %). Final re-published after the audit runs (tag final
+  01:08:24, ALL PASS, 0.2142 mW), robust PASS, report rebuilt, report/5714699.pdf re-copied (identical).
+- DECISION REVERSED (user review 2026-10-06: "if the goal is 66 and we get 69"): the ko +-7 % guard is extra margin
+  beyond evaluate.py's (Abeta +0.3 dB, Ts 24.8 ns) and brief/spec.md says not to add more: over-design costs power.
+  Round 6 (results/ropt/cr_r6, design/work/r6/space_r6.json, 360 trials, seed v15): no ko perturbation (PF empty),
+  keeps all evaluate.py constraints, the CM-excursion gate (< 50 mV) and the static CM gate (|Vcm - 0.9| <= 10 mV);
+  ranges widened downward for tsc, ko, Won, Wop, Wctl. Final candidate must still pass robust.py.
+- Round 6 stopped at about 240 trials: 14 feasible, best 0.2093 mW (#118/#238; Abeta 71.1, SNR 66.13: slack left).
+  Cheaper trials fail on SNR (71), settling/ringing (about 58) and the static CM gate (55): the CM window is only
+  +-0.03 wide in knr, so TPE wastes trials on it. Round 7 (scratch ropt7.py, results/ropt/cr_r7,
+  design/work/r6/space_r7.json, 400 trials): knr removed from the search and auto-centred per trial (Newton step
+  on the measured output CM, slope 0.365 V/unit, |Vcm - 0.9| <= 4 mV), seeded with the 4 best round-6 points and v15.
+- Round 7 result: 400 trials, 123 feasible (auto-CM works), converged 0.2030 to 0.2036 mW. All top points have
+  SNR 66.06 to 66.11 while Abeta spans 66.6 to 70.5 dB at equal power: SNR (Cin) now sets the power, not settling.
+  Won (0.93u) and Wop (10.1u) sit on their lower bounds. #374 materialised as design/work/x374: evaluate ALL PASS,
+  0.2032 mW, SNR 66.06, Abeta 69.43, Ts 23.22 ns, Iq 51.8 uA, window 112.9 uA, min margin 40 mV.
+- Output swing (fixed at 1.4 V since P1) on x374 with Cin and Cc scaled by (1.4/V)^2: 1.35 V fails (floor 60.5 dB);
+  1.45/1.5/1.55/1.6 V: 0.1996/0.1962/0.1928/0.1891 mW, Abeta floors 74 to 76 dB, A floors about 90 dB, SNR held,
+  but the error crosses zero at 17.5/16.1/15.2/14.7 ns (counts as a ringing peak before 25 ns, FAIL). Round 8
+  (results/ropt/cr_r8, design/work/r8/space_r8.json, 450 trials): VoutStep 1.40 to 1.62 as a knob, Cin 1.2 to 1.9p,
+  Cc 0.26 to 0.45p, output-device bounds widened, auto-CM kept, seeded with x374 and the four swing points.
+- The swing crossing is real underdamping: at 1.6 V the output error goes +17 mV (14 ns) -> -17 mV (16 ns) -> +0.24 mV
+  (25 ns); scaling Cc with Cin raised fc without moving p2. Record restore: experiment runs overwrote
+  results/latest.json; re-published the unchanged v15 .asc (tag final, ALL PASS 0.2142 mW), robust PASS, report rebuilt.
+- ARCHITECTURE SURVEY (user request: do not stay confined to the chosen topology): reference/papers/ARCH-SURVEY-2026-10.md,
+  six more IEEE papers downloaded (Hershberg 2012 ringamp, Lim and Flynn 2015 FD ringamp, Llimos Muntal 2018 CT ringamp,
+  Tang 2020 FIA, Ramirez-Angulo 2006 QFG class-AB, Thandri 2003 NCFF). Verdicts under our rules: keep current-reuse
+  telescopic input, current-buffer compensation, QFG class-AB output; reject ringamps (24 to 60 mV post-slew overshoot
+  vs 0.34 mV error band breaks the ringing rule; .noise at a dead-zone op point is an artifact), FIA (needs precharge
+  switches), Miller+Rz (+21 to +48 %), NCFF (> +100 %), nested/three-stage, class-A, single-stage gain-boosted;
+  CLS/split-ADC/incomplete settling/chopping excluded by the rules. Ranked in-architecture levers: (1) larger output
+  step with Cin, Cc scaled (round 8 running), (2) less output quiescent with stronger cascodes, (3) SC CMFB (-1.5 %).
+- Round 8 stopped at about 365 trials: 179 feasible but none below the 1.4 V seed (0.2032 mW); TPE retreated to
+  V < 1.45 because every V >= 1.5 trial rang. Manual damping probe at 1.5 V (xsw1.5): Cc 0.34p rings (16 ns),
+  0.37p ALL PASS 0.1963 mW (SNR 66.25, Abeta 68.57, Ts 23.73 ns, tau 1.410 ns), 0.40p too slow (Abeta 56.8),
+  0.43p 49.5: a narrow Cc window. 1.55 V: Cc 0.3626p no peak, Abeta 68.28, 0.1930 mW, SNR 66.34. 1.6 V still rings
+  at Cc 0.34p. Round 9 (results/ropt/cr_r9, design/work/r8/space_r9.json, 450 trials): V 1.48 to 1.64,
+  Cc 0.33 to 0.40p, Cin 1.25 to 1.62p, other knobs narrowed around x374, seeded with the passing 1.5/1.55 V points.
+- Record restore (scratch evaluations overwrote latest.json): re-published v15 .asc (tag final), robust PASS, rebuilt.
+  Scratch evaluations now go through a wrapper that restores results/latest.json with its mtime.
+- Round 9 stopped at about 185 trials: 54 feasible, best #129 0.1868 mW at Vstep 1.623 V, Cin 1.265p, Cc 0.3765p
+  (full evaluate on the netlist: ALL PASS, SNR 66.51, Abeta 71.23, A 86.51, Ts 21.69 ns, tau 1.892 ns, Iq 54.2 uA,
+  window 103.8 uA, min margin 27 mV). Pinned at bounds: Cin, Lin, Wcp, VCMI low; Cls, Wcn, Wtn high. Round 10
+  (scratch ropt10.py = ropt7 + min saturation margin >= 25 mV at the op point as a constraint; results/ropt/cr_r10,
+  design/work/r10/space_r10.json): V 1.56 to 1.72, Cin 0.95 to 1.40p, the pinned bounds widened, seeded with the
+  top 5 of round 9.
+- Round 10: 450 trials, 153 feasible, converged 0.1818 to 0.1824 mW (no bound pinned). #350 rounded as
+  design/work/v16 (Vstep 1.62 V, Cin 1.21p, Cc 0.36p after a damping trim: 0.356p gives a tiny target crossing at
+  21.4 ns, 0.364p is at the settling edge, 0.368p fails). Netlist: ALL PASS 0.1818 mW, SNR 66.30, Abeta 69.77,
+  A 84.97, Ts 21.65 ns, tau 1.806 ns, FoM 183.16 dB, min margin 37 mV (quiescent), robust PASS.
+  REJECTED: with the step applied (DC op, both polarities) the low-side output NMOS is in triode (Vds 91 mV,
+  margin -118 mV), and also in the reconstructed t = 25 ns state (Cls held by sources: margin -80 mV); the
+  high-side output PMOS keeps only 18 to 22 mV. Breaks the project gate (every FET saturated, both step
+  polarities) and the report claim. Round 11 (scratch ropt11.py: + min margin >= 15 mV in the step-applied DC
+  op; results/ropt/cr_r11, design/work/r11/space_r11.json, 500 trials): V 1.40 to 1.62, Won up to 2.4u,
+  Wop up to 18u, seeded with v15, x374, v16 and a 1.5 V midpoint.
+- Round 11 stopped at about 200 trials: TPE stayed at 1.40 to 1.45 V (best = x374 seed, 0.2032 mW, step margin 40 mV);
+  only 29 trials above 1.45 V. Round 12 (V forced to 1.45 to 1.60, Won 1.2 to 3.0u, seeded with v16 variants with a wide
+  output NMOS): best #68 0.1888 mW at 1.488 V (Won 1.72u, Cin 1.395p, Cc 0.391p), ALL PASS, step-applied DC margins
+  mcn 18.6 mV, mon 32 mV both polarities. Next cluster 0.1950 to 0.1966 mW at 1.47 V. #68 rounded = design/work/v17:
+  ALL PASS 0.1888 mW, Abeta 66.94, Ts 24.23 ns, but a knife edge: Cc +1 % fails (64.5 dB), ko -3 % rings, ko +3 %
+  too slow; swing +-0.5 % passes. Rule adopted: nominal + ko and Cc each at +-2 % must pass (much tighter than the
+  dropped ko +-7 % guard). Round 13 (scratch ropt13.py, multi-knob PERT=ko,Cc, PF=0.98,1.02; results/ropt/cr_r13,
+  space_r12, seeded with the round-12 top 10).
+- Round 13 (+-2 %): 0 of 77 robust-feasible; e.g. r12 #323 (nominal Abeta 73.3) gets a tiny pre-25 ns target crossing at
+  ko or Cc -2 % (Abeta 80 dB, but a zero crossing at 18 to 19 ns = ringing peak). High-swing optima sit next to critical
+  damping. Numerical sensitivity of v17: method=gear vs trap Abeta 66.9425 vs 66.9425 dB, reltol 1e-3 66.9388 dB
+  (the bench pins .option method=trap reltol=1e-4, carried into the .asc). Round 14: +-1 % on ko and Cc
+  (results/ropt/cr_r14), about 100x the numerical spread.
+- Round 14: 400 trials, 67 feasible; best #341 0.1915 mW (worst Abeta over +-1 % 67.83). Rounded = design/work/v18;
+  rounding moved it to the underdamped edge (Cc -1 % crossed), Cc re-centred 0.387p -> 0.389p: nominal ALL PASS
+  0.1918 mW, SNR 66.08, Abeta 69.35, Ts 22.29 ns; Cc and ko +-1 % all pass (Abeta 67.07 to 72.02, no crossing);
+  step-applied DC op both polarities all saturated (worst mon 27.0 mV, mcn 28.6 mV); robust PASS; loop T0 81.0 dB,
+  fc 39.8 MHz, PM 78.4 deg, GM 20.4 dB. Rfb*Cfb corner 1.11 kHz tripped a lint warning: Rin 100 -> 125Meg (Rfb 0.5 GOhm,
+  corner 890 Hz; noiseless; Abeta 69.35 -> 69.34). PROMOTED as v18 (v15 archived in design/work/archive_v15):
+  .asc regenerated (only .param lines differ), verify_circuit equivalent (62 components, 0 findings), lint 0/0,
+  evaluate --tag final --publish on the .asc ALL PASS 0.1918 mW (I(Vdd) 0.1065 mA, FoM 183.12 dB), robust PASS.
+  report_extra: CM excursion 33.2 mV (9.1 mV at 25 ns), output CM 0.899 V, tau tail 1.80 ns. Power -10.5 % vs v15,
+  -19 % vs v13. Report: swing paragraph rewritten (swing as a sizing variable, limited by output-NMOS saturation
+  with the step applied), +-1 % damping statement added, macro precision 3 digits (tools/report_extra.py, format only).
+- spec-auditor on v18: design PASS (all claims reproduced; step-applied and reconstructed t = 25 ns states fully
+  saturated, worst 27 / 33 mV; +-1 % corners pass; the Abeta slack pays for the window, spending it frees about 0.7 %
+  and fails the corners). Report FAIL on two stale passages. report-reviewer (8.5 to 9.5): same two plus settling
+  explanation errors. Diagnostics for the slow component (local e-fold 22.5 ns from 25 to 45 ns): 0.4 V step 14 ns
+  (stays, so not large-signal), fcc 0.5 9.8 ns, fcc 0.9 rings, Cls x3 10.5 ns: a pole-zero doublet of the split
+  current-buffer compensation and the AC-coupled output PMOS. Loop fc at the output extremes unchanged (39.1 to
+  39.8 MHz), so the fast 40 to 48.69 dB stretch (tau 1.29 ns < two-pole 2.85 ns) is large-signal recovery: I(Vdd)
+  falls through its quiescent value (54.9 -> 50.9 uA) in that stretch. Fixes: Rin/Rfb from \resRbig (p2); I(Vdd)
+  printed with 5 decimals (tools/evaluate.py publish fmt item 9, format only); D6 tau term with the EE4520 definition
+  on the same curve (xTauMid 1.29 ns: official tau costs 1.05 dB, circuit share 7.56 dB); p8 slew-rate budget
+  (2 I_D/C_c), fast-stretch and doublet description, damping window wording, input-CM trade-off (PMOS pair now
+  tightest, m1p 40 mV), beta note, NOIMOD 1/f clause, gm/ID both types, NEF ~6.1, n_tn label moved. New
+  report_extra macros (generated): xTauMid, xTauSlow, xAbFortyFive, xTauTwoPole, xStepMarg, xStepDev. Report 8 pages.
+- report-reviewer re-review (9 to 9.5): fixed the remaining items. Input-CM effect stated correctly (NMOS input pair and
+  PMOS tail gain Vds, PMOS input pair and NMOS tail lose it; quiescent worst M1p 40 mV via \xQMarg/\xQDev); A-Abeta gap
+  growth explained (Miller-multiplied Cgd, \xMillNa/\xMillNb; end gap \xGapEnd 16.0 dB); settling budget closes on its
+  own terms (post-slew 4.2 e-folds in 10.0 ns; small-signal two-pole tau 2.75 ns exact (K from |T(j wc)| = 1) is slower,
+  class-AB recovery closes it); slow part described as static floor plus a decaying doublet part (floor-subtracted
+  e-fold about 7 ns, \xTauSlow now fitted on err - err_final); slew stated as a peak rate; D6 "about half"; output CM
+  0.899 in the swing; page 8 tightened (parskip 2pt on page 8, shorter stage-1, damping, biasing sentences). Report 8
+  pages, submission copy identical, no en/em dashes in the PDF text.
+
 ## Failed approaches (do not retry without a new reason)
 
 - Optimising the global bias unit Ib with fixed cascode-bias diodes: shifts vcn/vcp, devices leave saturation.
+- Capacitor-boosted NMOS tail unit (adaptive tail): no settling gain in this topology.
 - Stronger CMFB (mirror ratio 8) to cut the 3 ns CM spike: no effect on the spike, slows DM settling.
 
 - Attempt 1 (June 2026): single-stage gain-boosted folded cascode + current reuse + SC-CMFB: 2.04 mW and

@@ -17,7 +17,7 @@
 .param Cc=0.443p Cls=0.52p Rb=3Meg C1d=2.5f fcc=0.61
 .param Rcm=2Meg Ccm=50f
 .param Lcm=0.5u Wcm=4u Wctl=3u Wc3=1u
-.param knr=0.75 kn={knr*Mt/Mtn} ko=0.64 kcn=0.6 kcp=0.5
+.param tsc=1 knr=0.75 kn={knr*Mt*tsc/Mtn} ko=0.64 kcn=0.6 kcp=0.5
 .param Wbcn=0.4u Lbcn=4u Wbcp=1u Lbcp=4u
 .param Cbig=10n
 *
@@ -39,7 +39,7 @@ Cb4 vcn 0 {Cbig}
 Cb5 vcp 0 {Cbig}
 *
 * ---- stage 1: complementary stacked input ----
-Mtp  ntp vbp vdd vdd pch L={Lt} W={Wt} m={Mt}
+Mtp  ntp vbp vdd vdd pch L={Lt} W={Wt*tsc} m={Mt}
 M1p  nb1 vin ntp ntp pch L={Lip} W={Wip} m={Mip}
 M2p  nb2 vip ntp ntp pch L={Lip} W={Wip} m={Mip}
 Mcp1 v1n vcp nb1 vdd pch L={Lcp} W={Wcp} m={Mcp}

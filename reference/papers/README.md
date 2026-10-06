@@ -100,3 +100,14 @@ needed here.
 
 These also serve as **citations for Deliverable 9** (architecture justification,
 sizing-for-settling, gain-booster design, low-power technique).
+
+---
+
+## Resit papers (October 2026), analysed in `NOTES-resit-2026-10.md`
+
+- `IEEE-8443396-A-66-dB-SNDR-Pipelined-Split-ADC-in-40-nm-CMOS-Using-a-Class-AB-Residue.pdf`: Akter et al., IEEE JSSC 2018, doi:10.1109/JSSC.2018.2859415. Class-AB push-pull residue amplifier with split-capacitor biasing and incomplete settling (40 nm, 1 V); not transferable here, but it prices level-shift capacitors.
+- `IEEE-9293306-A-High-Slew-Rate-Enhancement-Class-AB-Operational-Transconductance-Amplifier-OTA.pdf`: Kim, Song, Roh, IEEE Access 2020, doi:10.1109/ACCESS.2020.3044608. 0.18 µm class-AB OTA with triode slew-rate-enhancement devices in the mirror diodes; not applicable (no mirrors in our signal path).
+- `IEEE-1425714-Low-Voltage-Super-class-AB-CMOS-OTA-cells-with-very-high-slew-rate-and-power.pdf`: López-Martín et al., IEEE JSSC 2005, doi:10.1109/JSSC.2005.845977. Super class-AB OTAs (adaptive-biased input pair plus local CMFB); its adaptive-bias principle is the basis of experiment E2.
+- `IEEE-1266829-Miller-Compensation-Using-Current-Buffers-in-Fully-Differential-CMOS-Two-Stage.pdf`: Hurst et al., IEEE TCAS-I 2004, doi:10.1109/TCSI.2003.820254. Pole and zero formulas for four current-buffer compensation variants; our CR stage is their Fig. 3 case.
+- `IEEE-9307219-Design-of-Three-Stage-OTA-Based-on-Settling-Time-Requirements-Including-Large.pdf`: Giustolisi, Palumbo, IEEE TCAS-I 2021, doi:10.1109/TCSI.2020.3044454. Settling-time design with slew and separation factors; shows slewing costs about 19 % of our settling budget.
+- `IEEE-1406209-An-accurate-analysis-of-slew-rate-for-two-stage-CMOS-opamps.pdf`: Yavari, Maghari, Shoaei, IEEE TCAS-II 2005, doi:10.1109/TCSII.2004.842058. Large-signal slew-rate model for two-stage Miller opamps when a stage-1 device enters triode.

@@ -1,0 +1,43 @@
+* EE4525 transient bench: the FIXED test circuit (assignment fig. 1). Copy to design/work/.
+* The amplifier (core + CMFB + bias block) lives in amp.inc and connects only through:
+*   vip vin   amplifier inputs (summing nodes)     vop von   amplifier outputs
+*   vdd       amplifier supply (source Vdd, its current is the graded power)
+*   vddb      bias-block supply (excluded)          vcmr      0.9 V CM reference (ideal source allowed)
+* Sign: input+ -> Cin -> vin, Cfb from vop to vin, so V(von,vop) is the positive output step.
+* Tunables live in .param lines so tools/lt.py sweep / tools/optimize.py can override them.
+.lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
+.param VDD=1.8 VCM=0.9 VCMI=0.8276
+.param Cin=1.738p Cfb={Cin/4} Cload={Cin} Rin=100Meg Rfb={4*Rin}
+.param VoutStep=1.4 VinStep={VoutStep/4} tstep=10n Tsettle=25n tstop={tstep+Tsettle+45n} trise=50p
+
+Vdd vdd 0 {VDD}
+Vddb vddb 0 {VDD}
+Vcmr vcmr 0 {VCM}
+Vinp inp 0 PULSE({VCMI} {VCMI+VinStep/2} {tstep} {trise} {trise} 1 2) AC 0.5
+Vinn inn 0 PULSE({VCMI} {VCMI-VinStep/2} {tstep} {trise} {trise} 1 2) AC -0.5
+Cin1 inp vin {Cin}
+Rin1 inp vin {Rin} noiseless
+Cin2 inn vip {Cin}
+Rin2 inn vip {Rin} noiseless
+Cfb1 vop vin {Cfb}
+Rfb1 vop vin {Rfb} noiseless
+Cfb2 von vip {Cfb}
+Rfb2 von vip {Rfb} noiseless
+Cload1 vop 0 {Cload}
+Cload2 von 0 {Cload}
+
+.include amp.inc
+
+.tran 0 {tstop} 0 2p
+.option plotwinsize=0 method=trap reltol=1e-4
+* quick-look measurements (tools/metrics.py is the authority: floors, ringing, tau, power rule)
+.meas tran vg25 FIND V(vip,vin) AT={tstep+Tsettle}
+.meas tran vod25 FIND V(von,vop) AT={tstep+Tsettle}
+.meas tran A25 PARAM 20*log10(VoutStep/(abs(vg25)+1n))
+.meas tran Ab25 PARAM 20*log10(VoutStep/(abs(VoutStep-vod25)+1n))
+.meas tran errmax MAX abs(VoutStep-V(von,vop)) FROM={tstep+Tsettle} TO={tstop}
+.meas tran Abfloor PARAM 20*log10(VoutStep/(errmax+1n))
+.meas tran Iset AVG -I(Vdd) FROM={tstep} TO={tstep+Tsettle}
+.meas tran Iq AVG -I(Vdd) FROM={tstep-5n} TO={tstep}
+.meas tran P_mW PARAM 1.8*max(Iset,Iq)*1e3
+.end

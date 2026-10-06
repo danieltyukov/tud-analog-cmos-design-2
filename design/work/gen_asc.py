@@ -165,7 +165,9 @@ def build(analysis: str) -> str:
     # ======================================================================= Stage 1 (center)
     XA, XB, XC = 2240, 2752, 2496
     s.box(2080, 224, 2912, 1600, "Stage 1 (complementary input)")
-    mtp = s.pmos("Mtp", XC, 400, "left", mos2("Lt", "Wt", "Mt"))
+    amp_txt = (WORK / "amp.inc").read_text()
+    tail_w = "Wt*tsc" if re.search(r"(?m)^\.param[^\n]*\btsc=", amp_txt) else "Wt"   # stage-1 current scale
+    mtp = s.pmos("Mtp", XC, 400, "left", mos2("Lt", tail_w, "Mt"))
     s.flag(mtp["S"], "vdd"); s.flag(mtp["B"], "vdd"); s.flag(mtp["G"], "vbp")
     s.wire(mtp["D"], (XC, 560))
     s.wire((XA, 560), (XB, 560))                                   # ntp
@@ -205,8 +207,9 @@ def build(analysis: str) -> str:
                    ((XB, 1104), "na2"), ((XC, 1296), "ntn")):
         s.flag(pt, nm)
     # C1d across the two stage-1 outputs
-    c1d = s.cap_h("C1d", XC - 32, 928, "{C1d}")
-    s.wire((XA, 928), c1d["B"]); s.wire(c1d["A"], (XB, 928))
+    if re.search(r"(?m)^C1d\s", amp_txt):   # optional damping cap between the stage-1 outputs
+        c1d = s.cap_h("C1d", XC - 32, 928, "{C1d}")
+        s.wire((XA, 928), c1d["B"]); s.wire(c1d["A"], (XB, 928))
 
     # ======================================================================= Stage 2 + compensation, side a (left)
     def out_stage(side):

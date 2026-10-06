@@ -39,8 +39,8 @@
 \draw (Mtn.S) node[ground]{} (Mtc.S) node[ground]{};
 \draw (Mtn.G) -- ++(-0.3,0) node[left]{$v_{bn}$\,\Vtag{vbn}};
 \draw (Mtc.G) -- ++(0.3,0) node[right]{$v_{cmfb}$\,\Vtag{vcmfb}};
-% v1 nodes and the damping capacitor between them
-\draw (\xa,\yv) coordinate(v1n) to[C, l_={$C_{1d}$}, *-*] (\xb,\yv) coordinate(v1p);
+% v1 nodes (stage-1 outputs)
+\draw (\xa,\yv) node[circ]{} coordinate(v1n) (\xb,\yv) node[circ]{} coordinate(v1p);
 % ---------------------------------------------------------------- stage 2, side A (left) and side B (right)
 \draw (\xoa,-1.0) node[pmos,xscale=-1](Mop1){};
 \draw (\xob,-1.0) node[pmos](Mop2){};
@@ -73,11 +73,11 @@
 \node[anchor=north west,font=\scriptsize,align=left] at ($(Mtc.center)+(0.35,-0.3)$) {$M_{tc}$\\\Itag{mtc}};
 \dr{Mop1}{$M_{op1}$}{mop1} \dl{Mop2}{$M_{op2}$}{mop2} \dr{Mon1}{$M_{on1}$}{mon1} \dl{Mon2}{$M_{on2}$}{mon2}
 \def\vt#1#2#3{\node[anchor=#2,font=\scriptsize] at (#1) {#3};}
-\vt{ntp}{south west}{$n_{tp}$\,\Vtag{ntp}} \vt{ntn}{north west}{$n_{tn}$\,\Vtag{ntn}}
+\vt{ntp}{south west}{$n_{tp}$\,\Vtag{ntp}} \node[anchor=north west,font=\scriptsize] at (0.82,-9.6) {$n_{tn}$\,\Vtag{ntn}};
 \vt{nb1}{south west}{\Vtag{nb1}} \vt{nb2}{south east}{\Vtag{nb2}}
 \vt{na1}{south west}{\Vtag{na1}} \vt{na2}{south east}{\Vtag{na2}}
 \vt{v1n}{north east}{$v_{1n}$\,\Vtag{v1n}} \vt{v1p}{north west}{$v_{1p}$\,\Vtag{v1p}}
-\vt{gp1}{south west}{$g_{p1}$\,\Vtag{gp1}} \vt{gp2}{south east}{$g_{p2}$\,\Vtag{gp2}}
+\vt{gp1}{north west}{$g_{p1}$\,\Vtag{gp1}} \vt{gp2}{north east}{$g_{p2}$\,\Vtag{gp2}}
 \node[font=\scriptsize,anchor=north east] at (\xoa-0.6,\yv) {\Vtag{von}};
 \node[font=\scriptsize,anchor=north west] at (\xob+0.6,\yv) {\Vtag{vop}};
 \end{circuitikz}

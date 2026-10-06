@@ -7,17 +7,17 @@
 *
 .param Ib=9.0u                                 ; bias unit current (all bias currents are fixed multiples)
 .param Lip=0.25u Wip=7u Mip=3                  ; input PMOS
-.param Lin=1u Win=8.3u Min=2                   ; input NMOS
+.param Lin=0.995u Win=8.3u Min=2                   ; input NMOS
 .param Lt=0.5u Wt=5u Mt=5                      ; top PMOS tail (unit mirrors Mbp)
-.param Ltn=1u Wtn=4u Mtn=3 Mtc=1               ; bottom NMOS tail: Mtn units on vbn, Mtc units on the CMFB line
-.param Lcp=0.36u Wcp=8.5u Mcp=1                ; PMOS cascodes
-.param Lcn=0.36u Wcn=8.5u Mcn=1                 ; NMOS cascodes
-.param Lon=0.36u Won=2u Mon=1                  ; output NMOS
-.param Lop=0.25u Wop=12u Mop=2                  ; output PMOS (unit mirrors Mbo)
-.param Cc=0.443p Cls=0.52p Rb=3Meg C1d=2.5f fcc=0.61
+.param Ltn=1u Wtn=7.94u Mtn=3 Mtc=1               ; bottom NMOS tail: Mtn units on vbn, Mtc units on the CMFB line
+.param Lcp=0.36u Wcp=8.75u Mcp=1                ; PMOS cascodes
+.param Lcn=0.36u Wcn=11.66u Mcn=1                 ; NMOS cascodes
+.param Lon=0.36u Won=1.46u Mon=1                  ; output NMOS
+.param Lop=0.25u Wop=12.97u Mop=2                  ; output PMOS (unit mirrors Mbo)
+.param Cc=0.389p Cls=0.63p Rb=3Meg fcc=0.706
 .param Rcm=2Meg Ccm=50f
-.param Lcm=0.5u Wcm=4u Wctl=3u Wc3=1u
-.param knr=0.75 kn={knr*Mt/Mtn} ko=0.64 kcn=0.6 kcp=0.5
+.param Lcm=0.5u Wcm=4u Wctl=1.645u Wc3=1u
+.param tsc=0.686 knr=0.6 kn={knr*Mt*tsc/Mtn} ko=0.505 kcn=0.6 kcp=0.521
 .param Wbcn=0.4u Lbcn=4u Wbcp=1u Lbcp=4u
 .param Cbig=10n
 *
@@ -39,7 +39,7 @@ Cb4 vcn 0 {Cbig}
 Cb5 vcp 0 {Cbig}
 *
 * ---- stage 1: complementary stacked input ----
-Mtp  ntp vbp vdd vdd pch L={Lt} W={Wt} m={Mt}
+Mtp  ntp vbp vdd vdd pch L={Lt} W={Wt*tsc} m={Mt}
 M1p  nb1 vin ntp ntp pch L={Lip} W={Wip} m={Mip}
 M2p  nb2 vip ntp ntp pch L={Lip} W={Wip} m={Mip}
 Mcp1 v1n vcp nb1 vdd pch L={Lcp} W={Wcp} m={Mcp}
@@ -66,7 +66,6 @@ Cc1 von na1 {fcc*Cc}
 Cc2 vop na2 {fcc*Cc}
 Cc3 von nb1 {(1-fcc)*Cc}
 Cc4 vop nb2 {(1-fcc)*Cc}
-C1d v1n v1p {C1d}
 *
 * ---- CMFB ----
 Rcm1 vop vcms {Rcm}

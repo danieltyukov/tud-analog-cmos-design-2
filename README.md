@@ -9,7 +9,7 @@ Resit deadline **Sun 8 Nov 2026, 23:59**.
 |---|---|
 | 1 (June 2026, `legacy/attempt-1-2026-06/`) | 2.04 mW, settling missed at 25 ns, **3.5 (fail)** |
 | reference (`example/`, a friend's design) | 1.24 mW, all specs met, 7.5 |
-| **resit (this repo)** | **0.2375 mW, all specs met** (report and form values ready, not yet submitted) |
+| **resit (this repo)** | **0.1918 mW, all specs met** (report and form values ready, not yet submitted) |
 
 ## Final result
 
@@ -18,12 +18,13 @@ Measured by `tools/evaluate.py` on the drawn schematics `design/final/amp_tran.a
 
 | Quantity | Value |
 |---|---|
-| Power (1.8 V × I(Vdd), max of quiescent and 25 ns window average) | 0.2375 mW (0.1320 mA) |
-| SNR (amplifier noise 10 kHz to 100 GHz plus 42 kT/Cin) | 66.21 dB |
-| Aβ / A at 25 ns | 66.76 dB / 81.59 dB |
-| Settling time, τ = T38.6dB − T30dB | 24.48 ns, 1.792 ns |
-| FoM | 6.403e-19 J, 181.94 dB |
-| Output step (differential), Cin = Cload, Cfb | 1.4 V, 1.66 pF, 0.415 pF |
+| Power (1.8 V × I(Vdd), max of quiescent and 25 ns window average) | 0.1918 mW (0.10654 mA) |
+| SNR (amplifier noise 10 kHz to 100 GHz plus 42 kT/Cin) | 66.08 dB |
+| Aβ / A at 25 ns | 69.34 dB / 84.27 dB |
+| Settling time, τ = T38.6dB − T30dB | 22.29 ns, 1.641 ns |
+| FoM | 4.878e-19 J, 183.12 dB |
+| Output step (differential), Cin = Cload, Cfb | 1.478 V, 1.43 pF, 0.3575 pF |
+| Common mode: input, output | 0.811 V, 0.899 V |
 
 The complete 22-row table is page 2 of the report; the same values are in `results/latest.json`
 (generated, not tracked) and in `report/generated/results.tex`.
@@ -36,15 +37,24 @@ Two-stage amplifier, no gain boosting:
   both gates on the summing node) with PMOS and NMOS cascodes. One current produces both transconductances,
   which halves the stage-1 current for the needed gm and removes load-device noise.
 - **Compensation:** current buffers. Cc is split between the NMOS-cascode and PMOS-cascode sources, so there
-  is no right-half-plane zero and no nulling resistor; a small cap between the two stage-1 outputs sets the damping.
+  is no right-half-plane zero and no nulling resistor.
 - **Stage 2:** class-AB push-pull. The NMOS is driven directly, the PMOS through a level-shift capacitor whose
   DC is set by a 3 MΩ resistor from a bias line, so the slewing current is not limited by quiescent current.
 - **CMFB:** continuous time. 2 MΩ ∥ 50 fF output-CM sense, PMOS pair against vcmr, diode mirror into part of the
   NMOS tail.
 - **Bias:** separate block on Vddb (excluded from power), reference currents as fixed multiples of one unit,
   every line decoupled with 10 nF.
+- **Input common mode 0.811 V** (the FAQ leaves it free): below the output CM, which moves spare headroom from the
+  PMOS input pair to the NMOS input pair.
+- **Output step 1.478 V:** at a fixed SNR, Cin scales as 1/V², so the load charge falls as 1/V. The step is the
+  largest at which every transistor stays saturated with the step applied, in both polarities.
 
-The design history (budget, experiments, dead ends, power trajectory 0.43 to 0.2375 mW) is in `PROGRESS.md`.
+The design history (budget, experiments, dead ends, power trajectory 0.43 to 0.1918 mW) is in `PROGRESS.md`.
+A literature pass over IEEE Xplore (class-AB residue amplifiers, slew-rate enhancement, current-buffer
+compensation, settling-driven design) is summarised in `reference/papers/NOTES-resit-2026-10.md`; it led to the
+lower input common mode and the later optimisation rounds (0.2375 to 0.1918 mW). An architecture-level survey
+(ring amplifiers, floating-inverter amplifiers, compensation and output-stage alternatives against the assignment
+rules) is in `reference/papers/ARCH-SURVEY-2026-10.md`.
 
 ## Rerunning the simulations
 
@@ -87,7 +97,7 @@ The resit was run by a Claude Code agent with a purpose-built harness (`KICKOFF.
 | `brief/` | assignment PDF, FAQ, TA clarifications, distilled `spec.md`, `lessons.md`, `design-strategy.md` |
 | `tools/` | Python (uv) tooling around LTspice XVII: runner, metrics, judge, robustness, optimizer, gm/ID, lint, report macros |
 | `design/final/` | drawn deliverable schematics, portable model copy, equivalence reference netlist |
-| `design/work/` | netlist benches (`amp.inc` shared by tran, noise and loop benches), schematic generator, archived single-pair design |
+| `design/work/` | netlist benches (`amp.inc` shared by tran, noise and loop benches), schematic generator, archived earlier versions (`archive_*`) and optimiser rounds |
 | `report/` | 8-page LaTeX report, CircuiTikZ D2/D3 drawings, generated values and figures |
 | `.claude/` | project settings (permissions, hooks), skills, subagents |
 | `.mcp.json` | `ltspice-asc` MCP server for drawing and verifying `.asc` schematics |
