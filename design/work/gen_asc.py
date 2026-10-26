@@ -18,6 +18,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 WORK = REPO / "design" / "work"
 FINAL = REPO / "design" / "final"
+MARK = ((-64, 128), (4992, 2800))   # report figures: top-left and bottom-right marker points (outside everything)
+# report figures: crop windows (sheet coordinates) of the blocks
+CROPS = {"amp": (1880, 230, 3752, 1300), "cmfb": (3864, 230, 4920, 1110), "bias": (-8, 230, 1704, 1250)}
 
 
 class Sheet:
@@ -28,6 +31,7 @@ class Sheet:
         self.texts: list[str] = []
         self.rects: list[str] = []
         self.pin_dirs: dict[tuple[int, int], tuple[int, int]] = {}   # pin point -> outward unit vector
+        self.probes: list[tuple] = []                                     # report figures only: .op data labels
 
     def pins(self, d: dict, dirs: dict) -> dict:
         for k, v in d.items():
@@ -58,6 +62,18 @@ class Sheet:
             self.wire(p, q)
             p = q
         self.flags.append((p[0], p[1], name))
+
+    def probe(self, kind, node, expr, to=None):
+        """Report figures only: an LTspice .op data label ("v" for D2, "i" for D3) at `node`, or at the end of a
+        short drawn leader from `node` to `to` (the leader joins the same net, so the circuit is unchanged)."""
+        path = [node] + (list(to) if isinstance(to, list) else [to] if to is not None else [])
+        self.probes.append((kind, path, expr))
+
+    def vprobe(self, node, net, to=None):
+        self.probe("v", node, f"round(V({net})*1e3)*1m", to)
+
+    def iprobe(self, node, dev, to=None):
+        self.probe("i", node, f"round(abs(I{'d' if dev[0] in 'Mm' else ''}({dev}))*1e7)*100n", to)
 
     def text(self, x, y, s, size=2, directive=False):
         self.texts.append(f"TEXT {x} {y} Left {size} {'!' if directive else ';'}{s}")
@@ -137,12 +153,29 @@ class Sheet:
             out += [(a[0], a[1], b[0], b[1]) for a, b in zip(chain, chain[1:])]
         self.wires = out
 
-    def render(self, w=5200, h=3400):
+    def render(self, w=5200, h=3400, figure=None):
+        probes = [p for p in self.probes if p[0] == figure] if figure else []
+        for _, path, _ in probes:       # leaders exist only in the report figures
+            if len(path) > 1:
+                self.wire(*path)
         self.split_wires()
         out = ["Version 4", f"SHEET 1 {w} {h}"]
         out += [f"WIRE {a} {b} {c} {d}" for a, b, c, d in self.wires]
         out += [f"FLAG {x} {y} {n}" for x, y, n in self.flags]
-        out += self.lines + self.rects + self.texts
+        lines = self.lines
+        if figure:  # hide model names and R/C parameter names; the captions give the values
+            lines = []
+            for l in self.lines:
+                lines.append(l)
+                if l.startswith(("SYMBOL nmos4", "SYMBOL pmos4", "SYMBOL res", "SYMBOL cap")):
+                    lines.append("WINDOW 3 0 0 Invisible 2")
+                if l.startswith("SYMBOL nmos4"):
+                    lines.append("WINDOW 0 56 8 Left 2")
+            out += [f'DATAFLAG {path[-1][0]} {path[-1][1]} "{e}"' for _, path, e in probes]
+            # corner markers: tools/ltgui.py maps sheet coordinates to screen pixels from them
+            out += [f"LINE Normal {MARK[0][0]} {MARK[0][1]} {MARK[0][0] + 16} {MARK[0][1]} 2",
+                    f"LINE Normal {MARK[1][0] - 16} {MARK[1][1]} {MARK[1][0]} {MARK[1][1]} 2"]
+        out += lines + self.rects + self.texts
         return "\n".join(out) + "\n"
 
 
@@ -160,8 +193,13 @@ def mos(L, W, M):
     return f"l={{{L}}} w={{{W}}} m={m}"
 
 
-def build(analysis: str) -> str:
+def build(analysis: str, figure: str | None = None) -> str:
+    """analysis "tran" or "noise"; figure "v" (D2 node voltages) or "i" (D3 currents) builds a report-figure copy
+    of the transient sheet with LTspice .op data labels (not a deliverable)."""
     s = Sheet()
+
+    def idev(ref, pins, gate):
+        """(unused) D3 labels are branch leaders, placed per block below."""
     TOP, BOT = 224, 1600                       # block row
     # ======================================================================= Bias block (left)
     s.box(0, TOP, 1696, BOT, "Bias block: replica of the stage-1 half circuit (on Vddb, Cbig decoupling)")
@@ -192,6 +230,8 @@ def build(analysis: str) -> str:
     s.wire(mbp0["G"], (64, mbp0["G"][1]), (64, 704), (x, 704))          # self-cascode: tail gate = vbpr
     decouple((x, 704), "RD1", "CD1", "vbp", 240)
     s.flag((x, 528), "bp0"); s.flag((x, 704), "vbpr")
+    s.vprobe((x, 528), "bp0", to=(x - 64, 528)); s.vprobe((368, 704), "vbp", to=(432, 704))
+    s.iprobe((x, 848), "IBNP", to=(x - 64, 848))
     s.text(x - 160, 1040, "P replica: tail unit + input unit", size=1)
 
     # N replica: Ibnp into NMOS cascode unit + load unit, load gate from the cascode drain (vbnr)
@@ -207,6 +247,8 @@ def build(analysis: str) -> str:
     s.wire(mbn7["G"], (512, mbn7["G"][1]), (512, 528), (x, 528))         # load gate = cascode drain
     decouple((x, 528), "RD2", "CD2", "vbn", 688)
     s.flag((x, 528), "vbnr"); s.flag((x, 688), "bn5")
+    s.vprobe((816, 528), "vbn", to=(880, 528)); s.vprobe((x, 688), "bn5", to=(x + 64, 688))
+    s.iprobe((x, 496), "IBNN", to=(x - 64, 496))
     s.text(x - 128, 1040, "N replica: cascode unit + load unit", size=1)
 
     # Vcn: diode-connected NMOS fed by Ibcn = kcn*Ibnp
@@ -219,6 +261,7 @@ def build(analysis: str) -> str:
     s.flag(mbn3["S"], "0"); s.flag(mbn3["B"], "0")
     decouple((x, 528), "RD3", "CD3", "vcn", 1120)
     s.flag((x, 528), "vcnr")
+    s.vprobe((1248, 528), "vcn", to=(1312, 528)); s.iprobe((x, 496), "IBCN", to=(x - 64, 496))
 
     # Vcp: diode-connected PMOS sinking Ibcp = kcp*Ibnp
     x = 1056
@@ -230,6 +273,7 @@ def build(analysis: str) -> str:
     s.wire(mbp3["G"], (976, mbp3["G"][1]), (976, 1024), (x, 1024))
     decouple((x, 1024), "RD4", "CD4", "vcp", 1120)
     s.flag((x, 1024), "vcpr")
+    s.vprobe((1248, 1024), "vcp", to=(1312, 1024)); s.iprobe((x, 1056), "IBCP", to=(x - 64, 1056))
     s.text(912, 1360, "cascode gates (EE4520 fig. 6: Ibcn, Ibcp)", size=1)
 
     # ======================================================================= Stage 1 (center)
@@ -271,6 +315,15 @@ def build(analysis: str) -> str:
     for pt, nm in (((XC, 560), "tail"), ((XA, 752), "a1p"), ((XB, 752), "a1n"), ((XA, 912), "x1p"),
                    ((XB, 912), "x1n"), ((XA, 1072), "b1p"), ((XB, 1072), "b1n")):
         s.flag(pt, nm)
+    s.vprobe((2688, 560), "tail")
+    s.vprobe((2480, 640), "vip", to=(2480, 592)); s.vprobe((3152, 640), "vin", to=(3152, 592))
+    s.vprobe((XA, 752), "a1p", to=(XA - 96, 752)); s.vprobe((XB, 752), "a1n", to=(XB + 96, 752))
+    s.vprobe((2480, 912), "x1p"); s.vprobe((3152, 912), "x1n")
+    s.vprobe((2672, 1072), "b1p"); s.vprobe((2960, 1072), "b1n")
+    s.iprobe((XC, 528), "M0", to=(XC + 64, 528))                                    # tail
+    s.iprobe((XA, 736), "M1", to=(XA + 64, 736)); s.iprobe((XB, 736), "M2", to=(XB - 64, 736))   # M1 = M3 = M5
+    s.iprobe((XA, 1224), "M7", to=(XA - 64, 1224)); s.iprobe((XB, 1224), "M8", to=(XB + 64, 1224))
+    s.iprobe((XA + 176, 1088), "M7C", to=(XA + 144, 1088)); s.iprobe((XB - 176, 1088), "M8C", to=(XB - 144, 1088))
 
     # ======================================================================= Stage 2 + compensation (both sides)
     def out_stage(side):
@@ -310,6 +363,11 @@ def build(analysis: str) -> str:
             s.wire((XL, yc), cc["B"]); s.wire(cc["A"], rz["B"]); s.wire(rz["A"], (XO, yc))
             s.flag(cc["A"], "zn")
         s.flag((XL, mpd["G"][1]), f"gp{k}")
+        s.vprobe((XL, 480), f"gp{k}", to=(XL - sgn * 64, 480))
+        s.vprobe((XO, 800), out, to=(XO - sgn * 64, 800))
+        zx = (rz["A"][0] + cc["B"][0]) // 2 if side == "p" else (cc["A"][0] + rz["B"][0]) // 2
+        s.vprobe((zx, yc), "zp" if side == "p" else "zn", to=(zx, yc + 64))
+        s.iprobe((XO, 704), mp, to=(XO - sgn * 64, 704))
 
     out_stage("p")
     out_stage("n")
@@ -349,6 +407,12 @@ def build(analysis: str) -> str:
     s.wire((xp1, 896), (xp1 - 192, 896))
     s.flag((xp1 - 192, 896), "vcmfb")
     s.flag((xs, 560), "vcms"); s.flag((xm, 576), "cmt"); s.flag((xp2, 896), "cmd")
+    s.vprobe((xs + 64, 608), "vcms", to=(xs + 128, 608)); s.vprobe((xm + 72, 576), "cmt")
+    s.vprobe((xp2 - 56, 896), "cmd"); s.vprobe((xp1 - 104, 896), "vcmfb")
+    s.vprobe((mc0["G"][0] - 32, mc0["G"][1]), "vbp", to=(mc0["G"][0] - 32, mc0["G"][1] - 64))
+    s.vprobe((mc2["G"][0] + 32, mc2["G"][1]), "vcmr", to=(mc2["G"][0] + 32, mc2["G"][1] - 64))
+    s.iprobe((xm, 528), "MC0", to=(xm + 64, 528))
+    s.iprobe((xp1, 800), "MC1", to=(xp1 - 64, 800)); s.iprobe((xp2, 800), "MC2", to=(xp2 + 64, 800))
 
     # ======================================================================= Test bench (left, bottom)
     s.box(0, 1712, 2240, 2640, "Fixed test bench (Cin/Cfb = 4, Cload = Cin)")
@@ -387,15 +451,27 @@ def build(analysis: str) -> str:
     for line in bench.read_text().splitlines():
         if line.strip().lower().startswith(keep):
             dirs.append(line.strip())
+    if figure:  # .op data labels need the operating point that a transient run writes; no measurements
+        dirs = [".tran 0 1n 0 10p" if d.lower().startswith(".tran") else d for d in dirs
+                if not d.lower().startswith(".meas")]
     y = 1808
     for d in dirs:
         s.text(2432, y, d, directive=True)
         y += 40
     s.box(2400, 1712, 4912, y + 32, "Parameters, Simulations & Measurements")
-    return s.render(h=max(2700, y + 100))
+    return s.render(h=max(2700, y + 100), figure=figure)
 
 
 def main():
+    import sys
+
+    if sys.argv[1:2] == ["--figures"]:  # report D2/D3 copies with .op data labels (tools/ltgui.py uses these)
+        out = Path(sys.argv[2])
+        out.mkdir(parents=True, exist_ok=True)
+        for fig, name in (("v", "amp_d2.asc"), ("i", "amp_d3.asc")):
+            (out / name).write_text(build("tran", figure=fig))
+            print("wrote", out / name)
+        return
     FINAL.mkdir(parents=True, exist_ok=True)
     for a, name in (("tran", "amp_tran.asc"), ("noise", "amp_noise.asc")):
         (FINAL / name).write_text(build(a))

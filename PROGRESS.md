@@ -2,16 +2,15 @@
 
 ## Current state
 
-Phase: DONE (P8), final verification pass complete. Final design pp06 = design/final/amp_{tran,noise}.asc (gen_asc.py from
-design/work; verify_circuit equivalent, 65 components, 35 nets, 0 findings; lint 0/0). evaluate --tag final --publish on
-the .asc: ALL PASS, P 0.5447 mW (I(Vdd) 0.3026 mA window, 0.2766 quiescent), SNR 66.20, Abeta 74.37, A 89.00, Ts 23.77 ns,
-tau 2.500 ns, FoM 176.87 dB (TA ceiling 177), first zero crossing 26.92 ns, min sat margin 94 mV. robust PASS.
-+-1 % on Cc, Rz0, Cls, Ibnp all pass (first crossing >= 25.46 ns). Params: Ibnp 6.4u, N 9, M2 11, Cc 0.77p, Rz0 1.2k,
-Cls 0.68p, Cin 2.15p, Vstep 1.2, loads L 2u; cascode-gate diodes now 0.25 um (kcn 6, kcp 4, W 0.34u/0.36u).
-Verified independently: KCL at all 34 nodes (< 15 pA), branch sums, I(Vdd) = stage 1 + stage 2 + CMFB, replica ratios
-exact (18/9/9 units), 37 report formulas recomputed (`tools/crosscheck.py all`). D4/D5 are LTspice GUI screenshots
-(`tools/ltgui.py all`), values from LTspice .meas. Report 8 pages; report/5714699.pdf = main.pdf.
-Open TA point by user choice: stage 2 uses one RC level shifter (TA suggested two); see README / final message.
+Phase: DONE (P8). Final design = design/final/amp_{tran,noise}.asc (gen_asc.py from design/work; verify_circuit
+equivalent, 65 components, 35 nets, 0 findings; lint 0/0). Ibnp 6.2 uA since 26 Oct (was 6.4): the lowest bias that
+still settles 0.3 ns before 25 ns with any one of Cc, Rz, Cls, Ibnp off by 1 % (6.1 uA leaves 0.1 ns).
+evaluate --tag final --publish on the .asc: ALL PASS, P 0.5295 mW (I(Vdd) 0.2942 mA window, 0.2680 quiescent),
+SNR 66.19, Abeta 72.88, A 87.44, Ts 24.08 ns, tau 2.527 ns, FoM 176.95 dB (TA line 177), first zero crossing 26.49 ns,
+min sat margin 91 mV. robust PASS. `tools/crosscheck.py all`: KCL OK, 42 formulas, 60 drawn D2/D3 values vs LTspice.
+D4/D5 are LTspice GUI screenshots (`tools/ltgui.py all`, values from LTspice .meas); LTspice-drawn D2/D3 copies with
+.op data labels are kept in report/figures/*_ltspice.png (not in the report: user keeps CircuiTikZ D2/D3).
+Report 8 pages; report/5714699.pdf = main.pdf. Open TA point by user choice: one RC level shifter (TA suggested two).
 
 ## Plan (tick a box only with tool evidence; add sub-steps as needed)
 
@@ -188,6 +187,25 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
   177.06 (reference at gm/ID 16.7) - 4.19 (38 % of current in the pair) - 3.29 (amplifier noise) + 7.29 (tau 2.500 vs
   13.4 ns single stage) = 176.87 dB. TOOL CHANGE report_extra.py (macros xFoMideal..xTauOne, M0 current from the op
   raw at full precision; xFoMdom dropped), crosscheck.py (6 new checks, 42/0). Page 8 tightened to stay 8 pages.
+- 2026-10-26 user: D4/D5 only from LTspice (D2/D3 stay CircuiTikZ). NEW in tools/ltgui.py `d2d3`: LTspice draws figure
+  copies of the deliverable sheet (gen_asc.py figure mode: .op data labels, leaders, hidden model names; deliverables
+  byte-identical; verify_circuit equivalent) -> report/figures/d2_*_ltspice.png, d3_*_ltspice.png kept for comparison
+  (not in the report). crosscheck.py `figures`: all 60 drawn D2/D3 values match the LTspice GUI operating point.
+  External review answered: no tau constraint in the optimizer (tau 2.5004 is a coincidence); the binding limits are
+  the TA FoM line and settling: Ibnp 6.0u passes every spec at 0.514 mW (-6 %) but Ts 24.50 ns and FoM 177.01 dB
+  (report_extra lower_bias, now stated on page 8). End gap 14.89 vs start 14.18 dB: the input pair's Cgd (14.6 fF)
+  couples the 0.415 mV shift of a1p-a1n into the summing node (11.3 uV predicted vs 10.6 uV residual). Page 2: e-fold
+  wording (8.69 dB) and the conservative power window stated; fc now 34.79 MHz (2 decimals, matches 4.58 ns).
+- 2026-10-26 second external review: the page 8 sentence "Ibnp 6.0 passes every spec, kept 6.4 for the FoM line" was
+  self-damaging (documents an unsubmitted better design; the TA's 176/177 dB is a plausibility warning: transcript
+  "maximum one seventy six ... or 77; if you get [higher] something is wrong"). Sweep Ibnp 6.4..5.8 with +-1 % on Cc,
+  Rz0, Cls, Ibnp (scratch ibnp_sweep.py): FoM barely moves (176.87..177.05) because tau stretches; the real limit is
+  robustness. 6.2 uA: 0.5295 mW (-2.8 %), FoM 176.95, worst +-1 % Ts 24.70 ns; 6.1 uA: Cc+1 % Ts 24.90 (past the
+  0.2 ns margin); 6.0 uA: Cc+ / Rz0+ miss 25 ns. Switched amp.inc to Ibnp 6.2u and regenerated everything (asc,
+  reference, evaluate --publish ALL PASS, robust PASS, report_extra, ltgui all, crosscheck all OK). Page 8 now gives
+  the robustness reason (report_extra `tolerance`), tau = 1/(2 pi fc) computed from the printed fc, page 2 cites the
+  TA clarification of 21 June for the FoM limits. TOOL CHANGE evaluate.py: items 2 and 3 (A, Abeta at 25 ns) from
+  LTspice's .meas A25/Ab25 (the plot's text box), raw interpolation as cross-check (abort if > 0.05 dB); selftest OK.
 
 ## Failed approaches (do not retry without a new reason)
 

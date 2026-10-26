@@ -10,7 +10,7 @@ designed and verified in LTspice. Specs: SNR ≥ 66 dB, Aβ ≥ 66 dB and A > 78
 | 1 (June 2026, `legacy-v1/attempt-1-2026-06/`) | 2.04 mW, settling missed at 25 ns, **3.5 (fail)** |
 | reference (`example/`, a friend's design) | 1.24 mW, all specs met, 7.5 |
 | 2 (Oct 2026, `legacy-v2/`, not submitted) | class-AB current-reuse design, 0.19 mW; dropped after the TA meeting of 12 Oct 2026: too complicated, FoM 183 dB implausible (course maximum about 176 to 177 dB), unusual settling curve, bias not a replica (`brief/ta-feedback-2026-10-12.md`) |
-| **3 (this design)** | **0.5447 mW, all specs met, FoM 176.87 dB** (report and form values ready, not yet submitted) |
+| **3 (this design)** | **0.5295 mW, all specs met, FoM 176.95 dB** (report and form values ready, not yet submitted) |
 
 ## Final result
 
@@ -20,11 +20,11 @@ Measured by `tools/evaluate.py` on the drawn schematics `design/final/amp_tran.a
 
 | Quantity | Value |
 |---|---|
-| Power (1.8 V × average I(Vdd) over the 25 ns after the step; Vdd feeds stage 1, stage 2 and the CMFB) | 0.5447 mW (0.3026 mA) |
-| SNR (amplifier noise 10 kHz to 100 GHz plus 42 kT/Cin for both halves) | 66.20 dB |
-| Aβ / A at 25 ns | 74.37 dB / 89.00 dB |
-| Settling time, τ = T38.6dB − T30dB | 23.77 ns, 2.500 ns |
-| FoM | 2.054e-18 J, 176.87 dB |
+| Power (1.8 V × average I(Vdd) over the 25 ns after the step; Vdd feeds stage 1, stage 2 and the CMFB) | 0.5295 mW (0.2942 mA) |
+| SNR (amplifier noise 10 kHz to 100 GHz plus 42 kT/Cin for both halves) | 66.19 dB |
+| Aβ / A at 25 ns | 72.88 dB / 87.44 dB |
+| Settling time, τ = T38.6dB − T30dB | 24.08 ns, 2.527 ns |
+| FoM | 2.020e-18 J, 176.95 dB |
 | Output step (differential), Cin = Cload, Cfb | 1.2 V, 2.15 pF, 0.5375 pF |
 
 The complete 22-row table is page 2 of the report; the same values are in `results/latest.json`
@@ -50,8 +50,9 @@ The simple two-stage structure the TA recommended, no gain boosting:
   current (EE4520 fig. 6). Every line is
   decoupled with 1 kΩ and 10 nF.
 
-The settling is linear: a 1 % output step gives about the same τ (2.59 ns) as the full step (2.50 ns), the first zero crossing
-of the error is at 26.9 ns, and the loop has fc 34.8 MHz with 80° phase margin. The design history (budget,
+The settling is linear: a 1 % output step gives about the same τ (2.60 ns) as the full step (2.53 ns), the first zero crossing
+of the error is at 26.5 ns, and the loop has fc 33.75 MHz with 79.9° phase margin. The bias (Ibnp 6.2 µA) is the
+lowest at which the design still settles 0.3 ns before 25 ns with any one of Cc, Rz, Cls or Ibnp 1 % off. The design history (budget,
 experiments, optimiser runs, dead ends) is in `PROGRESS.md`.
 
 ## Rerunning the simulations

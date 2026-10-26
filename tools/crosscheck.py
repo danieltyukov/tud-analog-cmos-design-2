@@ -234,9 +234,45 @@ def formulas() -> int:
     return 1 if bad else 0
 
 
+# ----------------------------------------------------------------------------- D2/D3 drawings vs LTspice
+
+
+def figures() -> int:
+    """Every node voltage and drain current printed in the D2/D3 drawings (report/generated/opvals.tex) against the
+    operating point of the LTspice GUI run that draws the same circuit with .op data labels (tools/ltgui.py d2d3)."""
+    raw_p = REPO / "results" / "ltgui" / "schem" / "amp_d2.op.raw"
+    if not raw_p.exists():
+        print("run `uv run tools/ltgui.py d2d3` first")
+        return 1
+    raw = M.Raw(raw_p)
+    txt = (REPO / "report" / "generated" / "opvals.tex").read_text()
+    unit = {"V": 1.0, "mV": 1e-3, "$\\mu$A": 1e-6, "\\textmu A": 1e-6, "mA": 1e-3, "nA": 1e-9, "A": 1.0}
+    bad = n = 0
+    for kind, name, val in re.findall(r"csname op([vi])@([a-z0-9]+)\\endcsname\{([^}]*)\}", txt):
+        m = re.match(r"\s*([-+0-9.]+)\s*\\,\s*(.+?)\s*$", val)
+        if not m:
+            continue
+        num, u = m.group(1), m.group(2)
+        shown = float(num) * unit.get(u, math.nan)
+        trace = f"V({name})" if kind == "v" else f"Id({name.upper()})"
+        if not raw.has(trace):
+            continue
+        sim = float(raw[trace][0].real)
+        if kind == "i":
+            sim = abs(sim)
+        half = 0.5 * 10 ** (-len(num.split(".")[1])) * unit.get(u, math.nan) if "." in num else 0.5 * unit.get(u, 1)
+        ok = abs(shown - sim) <= half * 1.0001
+        bad += not ok
+        n += 1
+        if not ok:
+            print(f"[BAD] {trace:10s} drawn {val:16s} LTspice {sim:.6g}")
+    print(f"figures: {n} drawn values checked against the LTspice GUI operating point, {bad} problem(s)")
+    return 1 if bad else 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("what", choices=["kcl", "formulas", "all"])
+    ap.add_argument("what", choices=["kcl", "formulas", "figures", "all"])
     ap.add_argument("--asc", type=Path, default=REPO / "design" / "final" / "amp_tran.asc")
     a = ap.parse_args(argv)
     rc = 0
@@ -244,6 +280,8 @@ def main(argv=None) -> int:
         rc |= kcl(a.asc)
     if a.what in ("formulas", "all"):
         rc |= formulas()
+    if a.what in ("figures", "all"):
+        rc |= figures()
     return rc
 
 

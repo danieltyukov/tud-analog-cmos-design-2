@@ -118,6 +118,31 @@ def long_tran(t_ns: float = 2000.0) -> float:
     return 20 * math.log10(vstep / (abs(float(e[-1])) + 1e-9))
 
 
+def tolerance(ibnp: float) -> tuple[float, str]:
+    """Worst settling time when one of Cc, Rz, Cls or Ibnp is 1 % off (the margin that sets the bias, page 8)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    base = lt.set_params(lt.read_text(FINAL / "amp_tran.net"), {"Ibnp": f"{ibnp:.6g}"})
+    p0 = M.net_params(FINAL / "amp_tran.net")
+    nom = {"Cc": p0["cc"], "Rz0": p0["rz0"], "Cls": p0["cls"], "Ibnp": ibnp}
+    OUT.mkdir(parents=True, exist_ok=True)
+
+    def one(job):
+        k, s = job
+        n = OUT / f"tol_{ibnp*1e9:.0f}n_{k}{'p' if s > 0 else 'm'}.net"
+        n.write_text(lt.set_params(base, {k: f"{nom[k] * (1 + 0.01 * s):.6g}"}))
+        r = lt.run(n)
+        if not (r["ok"] and r["raw"]):
+            raise SystemExit(f"tolerance run failed: {r['errors']}")
+        m = M.tran_metrics(r["raw"], n)
+        Path(r["raw"]).unlink(missing_ok=True)
+        return max(m["Tsettle_A_ns"], m["Tsettle_Abeta_ns"]), k
+
+    with ThreadPoolExecutor(8) as ex:
+        res = list(ex.map(one, [(k, s) for k in nom for s in (-1, 1)]))
+    return max(res)
+
+
 def dev_tex(name: str) -> str:
     """m7c -> M_{7C}, mbp0 -> M_{BP0}."""
     return "M_{" + name[1:].upper() + "}"
@@ -158,6 +183,10 @@ def main(argv=None) -> int:
     smarg, sname = min((smp, snp), (smn, snn))
     omarg, oname = min(outp, outn)
     ab_long = long_tran()
+    p_bias = M.net_params(FINAL / "amp_tran.net")["ibnp"]
+    tol_ts, _ = tolerance(p_bias)
+    next_ib = round(p_bias * 1e6 - 0.1, 1) * 1e-6
+    tol_next_ts, tol_next_dev = tolerance(next_ib)
     pp = M.net_params(FINAL / "amp_tran.net")
 
     # transient: CM excursion, error kick, EE4520-style tau (40 to 48.69 dB)
@@ -236,9 +265,9 @@ def main(argv=None) -> int:
     m1, m9, m11 = devs["m1"], devs["m9"], devs["m11"]
     rz = pp["rz0"] * (20 / pp["m2"]) * ((pp["cc"] + 1.2 * pp["cin"]) / pp["cc"]) / 4
     macros = {
-        "xFc": f"{mid['fc_Hz']/1e6:.1f}", "xPM": f"{mid['PM_deg']:.1f}", "xGM": f"{mid.get('GM_dB', math.nan):.1f}",
+        "xFc": f"{mid['fc_Hz']/1e6:.2f}", "xPM": f"{mid['PM_deg']:.1f}", "xGM": f"{mid.get('GM_dB', math.nan):.1f}",
         "xTzero": f"{mid['T0_dB']:.1f}", "xTzeroExt": f"{ext['T0_dB']:.1f}", "xFcExt": f"{ext['fc_Hz']/1e6:.1f}",
-        "xPMExt": f"{ext['PM_deg']:.1f}", "xTauWc": f"{1e9/wc:.2f}", "xTauTwoPole": f"{tau_2p*1e9:.2f}",
+        "xPMExt": f"{ext['PM_deg']:.1f}", "xTauWc": f"{1e3/(2*math.pi*round(mid['fc_Hz']/1e6, 2)):.2f}", "xTauTwoPole": f"{tau_2p*1e9:.2f}",
         "xCMfc": f"{cm['fc']/1e6:.1f}", "xCMpm": f"{cm['pm']:.0f}", "xCMtzero": f"{cm['T0']:.1f}",
         "xCMexc": f"{abs(dev[k][i_pk])*1e3:.1f}", "xCMexcT": f"{(t[k][i_pk]-t0)*1e9:.1f}",
         "xCMexcTf": f"{abs(float(np.interp(t0 + 25e-9, t, dev)))*1e3:.1f}", "xVcm": f"{c0:.3f}",
@@ -266,6 +295,9 @@ def main(argv=None) -> int:
         "xGmIdIn": f"{m1['gm_id']:.1f}", "xIdTwo": f"{abs(m9['Id'])*1e6:.1f}", "xGmNine": f"{m9['Gm']*1e3:.3f}",
         "xGmEleven": f"{m11['Gm']*1e3:.3f}", "xGmIdNine": f"{m9['gm_id']:.1f}", "xGmIdEleven": f"{m11['gm_id']:.1f}",
         "xCp": f"{cp*1e15:.0f}",
+        "xTsSlack": f"{25 - tab[4]:.1f}", "xTolMargin": f"{25 - tol_ts:.1f}", "xTolNext": f"{next_ib*1e6:.1f}",
+        "xTolNextMargin": f"{25 - tol_next_ts:.1f}",
+        "xTolNextDev": {"Cc": "$C_c$", "Rz0": "$R_z$", "Cls": "$C_{ls}$", "Ibnp": "$I_{bnp}$"}[tol_next_dev],
         "xFoMideal": f"{fom1(25.0):.1f}", "xFoMone": f"{fom1(gmid1):.2f}", "xLcur": f"{l_cur:+.2f}",
         "xEtaCur": f"{100*i_pair/i_tot:.0f}", "xLnoise": f"{l_noise:+.2f}", "xGtau": f"{g_tau_disp:+.2f}",
         "xTauOne": f"{tau_1*1e9:.1f}",

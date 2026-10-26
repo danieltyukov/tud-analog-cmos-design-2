@@ -44,7 +44,7 @@ Cload2 von 0 {Cload}
 * ---- multipliers: N units per stage-1 half, stage-2 current = M2 tail units, CMFB ----
 .param N=9 Ncm=1 M2=11 Mcmt=2 Md=1
 * ---- bias block: one master current, fixed ratios (assignment: fixed Ibcn/Ibnp, Ibcp/Ibnp) ----
-.param Ibnp=6.4u kcn=6 kcp=4 Wbcn=0.34u Lbcn={Lcn} Wbcp=0.36u Lbcp={Lcp} Rdec=1k Cbig=10n
+.param Ibnp=6.2u kcn=6 kcp=4 Wbcn=0.34u Lbcn={Lcn} Wbcp=0.36u Lbcp={Lcp} Rdec=1k Cbig=10n
 * ---- compensation and CMFB ----
 * Rz tracks the p2-cancelling value (1/gm2)(Cc+CLeff)/Cc, normalised to Rz0*2 at M2 10, Cc 0.8p, Cin 2p
 .param Cc=0.77p Rz0=1.2k Rz={Rz0*(20/M2)*((Cc+1.2*Cin)/Cc)/4} Cls=0.68p Rb=2Meg Rcm=2Meg Ccm=50f Lcm=0.36u Wcm=8u

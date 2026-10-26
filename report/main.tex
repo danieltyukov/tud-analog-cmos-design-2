@@ -89,7 +89,8 @@ Item & Design item & Unit & Spec. & Achieved \\
 \small
 Both steps are differential: $\resVin$\,mV in and $\fpeval{round(\resVout,3)}$\,V out. Each output moves
 $\fpeval{round(\resVout/2,3)}$\,V around its \xVcm\,V common mode. \textbf{Power} is 1.8\,V times $I(V_{dd})$ averaged
-over the 25\,ns after the step (\xIwin\,$\mu$A; \xIq\,$\mu$A before it). $V_{dd}$ feeds every amplifier block: stage 1,
+over the 25\,ns after the step (\xIwin\,$\mu$A; \xIq\,$\mu$A before it). This is the conservative choice: the
+current before the step alone would give \dd[3]{1.8*\xIq/1000}\,mW. $V_{dd}$ feeds every amplifier block: stage 1,
 both halves of stage 2 and the CMFB amplifier. Only the bias block has its own supply, $V_{ddb}$, and it is not counted.
 \textbf{SNR} includes the $kT/C$ noise of both halves. Each output sees
 $kT C_{in}/C_{fb}^2 + kT/C_{fb} + kT/C_{load} = 21\,kT/C_{in}$, so the differential $kT/C$ noise is
@@ -101,8 +102,10 @@ as the FAQ allows). Then
 = 20\log_{10}\frac{\resVout\,\mathrm{V}/\sqrt{2}}{\sqrt{\resKTC^2 + \resVnAmp^2}\,\mu\mathrm{V}}
 = 20\log_{10}\frac{\dd[1]{\resVout/sqrt(2)*1e3}\,\mathrm{mV}}{\resVnTot\,\mu\mathrm{V}} = \resSNR\,\mathrm{dB}.
 \]
-$C_{CM}$ is the CMFB sense capacitor on each side, in parallel with $R_{cm} = \pRcm$\,M$\Omega$. $R_{big}$ is $R_{fb}$
-($R_{in} = R_{fb}/4$), and $C_{big}$ decouples each bias line. $\tau$ is one $e$-fold (8.6\,dB) of the $A\beta$ curve.
+The FoM limits in items 21 and 22 are from the TA clarification of 21 June 2026. $C_{CM}$ is the CMFB sense capacitor
+on each side, in parallel with $R_{cm} = \pRcm$\,M$\Omega$. $R_{big}$ is $R_{fb}$
+($R_{in} = R_{fb}/4$), and $C_{big}$ decouples each bias line. $\tau$ is the time $A\beta$ takes from 30 to 38.6\,dB, the
+course's approximation of one $e$-fold (8.69\,dB).
 \normalsize
 \clearpage
 
@@ -276,9 +279,9 @@ flicker falls only as $1/f^{0.825}$ and still matters inside the loop bandwidth.
 four times the $f_T$ of PMOS, so it loads $x_1$ least. Stage 2 is not pure class A: one RC level shifter ($C_{ls}$, $R_b$)
 also drives the PMOS current source from $x_1$. A pure class-A version, where only the PMOS bias current can pull the
 output up, still rang before 25\,ns at 1.04\,mW. With the coupling both devices amplify (\xGmNine\,mS + \xGmEleven\,mS)
-and the PMOS supplies the slewing current. Class-AB stages often get one level shifter per device so that neither gate
-can drift into cutoff. Here the NMOS gate is DC-coupled to $x_1$ and the CMFB holds $x_1$ near the replica's $v_{bn}$, so
-one shifter on the PMOS is enough; both devices stay in moderate inversion ($g_m/I_D = \xGmIdNine$ and \xGmIdEleven).
+and the PMOS supplies the slewing current. One level shifter is enough: the NMOS gate is DC-coupled
+to $x_1$, which the CMFB holds near the replica's $v_{bn}$, so neither device can drift into cutoff ($g_m/I_D = \xGmIdNine$
+and \xGmIdEleven).
 $R_z$ moves the Miller zero close to the second pole. The CMFB is continuous time: with only the amplification phase
 simulated, an SC CMFB would only add switches and output load. $R_{cm} \parallel
 C_{CM}$ sense the output CM, a PMOS pair compares it with $v_{cmr}$, and a diode drives \pNcm\ of the \pN\ load units per
@@ -293,34 +296,36 @@ takes \dd[0]{100*\resKTC^2/(\resKTC^2+\resVnAmp^2)}\,\% of the noise power ($C_{
 rest. The amplifier noise behaves as $\alpha kT/C_c$, so noise sets $C_c$ and speed sets the input pair:
 $g_{m1} = \xGmOne$\,mS per side (\xIdIn\,$\mu$A, $g_m/I_D = \xGmIdIn$, $L = \pLi\,\mu$m to keep $C_p$ small), with
 $f_c \approx \beta g_{m1}/(2\pi C_c)$. I tuned $I_{bnp}$, the unit counts, $C_c$, $R_z$, $C_{ls}$, $C_{in}$ and the swing
-together in a constrained power minimisation, keeping the first zero crossing after 25\,ns. Against 1/f noise the NMOS
-loads have $L = \pLl\,\mu$m (drain noise $\propto 1/L^2$); flicker is \xFlickShare\,\% of the total.
+together to minimise power. $A\beta$ is \resAbeta\,dB at 25\,ns only because the error heads for its zero crossing;
+in time the margin is \xTsSlack\,ns. I kept it on purpose: with any one of $C_c$, $R_z$, $C_{ls}$ or $I_{bnp}$ off by
+1\,\% the amplifier still settles \xTolMargin\,ns before the limit, while at $I_{bnp} = \xTolNext\,\mu$A a 1\,\% larger
+\xTolNextDev\ leaves only \xTolNextMargin\,ns. Against 1/f noise the NMOS
+loads have $L = \pLl\,\mu$m (drain noise $\propto 1/L^2$); flicker is \xFlickShare\,\% of the amplifier noise.
 
 \textbf{Noise devices and NEF.} The input pair gives \xNshIn\,\% of the amplifier noise power, the NMOS loads
 \xNshLoad\,\%, $R_z$ \xNshRz\,\% and the output stage \xNshStTwo\,\%. With $v_{n,amp}^2 = \mathrm{NEF}\cdot 2kT/(\beta C_{L,eff})$,
 $C_{L,eff} = C_{load} + (1-\beta)C_{fb} = \resCLeff$\,pF and $\beta = \resBetaIdeal$, NEF $\approx \dd[1]{\resNEF}$.
 
-\textbf{FoM in the course's efficiency terms.} For one single-stage amplifier in this test circuit
+\textbf{FoM in the course's efficiency terms.} For a single-stage amplifier in this circuit
 ($\tau = C_{L,eff}/(\beta g_m)$, $g_m = (g_m/I_D)\,I_D/2$ per side, all current in the input pair, only $kT/C$ noise)
 $C_{in}$ and the current drop out:
 \[
 \mathrm{FoM_{lin,1}} = 2\pi\,\frac{2V_{DD}}{g_m/I_D}\cdot\frac{C_{L,eff}}{\beta\,C_{in}}\cdot\frac{84\,kT}{V_{out,step}^2}.
 \]
 At $g_m/I_D \approx 25$ (deep weak inversion) and a \fpeval{round(\resVout,1)}\,V step this gives
-\xFoMideal\,dB. My FoM, \resFoMdB\,dB, is this reference at my input pair's $g_m/I_D = \xGmIdIn$ (\xFoMone\,dB),
+\xFoMideal\,dB. My \resFoMdB\,dB is this reference at my input pair's $g_m/I_D = \xGmIdIn$ (\xFoMone\,dB),
 $\xLcur$\,dB because only \xEtaCur\,\% of the current flows in the input pair, $\xLnoise$\,dB because the
 amplifier adds to the $kT/C$ noise, and $\xGtau$\,dB because $\tau = \resTau$\,ns is shorter than the single-stage
-\xTauOne\,ns: the input pair charges $C_c$ instead of the load, and the 30 to 38.6\,dB window catches the response
-speeding up.
+\xTauOne\,ns: the input pair charges $C_c$ instead of the load, and the 30 to 38.6\,dB window catches the speed-up.
 
 \textbf{Biasing.} The bias block runs from $V_{ddb}$ and is a replica of one stage-1 half. A tail unit and an input unit
 (gate at $v_{cmr}$) carry $I_{bnp} = \pIbnp\,\mu$A and set $v_{bp}$; a cascode unit and a load unit carry $I_{bnp}$ and set
 $v_{bn}$. $M_0$, $M_{1,2}$, $M_{5\ldots8}$, $M_{7C,8C}$, the stage-2 PMOS sources and the CMFB tail and diodes are integer
 multiples of these units, so they copy the replica's current density. The replica nodes sit at \opV{bp0} and \opV{bn5},
 against \opV{tail} and \opV{b1p} in the amplifier. The stage-2 PMOS runs \dd[0]{100*(\xIdTwo/(\pMtwo*\pIbnp)-1)}\,\%
-above \pMtwo\ units because its $V_{sd}$ is larger. The cascode gates come from wide-swing diodes as in the EE4520
-bias block (assignment fig.~6), with the cascode length (0.25\,$\mu$m) and currents $k_{cn}I_{bnp}$ and $k_{cp}I_{bnp}$;
-they keep the loads and the input pair at least \xQMarg\,mV from triode. $R_d$ and $C_{big} = \resCbig$\,nF decouple
-each bias line.
+above \pMtwo\ units because its $V_{sd}$ is larger. Wide-swing diodes as in the EE4520 bias block
+(assignment fig.~6), with the cascode length (0.25\,$\mu$m) and currents $k_{cn}I_{bnp}$ and $k_{cp}I_{bnp}$, set the
+cascode gates and keep the loads and the input pair at least \xQMarg\,mV from triode; $R_d$ and $C_{big} = \resCbig$\,nF
+decouple each line.
 \normalsize
 \end{document}

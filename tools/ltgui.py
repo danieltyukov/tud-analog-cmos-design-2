@@ -32,6 +32,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import lt  # noqa: E402
+import metrics as M  # noqa: E402
 
 REPO = lt.REPO
 FINAL = REPO / "design" / "final"
@@ -399,6 +400,149 @@ INSET_SCALE = 2.8
 INSET_AT = (300, 88)     # inset position: from the left edge and above the bottom edge of the cropped plot
 
 
+# ----------------------------------------------------------------------------- D2/D3 schematics
+
+
+SCH_SCREEN = (5600, 3700)
+SCH_FONT = int(os.environ.get("EE4525_SCH_FONT", "28"))
+SCH_COLORS = {f"SchematicColor{i}": (0xFFFFFF if i == 12 else 0) for i in range(14)}  # black on white
+
+
+def sch_ini(path: Path) -> None:
+    """Private settings for the schematic captures: white sheet, black drawing (LTspice needs the whole colour
+    block, so the user's palette is the base)."""
+    base = {}
+    user = Path.home() / ".wine/drive_c/users" / os.environ.get("USER", "") / "AppData/Roaming/LTspiceXVII.ini"
+    if user.exists():
+        txt = user.read_text(encoding="latin-1").replace("\r\n", "\n")
+        if "[Colors]" in txt:
+            block = txt[txt.index("[Colors]") + len("[Colors]"):].split("\n[")[0]
+            base = dict(l.split("=", 1) for l in block.splitlines() if "=" in l)
+    base.update({k: str(v) for k, v in COLORS.items()})
+    base.update({k: str(v) for k, v in SCH_COLORS.items()})
+    opts = {"WindowSize": f"0 {SCH_SCREEN[0]} 0 {SCH_SCREEN[1]}", "EnableWindowTabs": "false",
+            "DefaultTileType": "true", "ShowSchematicGrid": "false", "BoldSchFont": "true", "PenWidth": 2,
+            "SchFontSize": SCH_FONT,
+            "LastWebUpdateTime": int(time.time()), "LastWebUpdateQuery": int(time.time())}
+    lines = ["[Options]"] + [f"{k}={v}" for k, v in opts.items()] + ["[Colors]"] + [f"{k}={v}" for k, v in base.items()]
+    path.write_bytes(("\r\n".join(lines) + "\r\n").encode("latin-1"))
+
+
+def title_bar_rows(png: Path) -> list[int]:
+    """Rows that belong to an active (blue) MDI title bar, sampled near the right edge."""
+    from PIL import Image
+
+    im = Image.open(png).convert("RGB")
+    w, h = im.size
+    rows = []
+    for y in range(95, h - 30):
+        r, g, b = im.getpixel((w - 120, y))
+        if b > 180 and r < 120 and g > 100:
+            rows.append(y)
+    return rows
+
+
+def capture_schematic(asc: Path, work: Path) -> Path:
+    """Run `asc` in the LTspice GUI (short transient, so the .op data labels fill in), maximise the schematic
+    and fit it to the window; returns the screenshot."""
+    global SCREEN
+    keep = SCREEN
+    SCREEN = SCH_SCREEN
+    display, xvfb = start_display()
+    SCREEN = keep
+    try:
+        env = {**os.environ, "DISPLAY": display, "WINEDEBUG": "-all"}
+        subprocess.Popen(["wine", lt.LTSPICE_EXE, "-Run", asc.name, "-ini", "plot.ini"], cwd=work, env=env,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        log = work / f"{asc.stem}.log"
+        t0 = time.time()
+        while time.time() - t0 < 180:
+            if log.exists() and "elapsed time" in lt.read_text(log):
+                break
+            time.sleep(0.5)
+        else:
+            raise SystemExit(f"LTspice GUI run did not finish ({work})")
+        time.sleep(3.0)
+        # activate the schematic (lower tiled window), then press its maximise button
+        xdo(display, "mousemove", str(SCH_SCREEN[0] // 2), str(int(SCH_SCREEN[1] * 0.8)), "click", "1")
+        time.sleep(1.0)
+        probe = work / "tiles.png"
+        screenshot(display, probe)
+        rows = title_bar_rows(probe)
+        if not rows:
+            raise SystemExit(f"could not find the schematic title bar ({probe})")
+        y = (rows[0] + max(r for r in rows if r - rows[0] < 40)) // 2
+        xdo(display, "mousemove", str(SCH_SCREEN[0] - 39), str(y), "click", "1")
+        time.sleep(1.0)
+        xdo(display, "key", "space")   # zoom to fit
+        time.sleep(2.5)
+        shot = work / f"{asc.stem}_screen.png"
+        screenshot(display, shot)
+        names = [xdo(display, "getwindowname", w) for w in xdo(display, "search", "--name", "").split()]
+        extra = [n for n in names if n and n != "Default IME" and not n.startswith("LTspice XVII - ")]
+        if extra:
+            raise SystemExit(f"LTspice showed a dialog: {extra} (see {shot})")
+    finally:
+        stop(display, xvfb)
+    if "???" in lt.read_text(log):
+        pass
+    return shot
+
+
+def crop_blocks(shot: Path, mark, crops: dict, stem: str, outdir: Path) -> dict:
+    """Map sheet coordinates to pixels from the two corner markers and cut out each block."""
+    import numpy as np
+    from PIL import Image
+
+    im = Image.open(shot).convert("RGB")
+    a = np.asarray(im).astype(int)
+    h, w, _ = a.shape
+    dark = (a.sum(axis=2) < 300)
+    dark[:100, :] = False; dark[h - 30:, :] = False; dark[:, :10] = False; dark[:, w - 10:] = False
+    ys, xs = np.nonzero(dark)
+    px0, px1, py0, py1 = xs.min(), xs.max(), ys.min(), ys.max()
+    (X0, Y0), (X1, Y1) = mark
+    sx = (px1 - px0) / (X1 - X0)
+    sy = (py1 - py0) / (Y1 - Y0)
+    out = {}
+    for name, (x0, y0, x1, y1) in crops.items():
+        box = (int(px0 + (x0 - X0) * sx), int(py0 + (y0 - Y0) * sy), int(px0 + (x1 - X0) * sx), int(py0 + (y1 - Y0) * sy))
+        p = outdir / f"{stem}_{name}.png"
+        im.crop(box).save(p)
+        out[name] = p
+    return out
+
+
+def make_schematics(figdir: Path) -> dict:
+    """D2 (node voltages) and D3 (drain currents): LTspice draws the deliverable circuit with its own .op data labels."""
+    sys.path.insert(0, str(REPO / "design" / "work"))
+    import gen_asc
+
+    work = OUTDIR / "schem"
+    if work.exists():
+        shutil.rmtree(work)
+    work.mkdir(parents=True)
+    shutil.copy2(FINAL / "log018.l", work / "log018.l")
+    sch_ini(work / "plot.ini")
+    # the labels must show the same operating point as the batch run behind the report (tools/opvals.py)
+    ref = lt.run(FINAL / "amp_tran.asc", op=True)
+    ref_raw = M.Raw(Path(ref["net"]).with_suffix(".raw"))
+    res = {}
+    for fig, stem in (("v", "d2"), ("i", "d3")):
+        asc = work / f"amp_{stem}.asc"
+        asc.write_text(gen_asc.build("tran", figure=fig))
+        shot = capture_schematic(asc, work)
+        gui = M.Raw(work / f"amp_{stem}.op.raw")
+        worst = max(abs(float(gui[n][0].real) - float(ref_raw[n][0].real))
+                    for n in ref_raw.names.values() if n.lower().startswith(("v(", "id(")) and gui.has(n))
+        if worst > 1e-6:
+            raise SystemExit(f"GUI operating point differs from the batch run by {worst:.3g}")
+        res[stem] = crop_blocks(shot, gen_asc.MARK, gen_asc.CROPS, stem, work)
+        for name, p in res[stem].items():
+            shutil.copy2(p, figdir / f"{stem}_{name}_ltspice.png")
+    return res
+
+
 def make_d4(asc: Path, out: Path) -> dict:
     r = gui_run(asc, "d4", "Transient Analysis", d4_body)
     m, L = r["meas"], latest().get("table")
@@ -433,13 +577,16 @@ def make_d5(asc: Path, out: Path) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("what", choices=["d4", "d5", "all"])
+    ap.add_argument("what", choices=["d2d3", "d4", "d5", "all"])
     ap.add_argument("--asc", type=Path)
     ap.add_argument("--out", type=Path)
     a = ap.parse_args(argv)
-    todo = ["d4", "d5"] if a.what == "all" else [a.what]
+    todo = ["d2d3", "d4", "d5"] if a.what == "all" else [a.what]
     for w in todo:
-        if w == "d4":
+        if w == "d2d3":
+            r = make_schematics(FIGDIR)
+            print("d2d3:", ", ".join(str(p) for v in r.values() for p in v.values()))
+        elif w == "d4":
             r = make_d4(a.asc or FINAL / "amp_tran.asc", a.out or FIGDIR / "d4_ltspice.png")
             m = r["meas"]
             print(f"d4: A25 {m['a25']:.2f} dB  Ab25 {m['ab25']:.2f} dB  T30 {m['t30_step'] * 1e9:.3f} ns  "

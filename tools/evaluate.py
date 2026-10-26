@@ -60,6 +60,13 @@ def evaluate(tran: Path, noise: Path, tag: str, plots: bool = True) -> dict:
     e, _, _ = asc_lint.lint_netlist(net_t)
     lint_errs += [f"{net_t.name}: {x}" for x in e]
     tm = M.tran_metrics(rt["raw"], net_t)
+    # A and Abeta at 25 ns are LTspice's own .meas (A25, Ab25: the values a TA sees in the log and the D4 plot
+    # shows); the interpolation of the raw data stays as the cross-check (they agree to about 0.001 dB).
+    for key, mk in (("A_at_25ns_dB", "a25"), ("Abeta_at_25ns_dB", "ab25")):
+        if mk in rt["meas"]:
+            if abs(rt["meas"][mk] - tm[key]) > 0.05:
+                raise SystemExit(f"{mk}: LTspice .meas {rt['meas'][mk]:.4f} dB vs raw {tm[key]:.4f} dB")
+            tm[key] = rt["meas"][mk]
     if plots:
         M.plot_settling(tm, out / "d4_settling.pdf")
 
