@@ -26,7 +26,7 @@
 \draw (4.4,-2.35) node[circ]{} -- (3.0,-2.35) |- (2.6,-4.7) node[left]{$v_{cmfb}\to M_{7C}, M_{8C}$};
 \node[font=\small,anchor=south east] at (vcms) {$v_{cms}$\,\Vtag{vcms}};
 \node[font=\small,anchor=south west] at ($(cmt)+(0.05,0)$) {$n_{cmt}$\,\Vtag{cmt}};
-\node[font=\small,anchor=south west] at ($(3.05,-2.35)$) {\Vtag{vcmfb}};
+\ifshowI\else\node[font=\small,anchor=south west,align=left] at ($(2.72,-2.35)$) {$v_{cmfb}$\\\Vtag{vcmfb}};\fi
 \node[font=\small,anchor=south west] at (cmd) {$n_{cmd}$\,\Vtag{cmd}};
 \node[font=\small,anchor=west] at ($(MC2.G)+(0.3,-0.4)$) {\Vtag{vcmr}};
 \def\dl#1#2#3{\node[anchor=west,font=\small,align=left] at ($(#1.center)+(0.42,0.1)$) {#2\\\Itag{#3}};}

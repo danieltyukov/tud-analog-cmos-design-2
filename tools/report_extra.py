@@ -8,6 +8,7 @@ Writes report/generated/extra.tex (macros \\xFc, \\xPM, ... and \\p... parameter
   - design/work/bench_loop.cir (differential loop gain, Middlebrook series injection; `Vext` = output offset)
   - a CM-loop copy of design/work/amp.inc with the CMFB output (gates of M7C/M8C) broken by a series AC source
   - results/<tag>/summary.json and the runs of design/final/amp_tran.asc / amp_noise.asc
+  - a copy of the final noise netlist with Rin and Rfb left noisy; the gm/ID tables (tools/gmid/) for the fT ratio
 design/work is the netlist the drawn .asc is proven equivalent to (verify_circuit), so the numbers apply to it.
 Every simulated number in the report text comes from this file or from generated/results.tex.
 """
@@ -23,6 +24,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import gmid as G  # noqa: E402
 import lt  # noqa: E402
 import metrics as M  # noqa: E402
 
@@ -143,6 +145,20 @@ def tolerance(ibnp: float) -> tuple[float, str]:
     return max(res)
 
 
+def noisy_rin_rfb() -> tuple[float, float]:
+    """Amplifier noise and SNR of the final noise netlist with Rin and Rfb left noisy (the FAQ allows noiseless)."""
+    net, n_sub = re.subn(r"(?m)^(R(?:in|fb)\d\s.*?)\s+noiseless[ \t]*\r?$", r"\1", lt.read_text(FINAL / "amp_noise.net"))
+    if n_sub != 4:
+        raise SystemExit(f"expected 4 noiseless resistors (Rin, Rfb per side), found {n_sub}")
+    OUT.mkdir(parents=True, exist_ok=True)
+    n = OUT / "noisy_rin_rfb.net"
+    n.write_text(net)
+    r = lt.run(n)
+    if not (r["ok"] and "vn_amp" in r["meas"] and "snr_db" in r["meas"]):
+        raise SystemExit(f"noisy Rin/Rfb run failed: {r['errors']}")
+    return r["meas"]["vn_amp"], r["meas"]["snr_db"]
+
+
 def dev_tex(name: str) -> str:
     """m7c -> M_{7C}, mbp0 -> M_{BP0}."""
     return "M_{" + name[1:].upper() + "}"
@@ -213,6 +229,20 @@ def main(argv=None) -> int:
     i_ov = int(np.argmax(ov))
     overshoot, t_ov = float(ov[i_ov]), float(t[k][i_ov] - t0)
     overshoot_final = float(np.max(err[-1] - err[k]))  # above the settled (static-error) value
+    # zero crossings of both errors (the spikes in D4); an exact zero sample keeps the previous sign
+    kz = t > t0 + 1e-9
+
+    def crossings(e: np.ndarray) -> np.ndarray:
+        s = np.sign(e[kz])
+        s = s[np.maximum.accumulate(np.where(s != 0, np.arange(len(s)), 0))]
+        return (t[kz][np.where(s[1:] != s[:-1])[0] + 1] - t0) * 1e9
+
+    zc_a = crossings(np.real(r["V(vip)"]) - np.real(r["V(vin)"]))
+    zc_ab = crossings(err)
+    if len(zc_a) < 2 or len(zc_ab) < 2:
+        raise SystemExit(f"expected two zero crossings per error, got A {zc_a} and Abeta {zc_ab}")
+    if abs(zc_a[0] - x["first_peak_A_ns"]) > 0.05 or abs(zc_ab[0] - x["first_peak_Abeta_ns"]) > 0.05:
+        raise SystemExit(f"first crossings {zc_a[0]:.3f}/{zc_ab[0]:.3f} ns differ from evaluate.py's first peaks")
     a_end = 20 * math.log10(vstep / (abs(float(np.real(r["V(vip)"])[-1] - np.real(r["V(vin)"])[-1])) + 1e-9))
     ab_end = float(ab[-1])
     tw = x.get("tau_windows_ns", {})
@@ -270,6 +300,14 @@ def main(argv=None) -> int:
     iq, iw = x["I_quiescent_mA"] * 1e3, x["I_settle_window_mA"] * 1e3
     m1, m9, m11 = devs["m1"], devs["m9"], devs["m11"]
     rz = pp["rz0"] * (20 / pp["m2"]) * ((pp["cc"] + 1.2 * pp["cin"]) / pp["cc"]) / 4
+
+    # why the stage-2 driver is NMOS: fT of NMOS vs PMOS at the driver's length and gm/ID (LTspice gm/ID tables)
+    def ft(typ: str) -> float:
+        sl = G._slice(G.load(typ), pp["ld"], 5e-6)
+        return float(np.interp(G._at_gmid(sl, m9["gm_id"]), np.arange(len(sl["ft"])), sl["ft"]))
+
+    ft_ratio = ft("nch") / ft("pch")
+    vn_noisy, snr_noisy = noisy_rin_rfb()
     macros = {
         "xFc": f"{mid['fc_Hz']/1e6:.2f}", "xPM": f"{mid['PM_deg']:.1f}", "xGM": f"{mid.get('GM_dB', math.nan):.1f}",
         "xTzero": f"{mid['T0_dB']:.1f}", "xTzeroExt": f"{ext['T0_dB']:.1f}", "xFcExt": f"{ext['fc_Hz']/1e6:.1f}",
@@ -280,6 +318,8 @@ def main(argv=None) -> int:
         "xTauSmall": f"{tau_small:.2f}", "xTthirtySmall": f"{t30_small:.1f}", "xTauMid": f"{tau_mid*1e9:.2f}", "xTauExact": f"{tab[7]:.4f}",
         "xXswing": f"{x1sw*1e3:.0f}", "xGpswing": f"{gpsw*1e3:.0f}", "xIpk": f"{ipk:.0f}",
         "xOvershoot": f"{overshoot*1e6:.0f}", "xOvershootFinal": f"{overshoot_final*1e6:.0f}", "xOvershootT": f"{t_ov*1e9:.1f}",
+        "xZcBackA": f"{zc_a[1]:.1f}", "xZcBackAb": f"{zc_ab[1]:.1f}",
+        "xVnNoisyR": f"{vn_noisy*1e6:.2f}", "xSNRNoisyR": f"{snr_noisy:.2f}", "xFtRatio": f"{ft_ratio:.1f}",
         "xTauWforty": f"{tw.get('40-48.6dB', math.nan):.2f}", "xTauWfifty": f"{tw.get('50-58.6dB', math.nan):.2f}",
         "xAbEnd": f"{ab_end:.1f}", "xAEnd": f"{a_end:.1f}", "xGapEnd": f"{a_end-ab_end:.1f}", "xTend": f"{(t[-1]-t0)*1e9:.0f}",
         "xAbLong": f"{ab_long:.1f}", "xOutMarg": f"{omarg*1e3:.0f}", "xOutDev": dev_tex(oname),

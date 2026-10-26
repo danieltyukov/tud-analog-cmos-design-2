@@ -46,6 +46,10 @@
 \draw (10.6,-8.1) node[circ]{} to[R, l_={$R_d$}] (12.5,-8.1) node[circ]{} coordinate(ovcp) to[C, l={$C_{big}$}] (12.5,-9.7) node[ground]{};
 \node[anchor=south west,font=\small] at (ovcp) {$v_{cp}$\,\Vtag{vcp}};
 \dn{($(BP3.center)+(-1.15,0.15)$)}{$M_{BP3}$}{mbp3}{east}
+% replica side of each Rd (no DC current through Rd, so the same voltage as the decoupled line)
+\def\rn#1#2#3#4{\node[anchor=#2,font=\footnotesize,align=left] at #1 {$v_{#3}$\\\Vtag{#4}};}
+\rn{(0.35,-3.1)}{north west}{bpr}{vbpr} \rn{(9.7,-0.25)}{south west}{bnr}{vbnr}
+\rn{(0.5,-7.95)}{south west}{cnr}{vcnr} \rn{(9.65,-8.2)}{north west}{cpr}{vcpr}
 \node[font=\footnotesize,align=left,anchor=north west] at (-1.6,-10.5) {supply arrows: $V_{ddb}$;
 $I_{bnp} = \pIbnp\,\mu$A, $k_{cn} = \pKcn$, $k_{cp} = \pKcp$\\$R_d = \pRd$\,k$\Omega$, $C_{big} = \resCbig$\,nF};
 \end{circuitikz}

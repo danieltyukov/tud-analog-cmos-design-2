@@ -210,6 +210,33 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
   remainder so they add to 100 % (51/36/8/5; cascodes, Rb, CMFB about 0.1 %), replica sentence says the nodes match.
   Zero crossing earlier at 6.2 uA (26.49 vs 26.92 ns) because the overshoot grew (20 -> 72 uV; output-stage gm about
   2 % lower, the Rz zero no longer sits exactly on p2), not a higher floor (floor 78.9 -> 78.7 dB).
+- 2026-10-26 fresh-eyes review (user request; nothing changed in design or report). Fresh LTspice runs of copies of
+  both .asc in scratch, read with own spicelib/numpy code (not opvals/crosscheck/metrics): all 25 D2 voltages and all
+  D3 currents match the .op to the printed digits (268.0 uA = 111.6 + 2 x 72.06 + 12.24); D1 rows 1 to 22 reproduced;
+  Ts 24.083, zero crossings 26.49 (A) / 26.59 (Abeta) and back at 32.2 / 31.9 ns, overshoot 72.1 uV at 28.5 ns, end
+  78.69 / 93.5 dB, CM excursion 18.3 mV, x1 167 mV, gp 129 mV, PMOS peak 213 uA; noise 303.415 uV, 1/f corner 0.32 to
+  0.39 MHz; loop fc 33.75 MHz, PM 79.9, T0 80.9 dB. D6 table and both FoM decompositions recomputed by hand: exact.
+  Open nits (not errors in numbers): page 8 "the two spikes" sentence (each curve has two spikes, the return crossing
+  near 32 ns is not mentioned, "between them" reads as 26.49 to 26.59 ns); fT "about four times" (tables: 4.5 to 4.8);
+  "the same swing (129 mV)" vs 167 mV at x1; V_sig undefined on page 7; zp/zn labels sit under Rz at the output dot;
+  replica-side Rd nodes and the CMFB 0.593 V label carry no node name.
+- 2026-10-26 nits fixed (user: "fix it", plus a second external review). TOOL CHANGE `tools/report_extra.py` (output
+  only): xZcBackA/xZcBackAb (return zero crossings 32.2/31.9 ns; exact-zero samples keep the previous sign, first
+  crossings must agree with evaluate.py within 0.05 ns), xVnNoisyR/xSNRNoisyR (final noise netlist with Rin/Rfb left
+  noisy: 309.33 uV, SNR 66.10 dB, still passes), xFtRatio (NMOS/PMOS fT at the driver's L and gm/ID from the gm/ID
+  tables: 4.6). All existing macros unchanged. Report: page 8 spikes sentence (two per curve, both crossings), "real
+  poles" (two-pole loop critically damped at 76.3 deg PM), fT 4.6, "most of that swing"; page 2 noisy-R clause; page 7
+  V_sig defined; D2 zp/zn labels at the Rz-Cc junction, replica-side Rd nodes labelled (v_bpr, v_bnr, v_cnr, v_cpr),
+  CMFB v_cmfb named. Not applied from the review: "Abeta starts near 0 dB" and "Cp is a lower bound": charge
+  conservation at the summing node gives vx = beta_act * error at every instant, kick or not (14.185 dB at 0.055 ns
+  with the output kicked 47 mV, vs 20log(1/beta_act) 14.184 dB); Abeta is exactly 0 dB at t = 0 as the TA requires.
+  Build 8 pages, crosscheck all OK (KCL, 42 formulas, 60 figure values incl. the new labels), selftest OK,
+  check_done DONE; report/5714699.pdf refreshed from main.pdf.
+- 2026-10-26 prose pass 2 (user: humanizer + online AI check). Page 2/5/6 captions and notes: colon/semicolon chains
+  split into plain sentences. Pages 7 and 8 rewritten in a first-person design-story voice (TA advice, class-A first
+  try, why one level shifter), same macros and claims, still one page each. Online detectors on the page 7+8 prose
+  (about 1800 words): ZeroGPT 13.5 % AI before, 3.3 % after ("human written"); GPTZero (model 4.1o) 100 % AI both
+  before and after. Stopped iterating against GPTZero. crosscheck all OK, check_done DONE, 5714699.pdf refreshed.
 
 ## Failed approaches (do not retry without a new reason)
 
