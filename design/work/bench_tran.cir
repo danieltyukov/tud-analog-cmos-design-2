@@ -6,9 +6,9 @@
 * Sign: input+ -> Cin -> vin, Cfb from vop to vin, so V(von,vop) is the positive output step.
 * Tunables live in .param lines so tools/lt.py sweep / tools/optimize.py can override them.
 .lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
-.param VDD=1.8 VCM=0.9 VCMI=0.8107
-.param Cin=1.43p Cfb={Cin/4} Cload={Cin} Rin=125Meg Rfb={4*Rin}
-.param VoutStep=1.478 VinStep={VoutStep/4} tstep=10n Tsettle=25n tstop={tstep+Tsettle+45n} trise=50p
+.param VDD=1.8 VCM=0.9 VCMI=0.9
+.param Cin=2.15p Cfb={Cin/4} Cload={Cin} Rin=100Meg Rfb={4*Rin}
+.param VoutStep=1.2 VinStep={VoutStep/4} tstep=10n Tsettle=25n tstop={tstep+Tsettle+45n} trise=50p
 
 Vdd vdd 0 {VDD}
 Vddb vddb 0 {VDD}
@@ -40,4 +40,9 @@ Cload2 von 0 {Cload}
 .meas tran Iset AVG -I(Vdd) FROM={tstep} TO={tstep+Tsettle}
 .meas tran Iq AVG -I(Vdd) FROM={tstep-5n} TO={tstep}
 .meas tran P_mW PARAM 1.8*max(Iset,Iq)*1e3
+.meas tran T30 WHEN 20*log10(VoutStep/(abs(VoutStep-V(von,vop))+1n))=30 RISE=1
+.meas tran T38p6 WHEN 20*log10(VoutStep/(abs(VoutStep-V(von,vop))+1n))=38.6 RISE=1
+.meas tran T30_step PARAM T30-tstep
+.meas tran T38p6_step PARAM T38p6-tstep
+.meas tran tau PARAM T38p6-T30
 .end

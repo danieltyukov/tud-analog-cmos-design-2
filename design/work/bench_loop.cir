@@ -6,8 +6,8 @@
 * (A 1 TH / 1 TF break was tried: LTspice then lands the .op in a wrong state.)
 * T = -V(sin,sip)/V(vin,vip). Gates: fc within 10 % of target, PM 72 to 78 deg, A0*beta.
 .lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
-.param VDD=1.8 VCM=0.9 VCMI=0.8107
-.param Cin=1.43p Cfb={Cin/4} Cload={Cin} Rin=125Meg Rfb={4*Rin}
+.param VDD=1.8 VCM=0.9 VCMI=0.9
+.param Cin=2.15p Cfb={Cin/4} Cload={Cin} Rin=100Meg Rfb={4*Rin}
 * Vext: differential output offset at which the loop is linearised (0 = quiescent, +-VoutStep = settled extremes)
 .param Vext=0
 

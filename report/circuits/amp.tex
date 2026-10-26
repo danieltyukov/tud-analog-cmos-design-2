@@ -1,83 +1,88 @@
-% Main amplifier (stage 1, stage 2, compensation, level shift). Used by D2 (\showIfalse) and D3 (\showItrue).
+% Amplifier core: stage 1 (PMOS-input telescopic cascode), stage 2 (push-pull common source), Miller Cc + Rz,
+% level shift Cls/Rb. Used by D2 (\showIfalse, node voltages) and D3 (\showItrue, drain currents).
 % Node and device names are the LTspice names (lower case) of design/final/amp_tran.asc.
-% Bulks: NMOS to ground; input and CMFB pairs to their own source; all other PMOS to vdd.
+% Bulks: NMOS to ground; input pair to the tail node; all other PMOS to vdd.
 \begin{circuitikz}[american, scale=0.92]
 \small
-\def\xa{-1.8}\def\xb{1.8}\def\xoa{-7.6}\def\xob{7.6}\def\xla{-5.8}\def\xlb{5.8}
-\def\yv{-5.6}
+\def\xa{-2.5}\def\xb{2.5}\def\xoa{-8.4}\def\xob{8.4}\def\xla{-5.4}\def\xlb{5.4}
+\def\yv{-5.6}\def\yc{-7.3}
 \coordinate (XLA) at (\xla,0); \coordinate (XLB) at (\xlb,0); \coordinate (XOA) at (\xoa,0); \coordinate (XOB) at (\xob,0);
 % ---------------------------------------------------------------- stage 1
-\draw (0,-1.0) node[pmos](Mtp){};
-\draw (Mtp.S) -- ++(0,0.25) node[vdd]{};
-\draw (Mtp.G) -- ++(-0.3,0) node[left]{$v_{bp}$\,\Vtag{vbp}};
-\draw (Mtp.D) -- (0,-2.0) coordinate(ntp);
+\draw (0,-1.0) node[pmos](M0){};
+\draw (M0.S) -- ++(0,0.25) node[vdd]{};
+\draw (M0.G) -- ++(-0.3,0) node[left]{$v_{bp}$\,\Vtag{vbp}};
+\draw (M0.D) -- (0,-2.0) coordinate(tail);
 \draw (\xa,-2.0) -- (\xb,-2.0);
-\draw (\xa,-2.95) node[pmos](M1p){};
-\draw (\xb,-2.95) node[pmos,xscale=-1](M2p){};
-\draw (M1p.S) -- (\xa,-2.0) (M2p.S) -- (\xb,-2.0);
-\draw (M1p.G) -- ++(-0.3,0) node[left]{$v_{in}$};
-\draw (M2p.G) -- ++(0.3,0) node[right]{$v_{ip}$};
-\draw (\xa,-4.8) node[pmos](Mcp1){};
-\draw (\xb,-4.8) node[pmos,xscale=-1](Mcp2){};
-\draw (M1p.D) -- (Mcp1.S) coordinate[midway](nb1) (M2p.D) -- (Mcp2.S) coordinate[midway](nb2);
-\draw (Mcp1.G) -- ++(-0.3,0) node[left]{$v_{cp}$\,\Vtag{vcp}};
-\draw (Mcp2.G) -- ++(0.3,0) node[right]{$v_{cp}$\,\Vtag{vcp}};
-\draw (\xa,-6.6) node[nmos](Mcn1){};
-\draw (\xb,-6.6) node[nmos,xscale=-1](Mcn2){};
-\draw (Mcp1.D) -- (Mcn1.D) (Mcp2.D) -- (Mcn2.D);
-\draw (Mcn1.G) -- ++(-0.3,0) node[left]{$v_{cn}$\,\Vtag{vcn}};
-\draw (Mcn2.G) -- ++(0.3,0) node[right]{$v_{cn}$\,\Vtag{vcn}};
-\draw (\xa,-8.55) node[nmos](M1n){};
-\draw (\xb,-8.55) node[nmos,xscale=-1](M2n){};
-\draw (Mcn1.S) -- (M1n.D) coordinate[midway](na1) (Mcn2.S) -- (M2n.D) coordinate[midway](na2);
-\draw (M1n.G) -- ++(-0.3,0) node[left]{$v_{in}$\,\Vtag{vin}};
-\draw (M2n.G) -- ++(0.3,0) node[right]{$v_{ip}$\,\Vtag{vip}};
-\draw (M1n.S) -- (\xa,-9.55) -- (\xb,-9.55) -- (M2n.S);
-\draw (-0.75,-10.5) node[nmos](Mtn){};
-\draw (0.75,-10.5) node[nmos,xscale=-1](Mtc){};
-\draw (Mtn.D) |- (0,-9.55) coordinate(ntn) (Mtc.D) |- (0,-9.55);
-\draw (Mtn.S) node[ground]{} (Mtc.S) node[ground]{};
-\draw (Mtn.G) -- ++(-0.3,0) node[left]{$v_{bn}$\,\Vtag{vbn}};
-\draw (Mtc.G) -- ++(0.3,0) node[right]{$v_{cmfb}$\,\Vtag{vcmfb}};
-% v1 nodes (stage-1 outputs)
-\draw (\xa,\yv) node[circ]{} coordinate(v1n) (\xb,\yv) node[circ]{} coordinate(v1p);
-% ---------------------------------------------------------------- stage 2, side A (left) and side B (right)
-\draw (\xoa,-1.0) node[pmos,xscale=-1](Mop1){};
-\draw (\xob,-1.0) node[pmos](Mop2){};
-\draw (Mop1.S) -- ++(0,0.25) node[vdd]{} (Mop2.S) -- ++(0,0.25) node[vdd]{};
-\draw (\xoa,-10.5) node[nmos,xscale=-1](Mon1){};
-\draw (\xob,-10.5) node[nmos](Mon2){};
-\draw (Mon1.S) node[ground]{} (Mon2.S) node[ground]{};
-\draw (Mop1.D) -- (Mon1.D) (Mop2.D) -- (Mon2.D);
-\draw (\xoa,\yv) node[circ]{} -- ++(-0.6,0) node[left]{$v_{on}$};
-\draw (\xob,\yv) node[circ]{} -- ++(0.6,0) node[right]{$v_{op}$};
-% level shift: Cls from v1 to the PMOS gate, Rb from the gate to vbo
-\draw (Mop1.G) -- (Mop1.G -| XLA) coordinate(gp1) to[C, l_={$C_{ls}$}] (\xla,-3.0) -- (\xla,\yv) -- (v1n);
-\draw (Mop2.G) -- (Mop2.G -| XLB) coordinate(gp2) to[C, l={$C_{ls}$}] (\xlb,-3.0) -- (\xlb,\yv) -- (v1p);
-\draw (gp1) node[circ]{} to[R, l_={$R_b$}] ++(0,1.25) node[above]{$v_{bo}$\,\Vtag{vbo}};
-\draw (gp2) node[circ]{} to[R, l={$R_b$}] ++(0,1.25) node[above]{$v_{bo}$\,\Vtag{vbo}};
-\draw (\xla,\yv) node[circ]{} |- (Mon1.G);
-\draw (\xlb,\yv) node[circ]{} |- (Mon2.G);
-% current-buffer compensation: output -> PMOS-cascode source (nb) and -> NMOS-cascode source (na)
-\draw (XOA |- nb1) node[circ]{} -- (-5.3,0|-nb1) to[C, l={$(1{-}f_{cc})C_c$}] (-4.1,0|-nb1) -- (nb1) node[circ]{};
-\draw (XOB |- nb2) node[circ]{} -- (5.3,0|-nb2) to[C, l_={$(1{-}f_{cc})C_c$}] (4.1,0|-nb2) -- (nb2) node[circ]{};
-\draw (XOA |- na1) node[circ]{} -- (-5.3,0|-na1) to[C, l={$f_{cc}C_c$}] (-4.1,0|-na1) -- (na1) node[circ]{};
-\draw (XOB |- na2) node[circ]{} -- (5.3,0|-na2) to[C, l_={$f_{cc}C_c$}] (4.1,0|-na2) -- (na2) node[circ]{};
+\draw (\xa,-2.95) node[pmos](M1){};
+\draw (\xb,-2.95) node[pmos,xscale=-1](M2){};
+\draw (M1.S) -- (\xa,-2.0) (M2.S) -- (\xb,-2.0);
+\draw (M1.G) -- ++(-0.3,0) node[left]{$v_{ip}$\,\Vtag{vip}};
+\draw (M2.G) -- ++(0.3,0) node[right]{$v_{in}$\,\Vtag{vin}};
+\draw (\xa,-4.8) node[pmos](M3){};
+\draw (\xb,-4.8) node[pmos,xscale=-1](M4){};
+\draw (M1.D) -- (M3.S) coordinate[midway](a1p) (M2.D) -- (M4.S) coordinate[midway](a1n);
+\draw (M3.G) -- ++(-0.3,0) node[left]{$v_{cp}$\,\Vtag{vcp}};
+\draw (M4.G) -- ++(0.3,0) node[right]{$v_{cp}$};
+\draw (\xa,-6.6) node[nmos](M5){};
+\draw (\xb,-6.6) node[nmos,xscale=-1](M6){};
+\draw (M3.D) -- (M5.D) (M4.D) -- (M6.D);
+\draw (M5.G) -- ++(-0.3,0) node[left]{$v_{cn}$\,\Vtag{vcn}};
+\draw (M6.G) -- ++(0.3,0) node[right]{$v_{cn}$};
+\draw (\xa,-8.7) node[nmos](M7){};
+\draw (\xb,-8.7) node[nmos,xscale=-1](M8){};
+\draw (-1.0,-8.7) node[nmos,xscale=-1](M7C){};
+\draw (1.0,-8.7) node[nmos](M8C){};
+\draw (M5.S) -- (M7.D) (M6.S) -- (M8.D);
+\draw (\xa,-7.75) coordinate(b1p) node[circ]{} -| (M7C.D);
+\draw (\xb,-7.75) coordinate(b1n) node[circ]{} -| (M8C.D);
+\draw (M7.S) node[ground]{} (M8.S) node[ground]{} (M7C.S) node[ground]{} (M8C.S) node[ground]{};
+\draw (M7.G) -- ++(-0.3,0) node[left]{$v_{bn}$\,\Vtag{vbn}};
+\draw (M8.G) -- ++(0.3,0) node[right]{$v_{bn}$};
+\draw (M7C.G) -- (M8C.G);
+\draw (0,0 |- M7C.G) node[circ]{} -- ++(0,-0.9) node[below]{$v_{cmfb}$\,\Vtag{vcmfb}};
+% stage-1 outputs
+\draw (\xa,\yv) node[circ]{} coordinate(x1p) (\xb,\yv) node[circ]{} coordinate(x1n);
+% ---------------------------------------------------------------- stage 2, side p (left, drives vop) and side n (right, von)
+\draw (\xoa,-1.0) node[pmos,xscale=-1](M11){};
+\draw (\xob,-1.0) node[pmos](M12){};
+\draw (M11.S) -- ++(0,0.25) node[vdd]{} (M12.S) -- ++(0,0.25) node[vdd]{};
+\draw (\xoa,-8.7) node[nmos,xscale=-1](M9){};
+\draw (\xob,-8.7) node[nmos](M10){};
+\draw (M9.S) node[ground]{} (M10.S) node[ground]{};
+\draw (M11.D) -- (M9.D) (M12.D) -- (M10.D);
+\draw (\xoa,\yv) node[circ]{} -- ++(-0.6,0) node[left]{$v_{op}$};
+\draw (\xob,\yv) node[circ]{} -- ++(0.6,0) node[right]{$v_{on}$};
+% level shift: Cls from x1 to the PMOS gate, Rb from the gate to vbp (DC bias from the replica)
+\draw (M11.G) -- (M11.G -| XLA) coordinate(gp1) to[C, l_={$C_{ls}$}] (\xla,-3.0) -- (\xla,\yv) -- (x1p);
+\draw (M12.G) -- (M12.G -| XLB) coordinate(gp2) to[C, l={$C_{ls}$}] (\xlb,-3.0) -- (\xlb,\yv) -- (x1n);
+\draw (gp1) node[circ]{} to[R, l_={$R_b$}] ++(0,1.25) node[above]{$v_{bp}$};
+\draw (gp2) node[circ]{} to[R, l={$R_b$}] ++(0,1.25) node[above]{$v_{bp}$};
+\draw (\xla,\yv) node[circ]{} |- (M9.G);
+\draw (\xlb,\yv) node[circ]{} |- (M10.G);
+% Miller compensation: output - Rz - Cc - x1
+\draw (\xoa,\yc) node[circ]{} to[R, l={$R_z$}] (-6.9,\yc) coordinate(zp) to[C, l={$C_c$}] (\xla,\yc) node[circ]{};
+\draw (\xob,\yc) node[circ]{} to[R, l_={$R_z$}] (6.9,\yc) coordinate(zn) to[C, l_={$C_c$}] (\xlb,\yc) node[circ]{};
 % ---------------------------------------------------------------- device names, currents (D3), node voltages (D2)
 \def\dl#1#2#3{\node[anchor=west,font=\scriptsize,align=left] at ($(#1.center)+(0.42,0.1)$) {#2\\\Itag{#3}};}
 \def\dr#1#2#3{\node[anchor=east,font=\scriptsize,align=right] at ($(#1.center)+(-0.42,0.1)$) {#2\\\Itag{#3}};}
-\dl{Mtp}{$M_{tp}$}{mtp} \dl{M1p}{$M_{1p}$}{m1p} \dr{M2p}{$M_{2p}$}{m2p}
-\dl{Mcp1}{$M_{cp1}$}{mcp1} \dr{Mcp2}{$M_{cp2}$}{mcp2} \dl{Mcn1}{$M_{cn1}$}{mcn1} \dr{Mcn2}{$M_{cn2}$}{mcn2}
-\dl{M1n}{$M_{1n}$}{m1n} \dr{M2n}{$M_{2n}$}{m2n}
-\node[anchor=north east,font=\scriptsize,align=right] at ($(Mtn.center)+(-0.35,-0.3)$) {$M_{tn}$\\\Itag{mtn}};
-\node[anchor=north west,font=\scriptsize,align=left] at ($(Mtc.center)+(0.35,-0.3)$) {$M_{tc}$\\\Itag{mtc}};
-\dr{Mop1}{$M_{op1}$}{mop1} \dl{Mop2}{$M_{op2}$}{mop2} \dr{Mon1}{$M_{on1}$}{mon1} \dl{Mon2}{$M_{on2}$}{mon2}
+\dl{M0}{$M_{0}$}{m0} \dl{M1}{$M_{1}$}{m1} \dr{M2}{$M_{2}$}{m2}
+\dl{M3}{$M_{3}$}{m3} \dr{M4}{$M_{4}$}{m4} \dl{M5}{$M_{5}$}{m5} \dr{M6}{$M_{6}$}{m6}
+\node[anchor=north east,font=\scriptsize,align=right] at ($(M7.center)+(-0.4,-0.35)$) {$M_{7}$\\\Itag{m7}};
+\node[anchor=north west,font=\scriptsize,align=left] at ($(M8.center)+(0.4,-0.35)$) {$M_{8}$\\\Itag{m8}};
+\node[anchor=north east,font=\scriptsize,align=right] at ($(M7C.center)+(-0.25,-0.5)$) {$M_{7C}$\\\Itag{m7c}};
+\node[anchor=north west,font=\scriptsize,align=left] at ($(M8C.center)+(0.25,-0.5)$) {$M_{8C}$\\\Itag{m8c}};
+\dr{M11}{$M_{11}$}{m11} \dl{M12}{$M_{12}$}{m12} \dr{M9}{$M_{9}$}{m9} \dl{M10}{$M_{10}$}{m10}
 \def\vt#1#2#3{\node[anchor=#2,font=\scriptsize] at (#1) {#3};}
-\vt{ntp}{south west}{$n_{tp}$\,\Vtag{ntp}} \node[anchor=north west,font=\scriptsize] at (0.82,-9.6) {$n_{tn}$\,\Vtag{ntn}};
-\vt{nb1}{south west}{\Vtag{nb1}} \vt{nb2}{south east}{\Vtag{nb2}}
-\vt{na1}{south west}{\Vtag{na1}} \vt{na2}{south east}{\Vtag{na2}}
-\vt{v1n}{north east}{$v_{1n}$\,\Vtag{v1n}} \vt{v1p}{north west}{$v_{1p}$\,\Vtag{v1p}}
+\vt{tail}{south west}{$n_{tail}$\,\Vtag{tail}}
+\node[anchor=east,font=\scriptsize] at ($(a1p)+(-0.12,0)$) {$a_{1p}$\,\Vtag{a1p}};
+\node[anchor=west,font=\scriptsize] at ($(a1n)+(0.12,0)$) {$a_{1n}$\,\Vtag{a1n}};
+\node[anchor=east,font=\scriptsize] at ($(b1p)+(-0.12,0)$) {$b_{1p}$\,\Vtag{b1p}};
+\node[anchor=west,font=\scriptsize] at ($(b1n)+(0.12,0)$) {$b_{1n}$\,\Vtag{b1n}};
+\node[anchor=south east,font=\scriptsize] at ($(x1p)+(-0.12,0.04)$) {$x_{1p}$\,\Vtag{x1p}};
+\node[anchor=south west,font=\scriptsize] at ($(x1n)+(0.12,0.04)$) {$x_{1n}$\,\Vtag{x1n}};
+\node[anchor=north,font=\scriptsize] at (-7.65,\yc-0.3) {$z_p$\,\Vtag{zp}};
+\node[anchor=north,font=\scriptsize] at (7.65,\yc-0.3) {$z_n$\,\Vtag{zn}};
 \vt{gp1}{north west}{$g_{p1}$\,\Vtag{gp1}} \vt{gp2}{north east}{$g_{p2}$\,\Vtag{gp2}}
-\node[font=\scriptsize,anchor=north east] at (\xoa-0.6,\yv) {\Vtag{von}};
-\node[font=\scriptsize,anchor=north west] at (\xob+0.6,\yv) {\Vtag{vop}};
+\node[font=\scriptsize,anchor=north east] at (\xoa-0.6,\yv) {\Vtag{vop}};
+\node[font=\scriptsize,anchor=north west] at (\xob+0.6,\yv) {\Vtag{von}};
 \end{circuitikz}

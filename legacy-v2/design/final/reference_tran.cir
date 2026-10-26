@@ -1,0 +1,123 @@
+* EE4525 transient bench: the FIXED test circuit (assignment fig. 1). Copy to design/work/.
+* The amplifier (core + CMFB + bias block) lives in amp.inc and connects only through:
+*   vip vin   amplifier inputs (summing nodes)     vop von   amplifier outputs
+*   vdd       amplifier supply (source Vdd, its current is the graded power)
+*   vddb      bias-block supply (excluded)          vcmr      0.9 V CM reference (ideal source allowed)
+* Sign: input+ -> Cin -> vin, Cfb from vop to vin, so V(von,vop) is the positive output step.
+* Tunables live in .param lines so tools/lt.py sweep / tools/optimize.py can override them.
+.lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
+.param VDD=1.8 VCM=0.9 VCMI=0.8107
+.param Cin=1.43p Cfb={Cin/4} Cload={Cin} Rin=125Meg Rfb={4*Rin}
+.param VoutStep=1.478 VinStep={VoutStep/4} tstep=10n Tsettle=25n tstop={tstep+Tsettle+45n} trise=50p
+
+Vdd vdd 0 {VDD}
+Vddb vddb 0 {VDD}
+Vcmr vcmr 0 {VCM}
+Vinp inp 0 PULSE({VCMI} {VCMI+VinStep/2} {tstep} {trise} {trise} 1 2) AC 0.5
+Vinn inn 0 PULSE({VCMI} {VCMI-VinStep/2} {tstep} {trise} {trise} 1 2) AC -0.5
+Cin1 inp vin {Cin}
+Rin1 inp vin {Rin} noiseless
+Cin2 inn vip {Cin}
+Rin2 inn vip {Rin} noiseless
+Cfb1 vop vin {Cfb}
+Rfb1 vop vin {Rfb} noiseless
+Cfb2 von vip {Cfb}
+Rfb2 von vip {Rfb} noiseless
+Cload1 vop 0 {Cload}
+Cload2 von 0 {Cload}
+
+* ---- begin amp.inc ----
+* EE4525 amplifier, variant CR: stacked complementary input (PMOS pair on a top tail, NMOS pair on a
+* bottom tail, both gates on the summing node, current reused), telescopic cascodes onto v1,
+* current-buffer compensation, class-AB output (NMOS gate direct, PMOS gate via level-shift cap), CT CMFB
+* acting on part of the NMOS tail.
+* External nets: vip vin (inputs)  vop von (outputs)  vdd  vddb  vcmr  0
+* Side a: inputs vin -> v1n -> von.  Side b: vip -> v1p -> vop.
+*
+.param Ib=9.0u                                 ; bias unit current (all bias currents are fixed multiples)
+.param Lip=0.25u Wip=7u Mip=3                  ; input PMOS
+.param Lin=0.995u Win=8.3u Min=2                   ; input NMOS
+.param Lt=0.5u Wt=5u Mt=5                      ; top PMOS tail (unit mirrors Mbp)
+.param Ltn=1u Wtn=7.94u Mtn=3 Mtc=1               ; bottom NMOS tail: Mtn units on vbn, Mtc units on the CMFB line
+.param Lcp=0.36u Wcp=8.75u Mcp=1                ; PMOS cascodes
+.param Lcn=0.36u Wcn=11.66u Mcn=1                 ; NMOS cascodes
+.param Lon=0.36u Won=1.46u Mon=1                  ; output NMOS
+.param Lop=0.25u Wop=12.97u Mop=2                  ; output PMOS (unit mirrors Mbo)
+.param Cc=0.389p Cls=0.63p Rb=3Meg fcc=0.706
+.param Rcm=2Meg Ccm=50f
+.param Lcm=0.5u Wcm=4u Wctl=1.645u Wc3=1u
+.param tsc=0.686 knr=0.6 kn={knr*Mt*tsc/Mtn} ko=0.505 kcn=0.6 kcp=0.521
+.param Wbcn=0.4u Lbcn=4u Wbcp=1u Lbcp=4u
+.param Cbig=10n
+*
+* ---- bias block (vddb) ----
+Ibp  vbp 0 {Ib}
+Mbp  vbp vbp vddb vddb pch L={Lt} W={Wt} m=1
+Ibn  vddb vbn {kn*Ib}
+Mbn  vbn vbn 0 0 nch L={Ltn} W={Wtn} m=1
+Ibo  vbo 0 {ko*Ib}
+Mbo  vbo vbo vddb vddb pch L={Lop} W={Wop} m=1
+Ibcn vddb vcn {kcn*Ib}
+Mbcn vcn vcn 0 0 nch L={Lbcn} W={Wbcn} m=1
+Ibcp vcp 0 {kcp*Ib}
+Mbcp vcp vcp vddb vddb pch L={Lbcp} W={Wbcp} m=1
+Cb1 vbp 0 {Cbig}
+Cb2 vbn 0 {Cbig}
+Cb3 vbo 0 {Cbig}
+Cb4 vcn 0 {Cbig}
+Cb5 vcp 0 {Cbig}
+*
+* ---- stage 1: complementary stacked input ----
+Mtp  ntp vbp vdd vdd pch L={Lt} W={Wt*tsc} m={Mt}
+M1p  nb1 vin ntp ntp pch L={Lip} W={Wip} m={Mip}
+M2p  nb2 vip ntp ntp pch L={Lip} W={Wip} m={Mip}
+Mcp1 v1n vcp nb1 vdd pch L={Lcp} W={Wcp} m={Mcp}
+Mcp2 v1p vcp nb2 vdd pch L={Lcp} W={Wcp} m={Mcp}
+Mcn1 v1n vcn na1 0 nch L={Lcn} W={Wcn} m={Mcn}
+Mcn2 v1p vcn na2 0 nch L={Lcn} W={Wcn} m={Mcn}
+M1n  na1 vin ntn 0 nch L={Lin} W={Win} m={Min}
+M2n  na2 vip ntn 0 nch L={Lin} W={Win} m={Min}
+Mtn  ntn vbn 0 0 nch L={Ltn} W={Wtn} m={Mtn}
+Mtc  ntn vcmfb 0 0 nch L={Ltn} W={Wtn} m={Mtc}
+*
+* ---- stage 2 (class-AB) ----
+Mon1 von v1n 0 0 nch L={Lon} W={Won} m={Mon}
+Mop1 von gp1 vdd vdd pch L={Lop} W={Wop} m={Mop}
+Cls1 v1n gp1 {Cls}
+Rb1  gp1 vbo {Rb}
+Mon2 vop v1p 0 0 nch L={Lon} W={Won} m={Mon}
+Mop2 vop gp2 vdd vdd pch L={Lop} W={Wop} m={Mop}
+Cls2 v1p gp2 {Cls}
+Rb2  gp2 vbo {Rb}
+*
+* ---- compensation ----
+Cc1 von na1 {fcc*Cc}
+Cc2 vop na2 {fcc*Cc}
+Cc3 von nb1 {(1-fcc)*Cc}
+Cc4 vop nb2 {(1-fcc)*Cc}
+*
+* ---- CMFB ----
+Rcm1 vop vcms {Rcm}
+Rcm2 von vcms {Rcm}
+Ccm1 vop vcms {Ccm}
+Ccm2 von vcms {Ccm}
+Mct  ncs vbp vdd vdd pch L={Lt} W={Wctl} m=1
+Mc1  vcmfb vcms ncs ncs pch L={Lcm} W={Wcm} m=1
+Mc2  ncm2 vcmr ncs ncs pch L={Lcm} W={Wcm} m=1
+Mc3  vcmfb vcmfb 0 0 nch L={Ltn} W={Wc3} m=1
+Mc4  ncm2 ncm2 0 0 nch L={Ltn} W={Wc3} m=1
+* ---- end amp.inc ----
+
+.tran 0 {tstop} 0 2p
+.option plotwinsize=0 method=trap reltol=1e-4
+* quick-look measurements (tools/metrics.py is the authority: floors, ringing, tau, power rule)
+.meas tran vg25 FIND V(vip,vin) AT={tstep+Tsettle}
+.meas tran vod25 FIND V(von,vop) AT={tstep+Tsettle}
+.meas tran A25 PARAM 20*log10(VoutStep/(abs(vg25)+1n))
+.meas tran Ab25 PARAM 20*log10(VoutStep/(abs(VoutStep-vod25)+1n))
+.meas tran errmax MAX abs(VoutStep-V(von,vop)) FROM={tstep+Tsettle} TO={tstop}
+.meas tran Abfloor PARAM 20*log10(VoutStep/(errmax+1n))
+.meas tran Iset AVG -I(Vdd) FROM={tstep} TO={tstep+Tsettle}
+.meas tran Iq AVG -I(Vdd) FROM={tstep-5n} TO={tstep}
+.meas tran P_mW PARAM 1.8*max(Iset,Iq)*1e3
+.end

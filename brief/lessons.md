@@ -1,7 +1,7 @@
 # Lessons from attempt 1 (failed, 3.5) and the passing example (7.5)
 
-Read once at the start. Each line cost real time to learn. Details: `legacy/attempt-1-2026-06/NOTE.md`
-and `legacy/attempt-1-2026-06/claude-memory/`.
+Read once at the start. Each line cost real time to learn. Details: `legacy-v1/attempt-1-2026-06/NOTE.md`
+and `legacy-v1/attempt-1-2026-06/claude-memory/`.
 
 ## Why attempt 1 failed, and what to do instead
 

@@ -4,7 +4,12 @@
 (0.18 µm CMOS, `log018.l`, 1.8 V, LTspice) that meets every spec in `brief/spec.md` at the
 **lowest possible power**, then write the 8-page report. Deadline **Sun 8 Nov 2026 23:59**.
 **Power is the grade.** Attempt 1 failed (3.5: missed settling at 2.04 mW). A friend passed with
-7.5 at 1.24 mW. Target: every check PASS at **≤ 0.6 mW**, stretch ≤ 0.45 mW (`brief/design-strategy.md`).
+7.5 at 1.24 mW. Attempt 2 (class-AB current reuse, 0.19 mW, FoM 183 dB) was dropped after the TA
+meeting of 12 Oct 2026 (`brief/ta-feedback-2026-10-12.md`): too complicated, implausible FoM, odd
+settling curve. **Attempt 3 (now): the simple architecture the TA recommends**, telescopic cascode
+stage 1 + common-source stage 2, Miller compensation, continuous-time CMFB, replica (EE4520-style)
+bias block. Target: every check PASS (including FoM ≤ 177 dB plausibility) at the lowest power this
+architecture reaches, with a clean two-stage settling curve the TA will recognise.
 
 ## Start of every session (in this order)
 
@@ -12,8 +17,9 @@
 2. `uv run tools/selftest.py` (10 s). If it fails, fix the toolchain before anything else.
 3. Do the next unchecked step of the plan in `PROGRESS.md`.
 
-First session only, also read: `brief/spec.md`, `brief/lessons.md`, `brief/design-strategy.md`,
-`example/README.md`. Do not browse `legacy/` unless a lesson points there. Never `Read` `.raw` files.
+First session only, also read: `brief/spec.md`, `brief/ta-feedback-2026-10-12.md` (overrides older
+strategy), `brief/lessons.md`, `brief/design-strategy.md`, `example/README.md`. Do not browse
+`legacy-v1/` or `legacy-v2/` unless a lesson points there. Never `Read` `.raw` files.
 
 ## Tools (run from the repo root; outputs are compact by design)
 
@@ -82,4 +88,5 @@ Agents: `spec-auditor` (before claiming any milestone), `report-reviewer` (befor
 `brief/` assignment, spec, clarifications, lessons, strategy (read-only sources) · `design/templates/`
 benches · `design/work/` iteration · `design/final/` drawn deliverable `.asc` · `tools/` Python tooling
 (uv project) · `results/` generated (gitignored) · `report/` LaTeX · `example/` passing reference ·
-`reference/ee4520/` prior course (D6 baseline, bias block) · `models/` `log018.l` · `legacy/` attempt 1 (frozen).
+`reference/ee4520/` prior course (D6 baseline, bias block) · `models/` `log018.l` · `legacy-v1/` attempt 1
+(June 2026, frozen) · `legacy-v2/` attempt 2 (class-AB resit, frozen, see README history).

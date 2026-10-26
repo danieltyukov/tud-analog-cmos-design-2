@@ -33,6 +33,10 @@ import metrics as M  # noqa: E402
 REPO = lt.REPO
 # Margins the design must keep (robust to re-simulation noise; see brief/spec.md section 4)
 MARGIN = {"SNR": 0.05, "A": 0.3, "Abeta": 0.3, "Tsettle_ns": 0.2}
+# Plausibility limit from the TA (brief/ta-feedback-2026-10-12.md): no design in this course has
+# exceeded about 176 to 177 dB; above that something is wrong. tau per dB window is printed as a
+# diagnostic only (the passing example accelerates into its first zero crossing, ratio 1.53).
+FOM_MAX_DB = 177.0
 EE4520 = {"P_mW": 0.1119, "tau_ns": 497.4, "SNR_dB": 80.85, "FoM_dB": 175.20}
 
 
@@ -76,7 +80,13 @@ def evaluate(tran: Path, noise: Path, tag: str, plots: bool = True) -> dict:
     cin, cfb, cl = p.get("cin"), p.get("cfb"), p.get("cload")
     vout = tm["VoutStep_V"]
     ktc = M.ktc_uV(cin)
-    vn_amp = nm["Vn_amp_uVrms"]
+    # The amplifier noise is LTspice's own `.meas noise Vn_amp INTEG V(onoise)` (the number a TA sees in the
+    # log); the trapezoid integral of the raw data is the cross-check (they agree to about 0.002 %).
+    vn_trap = nm["Vn_amp_uVrms"]
+    vn_meas = rn["meas"].get("vn_amp")
+    vn_amp = vn_meas * 1e6 if vn_meas else vn_trap
+    if abs(vn_amp - vn_trap) > 1e-3 * vn_trap:
+        raise SystemExit(f"noise integral mismatch: LTspice .meas {vn_amp:.4f} uV vs raw trapezoid {vn_trap:.4f} uV")
     vn_tot = math.hypot(ktc, vn_amp)
     snr = M.snr_db(vout, vn_tot)
     P = tm.get("P_report_mW", math.nan)
@@ -122,6 +132,7 @@ def evaluate(tran: Path, noise: Path, tag: str, plots: bool = True) -> dict:
         "sim runs >= 30 ns past deadline": tm["checks"]["sim_long_enough"],
         "Power < 3 mW": P < 3.0,
         "FoM_dB > 170": fom_db > 170,
+        "FoM_dB <= 177 (TA plausibility)": fom_db <= FOM_MAX_DB,
         "all MOSFETs saturated": not not_sat,
         "lint: no errors": not lint_errs,
         "beta_actual <= beta_ideal (physics sanity)": tm["beta_actual"] <= beta * 1.01,
@@ -145,10 +156,12 @@ def evaluate(tran: Path, noise: Path, tag: str, plots: bool = True) -> dict:
             "Abeta_shift_at_25ns_dB": tm["Abeta_shift_at_25ns_dB"],
             "A_floor_dB": tm["A_floor_dB"], "Abeta_floor_dB": tm["Abeta_floor_dB"],
             "first_peak_A_ns": tm["first_peak_A_ns"], "first_peak_Abeta_ns": tm["first_peak_Abeta_ns"],
-            "slew_max_V_per_us": tm["slew_max_V_per_us"], "I_quiescent_mA": tm.get("I_quiescent_mA"),
+            "slew_max_V_per_us": tm["slew_max_V_per_us"],
+            "tau_windows_ns": tm["tau_windows_ns"], "tau_ratio": tm["tau_ratio"], "I_quiescent_mA": tm.get("I_quiescent_mA"),
             "I_settle_window_mA": tm.get("I_settle_window_mA"), "NEF_diff": nef_diff, "C_Leff_pF": c_leff * 1e12,
             "min_sat_margin_mV": min_margin * 1e3, "not_saturated": not_sat, "n_mosfets": len(mos),
             "noise_top_uVrms": nm["top_contributors_uVrms"], "flicker_corner_Hz_est": nm["flicker_corner_Hz_est"],
+            "Vn_amp_source": "LTspice .meas INTEG" if vn_meas else "raw trapezoid", "Vn_amp_trapezoid_uVrms": vn_trap,
             "lint_errors": lint_errs, "EE4520": EE4520,
         },
         "hints": hints,
@@ -194,6 +207,8 @@ def publish(summary: dict, tran_net: Path) -> None:
     x = summary["extra"]
     for k, v in (("BetaIdeal", x["beta_ideal"]), ("BetaActual", x["beta_actual"]), ("GapdB", x["gap_dB"]),
                  ("NEF", x["NEF_diff"]), ("FirstPeak", min(x["first_peak_A_ns"], x["first_peak_Abeta_ns"])),
+                 ("FirstPeakA", x["first_peak_A_ns"]), ("FirstPeakAbeta", x["first_peak_Abeta_ns"]),
+                 ("FlickCornerMHz", x["flicker_corner_Hz_est"] / 1e6),
                  ("Slew", x["slew_max_V_per_us"]), ("CLeff", x["C_Leff_pF"]),
                  ("FoMEEtwenty", x["EE4520"]["FoM_dB"])):
         lines.append(f"\\newcommand{{\\res{k}}}{{{v:.4g}}}")
@@ -222,6 +237,8 @@ def print_summary(s: dict) -> None:
     print(f"beta ideal {x['beta_ideal']:.4f} / actual {x['beta_actual']:.4f} (gap {x['gap_dB']:.2f} dB); "
           f"first peaks A {x['first_peak_A_ns']:.2f} ns, Abeta {x['first_peak_Abeta_ns']:.2f} ns; "
           f"floors A {x['A_floor_dB']:.2f} / Abeta {x['Abeta_floor_dB']:.2f} dB")
+    print("tau windows: " + ", ".join(f"{k} {v:.3f} ns" for k, v in x["tau_windows_ns"].items())
+          + f" (max/min {x['tau_ratio']:.2f})")
     print(f"I quiescent {x['I_quiescent_mA']:.4f} mA, settle-window {x['I_settle_window_mA']:.4f} mA; "
           f"NEF(diff) {x['NEF_diff']:.2f}; min sat margin {x['min_sat_margin_mV']:.0f} mV over {x['n_mosfets']} FETs")
     top = list(x["noise_top_uVrms"].items())[:4]

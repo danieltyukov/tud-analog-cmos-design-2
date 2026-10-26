@@ -1,0 +1,9 @@
+% Shared CircuiTikZ style for the D2/D3 figures (input by main.tex).
+% One drawing per block serves both sheets: \showIfalse = node voltages (D2), \showItrue = currents (D3).
+%   \Vtag{node}   blue node voltage from generated/opvals.tex  (LTspice node name, lower case)
+%   \Itag{device} red branch current from generated/opvals.tex  (device name, lower case)
+\ctikzset{bipoles/length=1.0cm, transistors/arrow pos=end, transistors/scale=0.8}
+\tikzset{every picture/.append style={line cap=round, line join=round, line width=0.6pt}}
+\newif\ifshowI \showIfalse
+\newcommand{\Vtag}[1]{\ifshowI\else\textcolor{blue!60!black}{\footnotesize\opV{#1}}\fi}
+\newcommand{\Itag}[1]{\ifshowI\textcolor{red!65!black}{\footnotesize\opI{#1}}\fi}

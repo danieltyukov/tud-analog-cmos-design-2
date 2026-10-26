@@ -1,28 +1,51 @@
-% Bias block on Vddb (excluded from the amplifier power): ideal reference currents, all fixed multiples of Ib,
-% into diode-connected replicas of the devices they bias; every line decoupled by Cbig.
-% Top row: PMOS replicas (current sinks below). Bottom row: NMOS replicas (current sources from Vddb above).
-\providecommand{\biasP}[7]{% x, y, device, node, device-subscript, current label, line-subscript
-  \draw (#1,#2) node[pmos](B#3){};
-  \draw (B#3.S) -- ++(0,0.25) node[vdd]{};
-  \draw (B#3.D) -- ++(0,-0.3) coordinate(J#3) to[I, l_={$#6$}] ++(0,-1.5) node[ground]{};
-  \draw (B#3.G) -- ++(-0.3,0) |- (J#3) node[circ]{};
-  \draw (J#3) -- ++(1.0,0) coordinate(O#3) to[C, l={$C_{big}$}] ++(0,-1.5) node[ground]{};
-  \node[font=\small,anchor=south west] at (O#3) {$v_{#7}$\,\Vtag{#4}};
-  \node[font=\small,anchor=west,align=left] at ($(B#3.center)+(0.35,0.25)$) {$M_{b#5}$ \Itag{#3}};}
-\providecommand{\biasN}[7]{% x, y, device, node, device-subscript, current label, line-subscript
-  \draw (#1,#2) node[nmos](B#3){};
-  \draw (B#3.S) node[ground]{};
-  \draw (B#3.D) -- ++(0,0.3) coordinate(J#3) to[I, l={$#6$}, invert] ++(0,1.5) node[vdd]{};
-  \draw (B#3.G) -- ++(-0.3,0) |- (J#3) node[circ]{};
-  \draw (J#3) -- ++(1.0,0) coordinate(O#3) to[C, l={$C_{big}$}] ++(0,-1.5) node[ground]{};
-  \node[font=\small,anchor=south west] at (O#3) {$v_{#7}$\,\Vtag{#4}};
-  \node[font=\small,anchor=north east,align=right] at ($(B#3.center)+(-0.45,-0.45)$) {$M_{b#5}$\\\Itag{#3}};}
-\begin{circuitikz}[american, scale=0.85]
+% Bias block on Vddb (excluded from the amplifier power). Replica of one stage-1 half circuit: the P replica
+% (tail unit + input unit with its gate at vcmr) sets vbp, the N replica (NMOS cascode unit + load unit) sets vbn.
+% vcn and vcp come from diodes fed by fixed multiples of Ibnp (EE4520 fig. 6). Every line: Rd + Cbig.
+\begin{circuitikz}[american, scale=0.8]
 \small
-\biasP{0}{0}{mbp}{vbp}{p}{I_b}{bp}
-\biasP{4.2}{0}{mbo}{vbo}{o}{k_oI_b}{bo}
-\biasP{8.4}{0}{mbcp}{vcp}{cp}{k_{cp}I_b}{cp}
-\biasN{0}{-6.0}{mbn}{vbn}{n}{k_nI_b}{bn}
-\biasN{4.2}{-6.0}{mbcn}{vcn}{cn}{k_{cn}I_b}{cn}
-\node[font=\small,align=left,anchor=north west] at (7.6,-5.0) {supply arrows: $V_{ddb}$\\$I_b = \pIb\,\mu$A\\$k_o = \pKo$, $k_n = \pKn$\\$k_{cn} = \pKcn$, $k_{cp} = \pKcp$};
+\def\dn#1#2#3#4{\node[anchor=#4,font=\footnotesize,align=center] at #1 {#2\\\Itag{#3}};}
+% ---- P replica (top left): MBP0 tail unit (gate from the input unit's drain), MBP1 input unit, Ibnp sink
+\draw (0,0) node[pmos,xscale=-1](BP0){};
+\draw (BP0.S) -- ++(0,0.25) node[vdd]{};
+\draw (0,-1.8) node[pmos](BP1){};
+\draw (BP0.D) -- (BP1.S) coordinate[midway](bp0);
+\draw (BP1.G) -- ++(-0.3,0) node[left]{$v_{cmr}$};
+\draw (BP1.D) -- (0,-3.0) coordinate(vbpr) to[I, l_={$I_{bnp}$}] (0,-4.6) node[ground]{};
+\draw (BP0.G) -- (2.7,0 |- BP0.G) -- (2.7,-3.0) -- (vbpr) node[circ]{};
+\draw (2.7,-3.0) node[circ]{} to[R, l_={$R_d$}] (4.3,-3.0) node[circ]{} coordinate(ovbp) to[C, l={$C_{big}$}] (4.3,-4.6) node[ground]{};
+\node[anchor=south west,font=\small] at (ovbp) {$v_{bp}$\,\Vtag{vbp}};
+\node[anchor=east,font=\footnotesize] at ($(bp0)+(-0.1,0)$) {$b_{p0}$\,\Vtag{bp0}};
+\dn{($(BP0.center)+(-1.15,0.15)$)}{$M_{BP0}$}{mbp0}{east}
+\dn{($(BP1.center)+(0.55,-0.1)$)}{$M_{BP1}$}{mbp1}{west}
+% ---- N replica (top right): Ibnp from Vddb, MBN5 cascode unit (gate vcn), MBN7 load unit (gate from the top)
+\draw (9.2,-1.4) node[nmos](BN5){};
+\draw (9.2,-3.4) node[nmos,xscale=-1](BN7){};
+\draw (BN5.D) -- (9.2,-0.5) coordinate(vbnr) to[I, l={$I_{bnp}$}, invert] (9.2,1.1) node[vdd]{};
+\draw (BN5.S) -- (BN7.D) coordinate[midway](bn5);
+\draw (BN5.G) -- ++(-0.3,0) node[left]{$v_{cn}$};
+\draw (BN7.S) node[ground]{};
+\draw (BN7.G) -- (10.6,0 |- BN7.G) -- (10.6,-0.5) -- (vbnr) node[circ]{};
+\draw (10.6,-0.5) node[circ]{} to[R, l_={$R_d$}] (12.5,-0.5) node[circ]{} coordinate(ovbn) to[C, l={$C_{big}$}] (12.5,-2.1) node[ground]{};
+\node[anchor=south west,font=\small] at (ovbn) {$v_{bn}$\,\Vtag{vbn}};
+\node[anchor=east,font=\footnotesize] at ($(bn5)+(-0.1,0)$) {$b_{n5}$\,\Vtag{bn5}};
+\dn{($(BN5.center)+(-0.75,0.85)$)}{$M_{BN5}$}{mbn5}{east}
+\dn{($(BN7.center)+(-0.55,-0.85)$)}{$M_{BN7}$}{mbn7}{east}
+% ---- vcn (bottom left): diode MBN3 fed by kcn Ibnp
+\draw (0,-9.0) node[nmos,xscale=-1](BN3){};
+\draw (BN3.D) -- (0,-8.0) coordinate(vcnr) to[I, l={$k_{cn}I_{bnp}$}, invert] (0,-6.4) node[vdd]{};
+\draw (BN3.S) node[ground]{};
+\draw (BN3.G) -- (2.7,0 |- BN3.G) -- (2.7,-8.0) -- (vcnr) node[circ]{};
+\draw (2.7,-8.0) node[circ]{} to[R, l_={$R_d$}] (4.3,-8.0) node[circ]{} coordinate(ovcn) to[C, l={$C_{big}$}] (4.3,-9.6) node[ground]{};
+\node[anchor=south west,font=\small] at (ovcn) {$v_{cn}$\,\Vtag{vcn}};
+\dn{($(BN3.center)+(-0.55,-0.2)$)}{$M_{BN3}$}{mbn3}{east}
+% ---- vcp (bottom right): diode MBP3 sinking kcp Ibnp
+\draw (9.2,-7.1) node[pmos,xscale=-1](BP3){};
+\draw (BP3.S) -- ++(0,0.25) node[vdd]{};
+\draw (BP3.D) -- (9.2,-8.1) coordinate(vcpr) to[I, l_={$k_{cp}I_{bnp}$}] (9.2,-9.7) node[ground]{};
+\draw (BP3.G) -- (10.6,0 |- BP3.G) -- (10.6,-8.1) -- (vcpr) node[circ]{};
+\draw (10.6,-8.1) node[circ]{} to[R, l_={$R_d$}] (12.5,-8.1) node[circ]{} coordinate(ovcp) to[C, l={$C_{big}$}] (12.5,-9.7) node[ground]{};
+\node[anchor=south west,font=\small] at (ovcp) {$v_{cp}$\,\Vtag{vcp}};
+\dn{($(BP3.center)+(-1.15,0.15)$)}{$M_{BP3}$}{mbp3}{east}
+\node[font=\footnotesize,align=left,anchor=north west] at (-1.6,-10.5) {supply arrows: $V_{ddb}$;
+$I_{bnp} = \pIbnp\,\mu$A, $k_{cn} = \pKcn$, $k_{cp} = \pKcp$\\$R_d = \pRd$\,k$\Omega$, $C_{big} = \resCbig$\,nF};
 \end{circuitikz}

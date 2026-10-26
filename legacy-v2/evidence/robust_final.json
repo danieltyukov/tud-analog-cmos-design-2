@@ -1,0 +1,14 @@
+{
+ "file": "/home/danieltyukov/workspace/tud/tud-analog-cmos-design-2/design/final/amp_tran.asc",
+ "sha": "214d7e368cf1",
+ "pass": true,
+ "worst": {
+  "A25": 84.25377655029409,
+  "Ab25": 69.31892776489298,
+  "Afl": 84.25663757324219,
+  "Abfl": 69.31995391845703,
+  "Ts": 22.309818894826797,
+  "pk": 1000000000.0
+ },
+ "time": "2026-10-06 03:33:55"
+}

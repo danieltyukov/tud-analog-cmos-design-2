@@ -29,7 +29,7 @@ shared params into `amp.inc` and delete them from the benches). Node contract: `
    output extremes: margins ≥ 50 to 100 mV there too, or A0 collapses at the final value.
 2. **Loop gain:** `uv run tools/lt.py run design/work/bench_loop.cir` then
    `uv run tools/metrics.py loop design/work/bench_loop.raw --plot results/loop.pdf`.
-   Targets (two-stage, `brief/design-strategy.md`): fc about 40 MHz, PM 72 to 78°, T0 ≥ 66+15+3 dB.
+   Targets (attempt 3): fc about 35 MHz, PM about 80° with Rz near the p2-cancelling value, T0 ≥ 66+15+3 dB.
 3. **Full evaluation:** `uv run tools/evaluate.py --tran design/work/bench_tran.cir --noise design/work/bench_noise.cir --tag vNN`.
    Read the FAIL lines and the hints. Plots land in `results/vNN/` (look at `d4_settling.png`).
 4. **Robustness:** `uv run tools/robust.py design/work/bench_tran.cir` must PASS before power descent ends.
@@ -39,7 +39,7 @@ shared params into `amp.inc` and delete them from the benches). Node contract: `
 | Symptom | Usual lever |
 |---|---|
 | Aβ floor (static) short | raise $A_0$ at the output extremes: longer L in stage 1, output devices out of triode, less swing |
-| Aβ(25 ns) short, floor fine | more fc (gm1/Cc) or less slewing (tail current, class-AB drive); check PM is not too high |
+| Aβ(25 ns) short, floor fine | more fc (gm1/Cc) or less slewing (tail current, AC-coupled PMOS drive); check PM is not too high |
 | first ringing peak before 25 ns | PM too low: move $p_2$ up (gm2), more Cc, or nulling/cascode-compensation tuning |
 | SNR short | bigger Cc (two-stage noise ≈ αkT/Cc), bigger Cin, more swing, longer L on 1/f-dominant devices |
 | SNR far above 66.3 | shrink Cin / Cc or cut input current: you are paying power for nothing |

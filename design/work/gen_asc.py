@@ -3,10 +3,11 @@
 
   uv run python design/work/gen_asc.py
 
-Every element is a drawn LTspice symbol and every local connection is a drawn wire; net-label flags
-are used only for sheet-spanning nets (ground, vdd, vddb, vcmr, bias lines, the CMFB control line,
-and the amplifier ports vip/vin/vop/von where they cross blocks). Parameters come from the .param
-lines of design/work/amp.inc and the bench files, so the drawing always matches the netlist.
+Attempt 3: telescopic cascode stage 1 + push-pull common-source stage 2, Miller Cc + Rz, continuous-time
+CMFB, replica bias block on Vddb. Every element is a drawn LTspice symbol and every local connection is a
+drawn wire; net-label flags are used only for sheet-spanning nets (ground, vdd, vddb, vcmr, bias lines,
+the CMFB control line and the amplifier ports vip/vin/vop/von where they cross blocks). Parameters come
+from the .param lines of design/work/amp.inc and the bench files, so the drawing matches the netlist.
 Pin offsets are the LTspice XVII symbol geometry (nmos4/pmos4/res/cap/current/voltage).
 """
 from __future__ import annotations
@@ -34,15 +35,13 @@ class Sheet:
         return d
 
     # ---------------------------------------------------------------- primitives
-    def symbol(self, sym, ref, x, y, rot, value=None, value2=None, extra=None):
+    def symbol(self, sym, ref, x, y, rot, value=None, value2=None):
         self.lines.append(f"SYMBOL {sym} {x} {y} {rot}")
         self.lines.append(f"SYMATTR InstName {ref}")
         if value is not None:
             self.lines.append(f"SYMATTR Value {value}")
         if value2 is not None:
             self.lines.append(f"SYMATTR Value2 {value2}")
-        for k, v in (extra or {}).items():
-            self.lines.append(f"SYMATTR {k} {v}")
 
     def wire(self, *pts):
         """Polyline through points; every segment must be horizontal or vertical."""
@@ -70,6 +69,7 @@ class Sheet:
     # ---------------------------------------------------------------- devices
     # Each helper places a device by its drain/source spine x and body top y and returns pin points.
     def nmos(self, ref, sx, ty, gate="left", value2=""):
+        """Drain at the top (ty), source at the bottom (ty+96)."""
         if gate == "left":
             self.symbol("nmos4", ref, sx - 48, ty, "R0", "nch", value2)
             g = (sx - 48, ty + 80)
@@ -137,7 +137,7 @@ class Sheet:
             out += [(a[0], a[1], b[0], b[1]) for a, b in zip(chain, chain[1:])]
         self.wires = out
 
-    def render(self, w=5600, h=3400):
+    def render(self, w=5200, h=3400):
         self.split_wires()
         out = ["Version 4", f"SHEET 1 {w} {h}"]
         out += [f"WIRE {a} {b} {c} {d}" for a, b, c, d in self.wires]
@@ -155,105 +155,172 @@ def params(path: Path) -> list[str]:
     return out
 
 
-def mos2(L, W, M):
-    m = M if M.isdigit() else f"{{{M}}}"
+def mos(L, W, M):
+    m = M if str(M).isdigit() else f"{{{M}}}"
     return f"l={{{L}}} w={{{W}}} m={m}"
 
 
 def build(analysis: str) -> str:
     s = Sheet()
+    TOP, BOT = 224, 1600                       # block row
+    # ======================================================================= Bias block (left)
+    s.box(0, TOP, 1696, BOT, "Bias block: replica of the stage-1 half circuit (on Vddb, Cbig decoupling)")
+
+    def decouple(node, rref, cref, line, x0):
+        """node -> Rdec -> bias line, Cbig from the line to ground; returns the line point."""
+        x, y = node
+        s.wire(node, (x0, y))
+        r = s.res_h(rref, x0, y, "{Rdec}")
+        xc = x0 + 128
+        s.wire(r["A"], (xc, y))
+        c = s.cap_v(cref, xc, y + 32, "{Cbig}")
+        s.wire((xc, y), c["A"])
+        s.flag(c["B"], "0")
+        s.flag((xc, y), line)
+
+    # P replica: tail unit + input unit (gate at vcmr), tail gate from the input unit's drain, Ibnp sink
+    x = 176
+    mbp0 = s.pmos("MBP0", x, 400, "left", mos("Lt", "Wt", 1))
+    mbp1 = s.pmos("MBP1", x, 560, "left", mos("Li", "Wi", 1))
+    s.flag(mbp0["S"], "vddb"); s.flag(mbp0["B"], "vddb")
+    s.wire(mbp0["D"], mbp1["S"])
+    s.wire(mbp1["B"], (x + 32, mbp1["B"][1]), (x + 32, 528), (x, 528))   # bulk = source (bp0)
+    s.flag(mbp1["G"], "vcmr")
+    ibnp = s.isrc("IBNP", x, 752, "{Ibnp}")
+    s.wire(mbp1["D"], ibnp["+"])
+    s.flag(ibnp["-"], "0")
+    s.wire(mbp0["G"], (64, mbp0["G"][1]), (64, 704), (x, 704))          # self-cascode: tail gate = vbpr
+    decouple((x, 704), "RD1", "CD1", "vbp", 240)
+    s.flag((x, 528), "bp0"); s.flag((x, 704), "vbpr")
+    s.text(x - 160, 1040, "P replica: tail unit + input unit", size=1)
+
+    # N replica: Ibnp into NMOS cascode unit + load unit, load gate from the cascode drain (vbnr)
+    x = 624
+    ibnn = s.isrc("IBNN", x, 400, "{Ibnp}")
+    s.flag(ibnn["+"], "vddb")
+    mbn5 = s.nmos("MBN5", x, 560, "left", mos("Lcn", "Wcn", 1))
+    mbn7 = s.nmos("MBN7", x, 720, "left", mos("Ll", "Wl", 1))
+    s.wire(ibnn["-"], mbn5["D"])
+    s.wire(mbn5["S"], mbn7["D"])
+    s.flag(mbn5["G"], "vcn"); s.flag(mbn5["B"], "0")
+    s.flag(mbn7["S"], "0"); s.flag(mbn7["B"], "0")
+    s.wire(mbn7["G"], (512, mbn7["G"][1]), (512, 528), (x, 528))         # load gate = cascode drain
+    decouple((x, 528), "RD2", "CD2", "vbn", 688)
+    s.flag((x, 528), "vbnr"); s.flag((x, 688), "bn5")
+    s.text(x - 128, 1040, "N replica: cascode unit + load unit", size=1)
+
+    # Vcn: diode-connected NMOS fed by Ibcn = kcn*Ibnp
+    x = 1056
+    ibcn = s.isrc("IBCN", x, 400, "{kcn*Ibnp}")
+    s.flag(ibcn["+"], "vddb")
+    mbn3 = s.nmos("MBN3", x, 560, "left", mos("Lbcn", "Wbcn", 1))
+    s.wire(ibcn["-"], mbn3["D"])
+    s.wire(mbn3["G"], (976, mbn3["G"][1]), (976, 528), (x, 528))
+    s.flag(mbn3["S"], "0"); s.flag(mbn3["B"], "0")
+    decouple((x, 528), "RD3", "CD3", "vcn", 1120)
+    s.flag((x, 528), "vcnr")
+
+    # Vcp: diode-connected PMOS sinking Ibcp = kcp*Ibnp
+    x = 1056
+    mbp3 = s.pmos("MBP3", x, 880, "left", mos("Lbcp", "Wbcp", 1))
+    s.flag(mbp3["S"], "vddb"); s.flag(mbp3["B"], "vddb")
+    ibcp = s.isrc("IBCP", x, 1072, "{kcp*Ibnp}")
+    s.wire(mbp3["D"], ibcp["+"])
+    s.flag(ibcp["-"], "0")
+    s.wire(mbp3["G"], (976, mbp3["G"][1]), (976, 1024), (x, 1024))
+    decouple((x, 1024), "RD4", "CD4", "vcp", 1120)
+    s.flag((x, 1024), "vcpr")
+    s.text(912, 1360, "cascode gates (EE4520 fig. 6: Ibcn, Ibcp)", size=1)
+
     # ======================================================================= Stage 1 (center)
-    XA, XB, XC = 2240, 2752, 2496
-    s.box(2080, 224, 2912, 1600, "Stage 1 (complementary input)")
-    amp_txt = (WORK / "amp.inc").read_text()
-    tail_w = "Wt*tsc" if re.search(r"(?m)^\.param[^\n]*\btsc=", amp_txt) else "Wt"   # stage-1 current scale
-    mtp = s.pmos("Mtp", XC, 400, "left", mos2("Lt", tail_w, "Mt"))
-    s.flag(mtp["S"], "vdd"); s.flag(mtp["B"], "vdd"); s.flag(mtp["G"], "vbp")
-    s.wire(mtp["D"], (XC, 560))
-    s.wire((XA, 560), (XB, 560))                                   # ntp
-    m1p = s.pmos("M1p", XA, 624, "left", mos2("Lip", "Wip", "Mip"))
-    m2p = s.pmos("M2p", XB, 624, "right", mos2("Lip", "Wip", "Mip"))
-    s.wire((XA, 560), m1p["S"]); s.wire((XB, 560), m2p["S"])
-    s.wire(m1p["B"], (XA + 32, m1p["B"][1]), (XA + 32, 560))       # bulk = source (ntp)
-    s.wire(m2p["B"], (XB - 32, m2p["B"][1]), (XB - 32, 560))
-    mcp1 = s.pmos("Mcp1", XA, 784, "left", mos2("Lcp", "Wcp", "Mcp"))
-    mcp2 = s.pmos("Mcp2", XB, 784, "right", mos2("Lcp", "Wcp", "Mcp"))
-    s.wire(m1p["D"], mcp1["S"]); s.wire(m2p["D"], mcp2["S"])        # nb1, nb2
-    for m in (mcp1, mcp2):
+    XA, XB, XC = 2560, 3072, 2816
+    s.box(2400, TOP, 3232, BOT, "Stage 1: PMOS-input telescopic cascode")
+    m0 = s.pmos("M0", XC, 400, "left", mos("Lt", "Wt", "2*N"))
+    s.flag(m0["S"], "vdd"); s.flag(m0["B"], "vdd"); s.flag(m0["G"], "vbp")
+    s.wire(m0["D"], (XC, 560))
+    s.wire((XA, 560), (XB, 560))                                    # tail
+    m1 = s.pmos("M1", XA, 624, "left", mos("Li", "Wi", "N"))
+    m2 = s.pmos("M2", XB, 624, "right", mos("Li", "Wi", "N"))
+    s.wire((XA, 560), m1["S"]); s.wire((XB, 560), m2["S"])
+    s.wire(m1["B"], (XA + 32, m1["B"][1]), (XA + 32, 560))         # bulk = tail
+    s.wire(m2["B"], (XB - 32, m2["B"][1]), (XB - 32, 560))
+    s.flag(m1["G"], "vip"); s.flag(m2["G"], "vin")
+    m3 = s.pmos("M3", XA, 784, "left", mos("Lcp", "Wcp", "N"))
+    m4 = s.pmos("M4", XB, 784, "right", mos("Lcp", "Wcp", "N"))
+    s.wire(m1["D"], m3["S"]); s.wire(m2["D"], m4["S"])             # a1p, a1n
+    for m in (m3, m4):
         s.flag(m["G"], "vcp"); s.flag(m["B"], "vdd")
-    mcn1 = s.nmos("Mcn1", XA, 976, "left", mos2("Lcn", "Wcn", "Mcn"))
-    mcn2 = s.nmos("Mcn2", XB, 976, "right", mos2("Lcn", "Wcn", "Mcn"))
-    s.wire(mcp1["D"], mcn1["D"]); s.wire(mcp2["D"], mcn2["D"])      # v1n, v1p
-    for m in (mcn1, mcn2):
+    m5 = s.nmos("M5", XA, 944, "left", mos("Lcn", "Wcn", "N"))
+    m6 = s.nmos("M6", XB, 944, "right", mos("Lcn", "Wcn", "N"))
+    s.wire(m3["D"], m5["D"]); s.wire(m4["D"], m6["D"])             # x1p, x1n
+    for m in (m5, m6):
         s.flag(m["G"], "vcn"); s.flag(m["B"], "0")
-    m1n = s.nmos("M1n", XA, 1136, "left", mos2("Lin", "Win", "Min"))
-    m2n = s.nmos("M2n", XB, 1136, "right", mos2("Lin", "Win", "Min"))
-    s.wire(mcn1["S"], m1n["D"]); s.wire(mcn2["S"], m2n["D"])        # na1, na2
-    s.flag(m1n["B"], "0"); s.flag(m2n["B"], "0")
-    s.wire(m1n["S"], (XA, 1296), (XB, 1296), m2n["S"])               # ntn
-    mtn = s.nmos("Mtn", XC - 96, 1360, "left", mos2("Ltn", "Wtn", "Mtn"))
-    mtc = s.nmos("Mtc", XC + 96, 1360, "right", mos2("Ltn", "Wtn", "Mtc"))
-    s.wire(mtn["D"], (XC - 96, 1296)); s.wire(mtc["D"], (XC + 96, 1296))
-    for m in (mtn, mtc):
+    m7 = s.nmos("M7", XA, 1104, "left", mos("Ll", "Wl", "N-Ncm"))
+    m8 = s.nmos("M8", XB, 1104, "right", mos("Ll", "Wl", "N-Ncm"))
+    m7c = s.nmos("M7C", XA + 176, 1104, "left", mos("Ll", "Wl", "Ncm"))
+    m8c = s.nmos("M8C", XB - 176, 1104, "right", mos("Ll", "Wl", "Ncm"))
+    s.wire(m5["S"], m7["D"]); s.wire(m6["S"], m8["D"])             # b1p, b1n
+    s.wire(m7c["D"], (XA + 176, 1072), (XA, 1072))
+    s.wire(m8c["D"], (XB - 176, 1072), (XB, 1072))
+    for m in (m7, m8, m7c, m8c):
         s.flag(m["S"], "0"); s.flag(m["B"], "0")
-    s.flag(mtn["G"], "vbn"); s.flag(mtc["G"], "vcmfb")
-    # inputs: one vertical per side joins the PMOS and NMOS input gates
-    xin_a, xin_b = XA - 128, XB + 128
-    s.wire(m1p["G"], (xin_a, m1p["G"][1]), (xin_a, m1n["G"][1]), m1n["G"])
-    s.wire(m2p["G"], (xin_b, m2p["G"][1]), (xin_b, m2n["G"][1]), m2n["G"])
-    s.flag((xin_a, 928 + 96), "vin"); s.flag((xin_b, 928 + 96), "vip")
-    # node-name tags (nets already wired; the names make the report's D2/D3 values traceable)
-    for pt, nm in (((XC, 560), "ntp"), ((XA, 752), "nb1"), ((XB, 752), "nb2"), ((XA, 1104), "na1"),
-                   ((XB, 1104), "na2"), ((XC, 1296), "ntn")):
+    s.flag(m7["G"], "vbn"); s.flag(m8["G"], "vbn")
+    s.flag(m7c["G"], "vcmfb"); s.flag(m8c["G"], "vcmfb")
+    s.text(XA + 48, 1344, "loads: N-Ncm units on vbn (replica), Ncm units on the CMFB line", size=1)
+    # node-name tags on nets that are already wired (they make the report's D2/D3 values traceable)
+    for pt, nm in (((XC, 560), "tail"), ((XA, 752), "a1p"), ((XB, 752), "a1n"), ((XA, 912), "x1p"),
+                   ((XB, 912), "x1n"), ((XA, 1072), "b1p"), ((XB, 1072), "b1n")):
         s.flag(pt, nm)
-    # C1d across the two stage-1 outputs
-    if re.search(r"(?m)^C1d\s", amp_txt):   # optional damping cap between the stage-1 outputs
-        c1d = s.cap_h("C1d", XC - 32, 928, "{C1d}")
-        s.wire((XA, 928), c1d["B"]); s.wire(c1d["A"], (XB, 928))
 
-    # ======================================================================= Stage 2 + compensation, side a (left)
+    # ======================================================================= Stage 2 + compensation (both sides)
     def out_stage(side):
-        sgn = -1 if side == "a" else 1
-        X1 = XA if side == "a" else XB
+        sgn = -1 if side == "p" else 1
+        X1 = XA if side == "p" else XB
         XO = X1 + sgn * 560                       # output spine
-        XL = X1 + sgn * 336                       # v1 / level-shift column
+        XL = X1 + sgn * 336                       # x1 / level-shift column
         XR = X1 + sgn * 448                       # Rb column
-        k = "1" if side == "a" else "2"
-        out, v1 = ("von", "v1n") if side == "a" else ("vop", "v1p")
-        gside = "right" if side == "a" else "left"
-        bx1, bx2 = (XO - 112, X1 - 176) if side == "a" else (X1 + 176, XO + 112)
-        s.box(bx1, 224, bx2, 1600, f"Stage 2{'A' if side == 'a' else 'B'} + comp.")
-        mop = s.pmos(f"Mop{k}", XO, 400, gside, mos2("Lop", "Wop", "Mop"))
-        mon = s.nmos(f"Mon{k}", XO, 1136, gside, mos2("Lon", "Won", "Mon"))
-        s.flag(mop["S"], "vdd"); s.flag(mop["B"], "vdd"); s.flag(mon["S"], "0"); s.flag(mon["B"], "0")
-        s.wire(mop["D"], mon["D"])                # output node
-        s.flag((XO, 816), out)
-        # level shift: Cls from v1 to gate, Rb from gate to vbo
-        cls = s.cap_v(f"Cls{k}", XL, 560, "{Cls}")
-        rb = s.res_v(f"Rb{k}", XR, mop["G"][1], "{Rb}")
-        s.wire(mop["G"], rb["A"], (XL, mop["G"][1]), cls["A"])
-        s.flag(rb["B"], "vbo")
-        s.wire(cls["B"], (XL, 928), (X1, 928))     # v1 bus
-        s.wire((XL, 928), (XL, mon["G"][1]), mon["G"])
-        s.flag((XL, 928), v1); s.flag((XL, mop["G"][1]), f"gp{k}")
-        # compensation caps: output -> PMOS-cascode source (nb) and -> NMOS-cascode source (na)
-        ylo, yhi = 752, 1104
-        lx = XO + 96 if side == "a" else XO - 160
-        for name, yy in ((f"Cc{3 if k == '1' else 4}", ylo), (f"Cc{k}", yhi)):
-            c = s.cap_h(name, lx, yy, "{(1-fcc)*Cc}" if yy == ylo else "{fcc*Cc}")
-            near, far = (c["B"], c["A"]) if side == "a" else (c["A"], c["B"])
-            s.wire(near, (XO, yy)); s.wire(far, (X1, yy))
+        k = "1" if side == "p" else "2"
+        out, x1 = ("vop", "x1p") if side == "p" else ("von", "x1n")
+        mn, mp = ("M9", "M11") if side == "p" else ("M10", "M12")
+        gside = "right" if side == "p" else "left"
+        bx1, bx2 = (XO - 112, X1 - 176) if side == "p" else (X1 + 176, XO + 112)
+        s.box(bx1, TOP, bx2, BOT, f"Stage 2 ({out}) + Cc, Rz")
+        mpd = s.pmos(mp, XO, 400, gside, mos("Lt", "Wt", "M2"))
+        mnd = s.nmos(mn, XO, 1104, gside, "l={Ld} w={Wd*M2/20} m={Md}")
+        s.flag(mpd["S"], "vdd"); s.flag(mpd["B"], "vdd"); s.flag(mnd["S"], "0"); s.flag(mnd["B"], "0")
+        s.wire(mpd["D"], mnd["D"])                # output node
+        s.flag((XO, 800), out)
+        # level shift: Cls from x1 to the PMOS gate, Rb from the gate to vbp
+        cls = s.cap_v(f"CLS{k}", XL, 560, "{Cls}")
+        rb = s.res_v(f"RB{k}", XR, mpd["G"][1], "{Rb}")
+        s.wire(mpd["G"], rb["A"], (XL, mpd["G"][1]), cls["A"])
+        s.flag(rb["B"], "vbp")
+        s.wire(cls["B"], (XL, 912), (X1, 912))   # x1 bus into stage 1
+        s.wire((XL, 912), (XL, mnd["G"][1]), mnd["G"])
+        # Miller compensation: x1 - Cc - Rz - output
+        yc = 1024
+        if side == "p":
+            rz = s.res_h(f"RZ{k}", XO + 32, yc, "{Rz}")
+            cc = s.cap_h(f"CC{k}", XO + 128, yc, "{Cc}")
+            s.wire((XO, yc), rz["B"]); s.wire(rz["A"], cc["B"]); s.wire(cc["A"], (XL, yc))
+            s.flag(rz["A"], "zp")
+        else:
+            cc = s.cap_h(f"CC{k}", XL + 32, yc, "{Cc}")
+            rz = s.res_h(f"RZ{k}", XL + 112, yc, "{Rz}")
+            s.wire((XL, yc), cc["B"]); s.wire(cc["A"], rz["B"]); s.wire(rz["A"], (XO, yc))
+            s.flag(cc["A"], "zn")
+        s.flag((XL, mpd["G"][1]), f"gp{k}")
 
-    out_stage("a")
-    out_stage("b")
+    out_stage("p")
+    out_stage("n")
 
     # ======================================================================= CMFB (right)
-    X0 = 3600
-    s.box(X0, 224, X0 + 1040, 1600, "CMFB (continuous time)")
-    r1 = s.res_h("Rcm1", X0 + 96, 480, "{Rcm}")
-    r2 = s.res_h("Rcm2", X0 + 96, 640, "{Rcm}")
-    c1 = s.cap_h("Ccm1", X0 + 96, 400, "{Ccm}")
-    c2 = s.cap_h("Ccm2", X0 + 96, 720, "{Ccm}")
+    X0 = 3872
+    s.box(X0, TOP, X0 + 1040, BOT, "CMFB (continuous time, on Vdd)")
+    r1 = s.res_h("RCM1", X0 + 96, 480, "{Rcm}")
+    r2 = s.res_h("RCM2", X0 + 96, 640, "{Rcm}")
+    c1 = s.cap_h("CCM1", X0 + 96, 400, "{Ccm}")
+    c2 = s.cap_h("CCM2", X0 + 96, 720, "{Ccm}")
     xs = X0 + 304                               # vcms column
     s.wire(r1["B"], (X0 + 64, 480)); s.wire(c1["B"], (X0 + 64, 400), (X0 + 64, 480))
     s.wire(r2["B"], (X0 + 64, 640)); s.wire(c2["B"], (X0 + 64, 720), (X0 + 64, 640))
@@ -261,19 +328,19 @@ def build(analysis: str) -> str:
     s.wire(c1["A"], (xs, 400), (xs, 720), c2["A"])
     s.wire(r1["A"], (xs, 480)); s.wire(r2["A"], (xs, 640))
     xp1, xp2 = X0 + 512, X0 + 800
-    mct = s.pmos("Mct", (xp1 + xp2) // 2, 400, "left", mos2("Lt", "Wctl", "1"))
-    s.flag(mct["S"], "vdd"); s.flag(mct["B"], "vdd"); s.flag(mct["G"], "vbp")
-    s.wire(mct["D"], ((xp1 + xp2) // 2, 576))
-    s.wire((xp1, 576), (xp2, 576))              # ncs
-    mc1 = s.pmos("Mc1", xp1, 640, "left", mos2("Lcm", "Wcm", "1"))
-    mc2 = s.pmos("Mc2", xp2, 640, "right", mos2("Lcm", "Wcm", "1"))
+    xm = (xp1 + xp2) // 2
+    mc0 = s.pmos("MC0", xm, 400, "left", mos("Lt", "Wt", "Mcmt"))
+    s.flag(mc0["S"], "vdd"); s.flag(mc0["B"], "vdd"); s.flag(mc0["G"], "vbp")
+    s.wire(mc0["D"], (xm, 576))
+    s.wire((xp1, 576), (xp2, 576))              # cmt
+    mc1 = s.pmos("MC1", xp1, 640, "left", mos("Lcm", "Wcm", 1))
+    mc2 = s.pmos("MC2", xp2, 640, "right", mos("Lcm", "Wcm", 1))
     s.wire((xp1, 576), mc1["S"]); s.wire((xp2, 576), mc2["S"])
-    s.wire(mc1["B"], (xp1 + 32, mc1["B"][1]), (xp1 + 32, 576))
-    s.wire(mc2["B"], (xp2 - 32, mc2["B"][1]), (xp2 - 32, 576))
-    s.wire((xs, 560), (xs + 64, 560), (xs + 64, mc1["G"][1]), mc1["G"])   # vcms -> Mc1 gate
+    s.flag(mc1["B"], "vdd"); s.flag(mc2["B"], "vdd")
+    s.wire((xs, 560), (xs + 64, 560), (xs + 64, mc1["G"][1]), mc1["G"])   # vcms -> MC1 gate
     s.flag(mc2["G"], "vcmr")
-    mc3 = s.nmos("Mc3", xp1, 960, "right", mos2("Ltn", "Wc3", "1"))
-    mc4 = s.nmos("Mc4", xp2, 960, "left", mos2("Ltn", "Wc3", "1"))
+    mc3 = s.nmos("MC3", xp1, 960, "right", mos("Ll", "Wl", 1))
+    mc4 = s.nmos("MC4", xp2, 960, "left", mos("Ll", "Wl", 1))
     s.wire(mc1["D"], mc3["D"]); s.wire(mc2["D"], mc4["D"])
     s.wire(mc3["G"], (xp1 + 80, mc3["G"][1]), (xp1 + 80, 896), (xp1, 896))   # diode
     s.wire(mc4["G"], (xp2 - 80, mc4["G"][1]), (xp2 - 80, 896), (xp2, 896))
@@ -281,36 +348,7 @@ def build(analysis: str) -> str:
         s.flag(m["S"], "0"); s.flag(m["B"], "0")
     s.wire((xp1, 896), (xp1 - 192, 896))
     s.flag((xp1 - 192, 896), "vcmfb")
-    s.flag((xs, 560), "vcms"); s.flag(((xp1 + xp2) // 2, 576), "ncs"); s.flag((xp2, 896), "ncm2")
-
-    # ======================================================================= Bias block (left, top)
-    s.box(0, 224, 1120, 1600, "Bias block (on Vddb, decoupled by Cbig)")
-    cols = [("p", "Ibp", "{Ib}", "Mbp", ("Lt", "Wt"), "vbp", "Cb1"),
-            ("n", "Ibn", "{kn*Ib}", "Mbn", ("Ltn", "Wtn"), "vbn", "Cb2"),
-            ("p", "Ibo", "{ko*Ib}", "Mbo", ("Lop", "Wop"), "vbo", "Cb3"),
-            ("n", "Ibcn", "{kcn*Ib}", "Mbcn", ("Lbcn", "Wbcn"), "vcn", "Cb4"),
-            ("p", "Ibcp", "{kcp*Ib}", "Mbcp", ("Lbcp", "Wbcp"), "vcp", "Cb5")]
-    for i, (typ, iref, ival, mref, (L, W), line, cref) in enumerate(cols):
-        x = 112 + i * 208
-        if typ == "p":
-            m = s.pmos(mref, x, 432, "left", f"l={{{L}}} w={{{W}}} m=1")
-            s.flag(m["S"], "vddb"); s.flag(m["B"], "vddb")
-            src = s.isrc(iref, x, 784, ival)
-            s.wire(m["D"], src["+"]); s.flag(src["-"], "0")
-            s.wire(m["G"], (m["G"][0], 576), (x, 576))                  # diode: gate to drain
-            node = (x, 640)
-        else:
-            src = s.isrc(iref, x, 432, ival)
-            s.flag(src["+"], "vddb")
-            m = s.nmos(mref, x, 752, "left", f"l={{{L}}} w={{{W}}} m=1")
-            s.wire(src["-"], m["D"])
-            s.flag(m["S"], "0"); s.flag(m["B"], "0")
-            s.wire(m["G"], (m["G"][0], 704), (x, 704))
-            node = (x, 640)
-        cb = s.cap_v(cref, x + 96, 1040, "{Cbig}")
-        s.wire(node, (x + 96, node[1]), cb["A"])
-        s.flag(cb["B"], "0")
-        s.flag((x + 96, node[1]), line)
+    s.flag((xs, 560), "vcms"); s.flag((xm, 576), "cmt"); s.flag((xp2, 896), "cmd")
 
     # ======================================================================= Test bench (left, bottom)
     s.box(0, 1712, 2240, 2640, "Fixed test bench (Cin/Cfb = 4, Cload = Cin)")
@@ -320,7 +358,7 @@ def build(analysis: str) -> str:
     vinp = s.vsrc("Vinp", 608, 2032, "PULSE({VCMI} {VCMI+VinStep/2} {tstep} {trise} {trise} 1 2)", "AC 0.5")
     vinn = s.vsrc("Vinn", 608, 2416, "PULSE({VCMI} {VCMI-VinStep/2} {tstep} {trise} {trise} 1 2)", "AC -0.5")
     s.flag(vinp["-"], "0"); s.flag(vinn["-"], "0")
-    for k, (src, sn, fb, out) in enumerate([(vinp, "vin", "Cfb1", "vop"), (vinn, "vip", "Cfb2", "von")]):
+    for k, (src, sn, out) in enumerate([(vinp, "vin", "vop"), (vinn, "vip", "von")]):
         y0 = 1904 + k * 384
         n = str(k + 1)
         cin = s.cap_h(f"Cin{n}", 800, y0, "{Cin}")
@@ -328,39 +366,32 @@ def build(analysis: str) -> str:
         cfb = s.cap_h(f"Cfb{n}", 1216, y0, "{Cfb}")
         rfb = s.res_h(f"Rfb{n}", 1200, y0 + 96, "{Rfb} noiseless")
         cl = s.cap_v(f"Cload{n}", 1520, y0 + 32, "{Cload}")
-        # input node
         s.wire(src["+"], (src["+"][0], y0), (720, y0), cin["B"])
         s.wire((720, y0), (720, y0 + 96), rin["B"])
         s.flag((720, y0), "inp" if k == 0 else "inn")
-        # summing node
         s.wire(cin["A"], (1008, y0), cfb["B"]); s.wire(rin["A"], (1008, y0 + 96), (1008, y0))
         s.wire(rfb["B"], (1136, y0 + 96), (1136, y0))
         s.flag((1008, y0), sn)
-        # output node
         s.wire(cfb["A"], (1520, y0), cl["A"]); s.wire(rfb["A"], (1360, y0 + 96), (1360, y0))
         s.flag(cl["B"], "0"); s.flag((1520, y0), out)
 
     # ======================================================================= directives box
-    dirs = [".lib 'log018.l' TT"]  # portable: design/final/log018.l (relative self-includes) sits next to the schematics
+    dirs = [".lib 'log018.l' TT"]  # portable: design/final/log018.l sits next to the schematics
     bench = WORK / ("bench_tran.cir" if analysis == "tran" else "bench_noise.cir")
     tran_params = params(WORK / "bench_tran.cir")
     if analysis == "noise":  # only what the noise sheet uses (the input sources need tstep, trise, VinStep)
         tran_params = [re.sub(r"\s+(Tsettle|tstop)=(\{[^}]*\}|\S+)", "", l) for l in tran_params]
     dirs += tran_params
     dirs += params(WORK / "amp.inc")
-    if analysis == "tran":
-        for line in bench.read_text().splitlines():
-            if line.strip().lower().startswith((".tran", ".option", ".meas")):
-                dirs.append(line.strip())
-    else:
-        for line in bench.read_text().splitlines():
-            if line.strip().lower().startswith((".noise", ".meas")):
-                dirs.append(line.strip())
+    keep = (".tran", ".option", ".meas") if analysis == "tran" else (".noise", ".meas")
+    for line in bench.read_text().splitlines():
+        if line.strip().lower().startswith(keep):
+            dirs.append(line.strip())
     y = 1808
     for d in dirs:
         s.text(2432, y, d, directive=True)
         y += 40
-    s.box(2400, 1712, 4640, y + 32, "Parameters, Simulations & Measurements")
+    s.box(2400, 1712, 4912, y + 32, "Parameters, Simulations & Measurements")
     return s.render(h=max(2700, y + 100))
 
 

@@ -12,7 +12,8 @@
       "mcp__ltspice-asc"
     ],
     "deny": [
-      "Edit(./legacy/**)",
+      "Edit(./legacy-v1/**)",
+      "Edit(./legacy-v2/**)",
       "Edit(./example/**)",
       "Edit(./brief/assignment.pdf)",
       "Edit(./brief/faq.txt)",

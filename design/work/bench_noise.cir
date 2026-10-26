@@ -2,9 +2,9 @@
 * Keep every .param identical to bench_tran.cir (or move shared params into amp.inc).
 * Rin/Rfb are noiseless (FAQ). kT/C is added by tools/metrics.py (42 kT/Cin, differential).
 .lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
-.param VDD=1.8 VCM=0.9 VCMI=0.8107
-.param Cin=1.43p Cfb={Cin/4} Cload={Cin} Rin=125Meg Rfb={4*Rin}
-.param VoutStep=1.478 VinStep={VoutStep/4}
+.param VDD=1.8 VCM=0.9 VCMI=0.9
+.param Cin=2.15p Cfb={Cin/4} Cload={Cin} Rin=100Meg Rfb={4*Rin}
+.param VoutStep=1.2 VinStep={VoutStep/4}
 
 Vdd vdd 0 {VDD}
 Vddb vddb 0 {VDD}
@@ -26,4 +26,7 @@ Cload2 von 0 {Cload}
 
 .noise V(von,vop) Vinp dec 100 10k 100G
 .meas noise Vn_amp INTEG V(onoise) FROM=10k TO=100G
+.meas noise Vn_kTC PARAM sqrt(42*1.380649e-23*300.15/Cin)
+.meas noise Vn_tot PARAM sqrt(Vn_amp*Vn_amp+Vn_kTC*Vn_kTC)
+.meas noise SNR_dB PARAM 20*log10(VoutStep/sqrt(2)/Vn_tot)
 .end

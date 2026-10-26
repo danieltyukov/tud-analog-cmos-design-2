@@ -167,6 +167,13 @@ def tran_metrics(raw_path, net_path=None, *, vg=("vip", "vin"), out=("vop", "von
 
     T30 = _cross_up(t, Ab, 30.0, t_step)
     T386 = _cross_up(t, Ab, 38.6, t_step)
+    # First-order check (TA, 12 Oct 2026): exponential settling is a straight line in dB, so one e-fold
+    # (8.69 dB, about 8.6 dB) takes the same time in every window. A large-signal recovery (class-AB slewing
+    # ending) gives a short tau in the 30 dB window and a longer one later, which inflates the FoM.
+    tau_win = {lo: (_cross_up(t, Ab, lo + 8.6, t_step) - _cross_up(t, Ab, lo, t_step)) * 1e9
+               for lo in (30.0, 40.0, 50.0)}
+    tw = [x for x in tau_win.values() if math.isfinite(x) and x > 0]
+    tau_ratio = max(tw) / min(tw) if len(tw) == len(tau_win) else math.inf
     Ts_A = _last_below(t, A, SPEC["A"], t_step)
     Ts_Ab = _last_below(t, Ab, SPEC["Abeta"], t_step)
 
@@ -196,6 +203,8 @@ def tran_metrics(raw_path, net_path=None, *, vg=("vip", "vin"), out=("vop", "von
         "T30_ns": (T30 - t_step) * 1e9,
         "T38p6_ns": (T386 - t_step) * 1e9,
         "tau_ns": (T386 - T30) * 1e9,
+        "tau_windows_ns": {f"{lo:.0f}-{lo + 8.6:.1f}dB": x for lo, x in tau_win.items()},
+        "tau_ratio": tau_ratio,
         "gap_dB": gap,
         "beta_actual": 10 ** (-gap / 20),
         "first_peak_A_ns": pk_A * 1e9,

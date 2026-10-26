@@ -1,0 +1,219 @@
+{
+ "tag": "final",
+ "time": "2026-10-06 03:33:41",
+ "files": {
+  "/home/danieltyukov/workspace/tud/tud-analog-cmos-design-2/design/final/amp_tran.asc": "214d7e368cf1",
+  "/home/danieltyukov/workspace/tud/tud-analog-cmos-design-2/design/final/amp_noise.asc": "3e211aa2392e"
+ },
+ "all_pass": true,
+ "checks": {
+  "SNR >= 66 dB (+margin)": true,
+  "Abeta(25ns) >= 66 dB (+margin)": true,
+  "A(25ns) >= 78 dB (+margin)": true,
+  "Abeta floor after 25ns >= 66 dB": true,
+  "A floor after 25ns >= 78 dB": true,
+  "settled before 25 ns (-margin)": "True",
+  "first ringing peak after 25 ns": true,
+  "sim runs >= 30 ns past deadline": true,
+  "Power < 3 mW": true,
+  "FoM_dB > 170": true,
+  "all MOSFETs saturated": true,
+  "lint: no errors": true,
+  "beta_actual <= beta_ideal (physics sanity)": true
+ },
+ "table": [
+  {
+   "item": 1,
+   "name": "SNR",
+   "unit": "dB",
+   "spec": "66",
+   "achieved": 66.07973748404454
+  },
+  {
+   "item": 2,
+   "name": "Abeta settle (loop settling)",
+   "unit": "dB",
+   "spec": "66",
+   "achieved": 69.33555991933204
+  },
+  {
+   "item": 3,
+   "name": "A settle (amplifier settling)",
+   "unit": "dB",
+   "spec": ">78",
+   "achieved": 84.26808166503906
+  },
+  {
+   "item": 4,
+   "name": "T settle (to required accuracy)",
+   "unit": "ns",
+   "spec": "25",
+   "achieved": 22.294180515567337
+  },
+  {
+   "item": 5,
+   "name": "T30dB",
+   "unit": "ns",
+   "spec": "-",
+   "achieved": 15.01599568120004
+  },
+  {
+   "item": 6,
+   "name": "T38.6dB",
+   "unit": "ns",
+   "spec": "-",
+   "achieved": 16.65749234705738
+  },
+  {
+   "item": 7,
+   "name": "tau = T38.6dB - T30dB",
+   "unit": "ns",
+   "spec": "-",
+   "achieved": 1.6414966658573418
+  },
+  {
+   "item": 8,
+   "name": "Power dissipation (amplifiers only)",
+   "unit": "mW",
+   "spec": "<3, min",
+   "achieved": 0.19178064236902861
+  },
+  {
+   "item": 9,
+   "name": "I(Vdd) (amplifiers only)",
+   "unit": "mA",
+   "spec": "<1.7, min",
+   "achieved": 0.10654480131612701
+  },
+  {
+   "item": 10,
+   "name": "Total effective kT/C noise at output",
+   "unit": "uVrms",
+   "spec": "free",
+   "achieved": 348.8730657486976
+  },
+  {
+   "item": 11,
+   "name": "Total integrated amplifier noise",
+   "unit": "uVrms",
+   "spec": "free",
+   "achieved": 384.25907876020284
+  },
+  {
+   "item": 12,
+   "name": "Total integrated noise (10kHz-100GHz)",
+   "unit": "uVrms",
+   "spec": "free",
+   "achieved": 519.0062192445625
+  },
+  {
+   "item": 13,
+   "name": "Input step voltage (diff)",
+   "unit": "mV",
+   "spec": "Vout/4",
+   "achieved": 369.5
+  },
+  {
+   "item": 14,
+   "name": "Output step voltage (diff)",
+   "unit": "V",
+   "spec": "free",
+   "achieved": 1.478
+  },
+  {
+   "item": 15,
+   "name": "Cin",
+   "unit": "pF",
+   "spec": "-",
+   "achieved": 1.43
+  },
+  {
+   "item": 16,
+   "name": "Cfb",
+   "unit": "pF",
+   "spec": "-",
+   "achieved": 0.3575
+  },
+  {
+   "item": 17,
+   "name": "Cload",
+   "unit": "pF",
+   "spec": "=Cin",
+   "achieved": 1.43
+  },
+  {
+   "item": 18,
+   "name": "CCM",
+   "unit": "pF",
+   "spec": "-",
+   "achieved": 0.05
+  },
+  {
+   "item": 19,
+   "name": "Rbig (Rfb)",
+   "unit": "GOhm",
+   "spec": "big",
+   "achieved": 0.5
+  },
+  {
+   "item": 20,
+   "name": "Cbig",
+   "unit": "nF",
+   "spec": "big",
+   "achieved": 10.0
+  },
+  {
+   "item": 21,
+   "name": "FoM_lin = 2 pi P tau / SNR_lin^2",
+   "unit": "J",
+   "spec": "-",
+   "achieved": 4.878102188590139e-19
+  },
+  {
+   "item": 22,
+   "name": "FoM_dB = -10 log10(FoM_lin)",
+   "unit": "dB",
+   "spec": ">170",
+   "achieved": 183.11749106138737
+  }
+ ],
+ "extra": {
+  "beta_ideal": 0.19999999999999998,
+  "beta_actual": 0.19026241227936044,
+  "gap_dB": 14.41294002532959,
+  "Abeta_shift_at_25ns_dB": 70.17417907714844,
+  "A_floor_dB": 84.26808166503906,
+  "Abeta_floor_dB": 69.33635711669922,
+  "first_peak_A_ns": Infinity,
+  "first_peak_Abeta_ns": Infinity,
+  "slew_max_V_per_us": 1091.74853515625,
+  "I_quiescent_mA": 0.05297109767604301,
+  "I_settle_window_mA": 0.10654480131612701,
+  "NEF_diff": 6.114260352885068,
+  "C_Leff_pF": 1.716,
+  "min_sat_margin_mV": 40.2,
+  "not_saturated": [],
+  "n_mosfets": 25,
+  "noise_top_uVrms": {
+   "V(m2n)": 190.60710548237665,
+   "V(m1n)": 190.60710548237665,
+   "V(m2p)": 170.77338910470445,
+   "V(m1p)": 170.77338910470445,
+   "V(mcn2)": 75.78163140794456,
+   "V(mcn1)": 75.78163140794456,
+   "V(mcp2)": 44.03242044662347,
+   "V(mcp1)": 44.03242044662347
+  },
+  "flicker_corner_Hz_est": 501187.2336272695,
+  "lint_errors": [],
+  "EE4520": {
+   "P_mW": 0.1119,
+   "tau_ns": 497.4,
+   "SNR_dB": 80.85,
+   "FoM_dB": 175.2
+  }
+ },
+ "hints": [
+  "Abeta(25ns) 69.3 dB: settling has slack, cut bias current"
+ ]
+}

@@ -1,5 +1,12 @@
 # Design strategy for minimum power (research brief, October 2026)
 
+> **Partly superseded (13 Oct 2026).** The TA rejected the class-AB / current-reuse direction of
+> sections 3 to 4 as too complicated and its FoM (183 dB) as implausible. Attempt 3 uses the simple
+> telescopic + common-source two-stage amplifier with a replica bias (`brief/ta-feedback-2026-10-12.md`).
+> Sections 1, 2, 5 and 6 (what binds, noise vs swing, risks, staged procedure) still apply. The
+> power table in section 3 is a model, not a target; the TA's FoM ceiling of about 176 to 177 dB
+> implies roughly 0.6 to 1 mW for this course's specs.
+
 From a first-principles power model calibrated on the friend's design (predicted 0.61 mA vs actual
 0.69 to 0.72 mA) and on attempt 1 (1.26 vs 1.135 mA). **Treat every power estimate as ±25 %.**
 Device numbers come from `tools/gmid.py` (LTspice tables for log018.l). Verify everything by simulation.

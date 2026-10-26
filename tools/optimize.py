@@ -8,7 +8,8 @@ space.json maps .param names to ranges; integer knobs (M) use "int":
   {"Wn": ["log", 20e-6, 80e-6], "Cc": ["log", 300e-15, 1.2e-12], "Mout": ["int", 1, 8]}
 Objective: minimise reported power. Constraints (all must hold, with evaluate.py margins):
   A(25ns) >= 78.3, Abeta(25ns) >= 66.3, floors after 25 ns >= 78/66, settled <= 24.8 ns,
-  first ringing peak after 25 ns, SNR >= 66.05 dB.
+  first ringing peak after 25 ns, SNR >= 66.05 dB, FoM <= 177 dB (TA plausibility ceiling).
+--extra-snr / --extra-ab add margin on top (dB) so the winner is not knife-edge.
 The study is stored in results/opt/<study>.db, so it resumes after an interruption.
 Use it only once the topology works and hand sizing is close (it tunes, it does not invent).
 Always re-verify the winner with tools/evaluate.py on the drawn .asc.
@@ -20,6 +21,7 @@ import json
 import math
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -42,7 +44,9 @@ def trial_eval(tran_text: str, noise_text: str, params: dict, d: Path) -> dict:
     p = M.net_params(nt)
     snr = M.snr_db(tm["VoutStep_V"], math.hypot(M.ktc_uV(p["cin"]), nm["Vn_amp_uVrms"]))
     shutil.rmtree(d, ignore_errors=True)
+    P = tm.get("P_report_mW", math.nan)
     return {
+        "FoM": M.fom(P, tm["tau_ns"], snr)[1],
         "P_mW": tm.get("P_report_mW", math.nan), "SNR": snr, "A25": tm["A_at_25ns_dB"],
         "Ab25": tm["Abeta_at_25ns_dB"], "Afloor": tm["A_floor_dB"], "Abfloor": tm["Abeta_floor_dB"],
         "Ts": max(tm["Tsettle_A_ns"], tm["Tsettle_Abeta_ns"]),
@@ -50,15 +54,17 @@ def trial_eval(tran_text: str, noise_text: str, params: dict, d: Path) -> dict:
     }
 
 
-CONSTRAINTS = ("A25", "Ab25", "Afloor", "Abfloor", "Tsettle", "first_peak", "SNR")
+CONSTRAINTS = ("A25", "Ab25", "Afloor", "Abfloor", "Tsettle", "first_peak", "SNR", "FoM_TA")
+EXTRA = {"snr": 0.0, "ab": 0.0}
 
 
 def violations(r: dict) -> list[float]:
     """Optuna convention: each value <= 0 means satisfied."""
     if r.get("failed"):
-        return [100.0] * 7
-    c = [78.3 - r["A25"], 66.3 - r["Ab25"], 78.0 - r["Afloor"], 66.0 - r["Abfloor"], r["Ts"] - 24.8,
-         25.0 - r["peak"], 66.05 - r["SNR"]]
+        return [100.0] * len(CONSTRAINTS)
+    xs, xa = EXTRA["snr"], EXTRA["ab"]
+    c = [78.3 - r["A25"], 66.3 + xa - r["Ab25"], 78.0 - r["Afloor"], 66.0 + xa - r["Abfloor"], r["Ts"] - 24.8,
+         25.0 - r["peak"], 66.05 + xs - r["SNR"], r["FoM"] - 177.0]
     # -inf means satisfied by infinite margin (no ringing peak at all: first peak = inf, as in
     # evaluate.py); NaN or +inf stay violations.
     return [x if math.isfinite(x) else (-100.0 if x == -math.inf else 100.0) for x in c]
@@ -75,7 +81,11 @@ def main(argv=None) -> int:
     ap.add_argument("--trials", type=int, default=150)
     ap.add_argument("-j", "--jobs", type=int, default=8)
     ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--extra-snr", type=float, default=0.0, help="extra SNR margin [dB] above 66.05")
+    ap.add_argument("--extra-ab", type=float, default=0.0, help="extra Abeta margin [dB] on the 25 ns value and floor")
+    ap.add_argument("--seed-params", default=None, help="JSON file {param: value}: enqueue a known point first")
     a = ap.parse_args(argv)
+    EXTRA.update(snr=a.extra_snr, ab=a.extra_ab)
 
     def text(f):
         f = lt.guard(f)
@@ -96,7 +106,14 @@ def main(argv=None) -> int:
                 params[k] = trial.suggest_int(k, int(lo), int(hi))
             else:
                 params[k] = trial.suggest_float(k, lo, hi, log=(kind == "log"))
-        r = trial_eval(tran_text, noise_text, params, root / a.study / f"t{trial.number:05d}")
+        # unique directory per evaluation: parallel workers can pick up the same enqueued trial
+        (root / a.study).mkdir(parents=True, exist_ok=True)
+        d = Path(tempfile.mkdtemp(prefix=f"t{trial.number:05d}_", dir=root / a.study))
+        try:
+            r = trial_eval(tran_text, noise_text, params, d)
+        except Exception as e:  # a crashed simulation is an infeasible point, not the end of the study
+            r = {"failed": True, "error": str(e)[:200]}
+            shutil.rmtree(d, ignore_errors=True)
         trial.set_user_attr("r", r)
         trial.set_user_attr("c", violations(r))
         for name, v in zip(CONSTRAINTS, violations(r)):
@@ -106,12 +123,14 @@ def main(argv=None) -> int:
     sampler = optuna.samplers.TPESampler(seed=a.seed, multivariate=True, n_startup_trials=min(20, a.trials // 4))
     study = optuna.create_study(study_name=a.study, storage=f"sqlite:///{root / (a.study + '.db')}",
                                 direction="minimize", sampler=sampler, load_if_exists=True)
+    if a.seed_params:
+        study.enqueue_trial(json.loads(lt.guard(a.seed_params).read_text()))
     study.optimize(objective, n_trials=a.trials, n_jobs=a.jobs)
 
     feas = [t for t in study.trials if t.user_attrs.get("c") and all(x <= 0 for x in t.user_attrs["c"])]
     print(f"{len(study.trials)} trials, {len(feas)} feasible")
     if not feas:
-        best = min(study.trials, key=lambda t: sum(max(0, x) for x in t.user_attrs.get("c", [100] * 7)))
+        best = min(study.trials, key=lambda t: sum(max(0, x) for x in t.user_attrs.get("c", [100] * len(CONSTRAINTS))))
         print("no feasible point; least-violating:", best.params, best.user_attrs.get("r"))
         return 2
     best = min(feas, key=lambda t: t.value)

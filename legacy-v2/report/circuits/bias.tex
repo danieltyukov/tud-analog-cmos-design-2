@@ -1,0 +1,28 @@
+% Bias block on Vddb (excluded from the amplifier power): ideal reference currents, all fixed multiples of Ib,
+% into diode-connected replicas of the devices they bias; every line decoupled by Cbig.
+% Top row: PMOS replicas (current sinks below). Bottom row: NMOS replicas (current sources from Vddb above).
+\providecommand{\biasP}[7]{% x, y, device, node, device-subscript, current label, line-subscript
+  \draw (#1,#2) node[pmos](B#3){};
+  \draw (B#3.S) -- ++(0,0.25) node[vdd]{};
+  \draw (B#3.D) -- ++(0,-0.3) coordinate(J#3) to[I, l_={$#6$}] ++(0,-1.5) node[ground]{};
+  \draw (B#3.G) -- ++(-0.3,0) |- (J#3) node[circ]{};
+  \draw (J#3) -- ++(1.0,0) coordinate(O#3) to[C, l={$C_{big}$}] ++(0,-1.5) node[ground]{};
+  \node[font=\small,anchor=south west] at (O#3) {$v_{#7}$\,\Vtag{#4}};
+  \node[font=\small,anchor=west,align=left] at ($(B#3.center)+(0.35,0.25)$) {$M_{b#5}$ \Itag{#3}};}
+\providecommand{\biasN}[7]{% x, y, device, node, device-subscript, current label, line-subscript
+  \draw (#1,#2) node[nmos](B#3){};
+  \draw (B#3.S) node[ground]{};
+  \draw (B#3.D) -- ++(0,0.3) coordinate(J#3) to[I, l={$#6$}, invert] ++(0,1.5) node[vdd]{};
+  \draw (B#3.G) -- ++(-0.3,0) |- (J#3) node[circ]{};
+  \draw (J#3) -- ++(1.0,0) coordinate(O#3) to[C, l={$C_{big}$}] ++(0,-1.5) node[ground]{};
+  \node[font=\small,anchor=south west] at (O#3) {$v_{#7}$\,\Vtag{#4}};
+  \node[font=\small,anchor=north east,align=right] at ($(B#3.center)+(-0.45,-0.45)$) {$M_{b#5}$\\\Itag{#3}};}
+\begin{circuitikz}[american, scale=0.85]
+\small
+\biasP{0}{0}{mbp}{vbp}{p}{I_b}{bp}
+\biasP{4.2}{0}{mbo}{vbo}{o}{k_oI_b}{bo}
+\biasP{8.4}{0}{mbcp}{vcp}{cp}{k_{cp}I_b}{cp}
+\biasN{0}{-6.0}{mbn}{vbn}{n}{k_nI_b}{bn}
+\biasN{4.2}{-6.0}{mbcn}{vcn}{cn}{k_{cn}I_b}{cn}
+\node[font=\small,align=left,anchor=north west] at (7.6,-5.0) {supply arrows: $V_{ddb}$\\$I_b = \pIb\,\mu$A\\$k_o = \pKo$, $k_n = \pKn$\\$k_{cn} = \pKcn$, $k_{cp} = \pKcp$};
+\end{circuitikz}

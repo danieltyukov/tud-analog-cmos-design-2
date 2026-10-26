@@ -116,7 +116,7 @@
 +cjswgn = 3.340547E-10    cjswgp = 4.221E-10
 +cgon   = 3.665E-10       cgop   = 3.28E-10
 +hdifn  = 2E-07           hdifp  = 2E-07
-.lib 'log018.l' MOS
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS
 .ENDL TT
 ***************** CORNER_LIB OF SNSP MODEL ***************
 .LIB SS
@@ -129,7 +129,7 @@
 +cjswgn = 3.507574E-10    cjswgp = 4.43205E-10
 +cgon   = 3.48175E-10     cgop   = 3.116E-10
 +hdifn  = 2E-07           hdifp  = 2E-07    
-.lib 'log018.l' MOS                         
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS                         
 .ENDL SS                                    
 ***************** CORNER_LIB OF FNFP MODEL ***************
 .LIB FF
@@ -142,7 +142,7 @@
 +cjswgn = 3.17352E-10     cjswgp = 4.00995E-10
 +cgon   = 3.84825E-10     cgop   = 3.444E-10
 +hdifn  = 2E-07           hdifp  = 2E-07
-.lib 'log018.l' MOS
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS
 .ENDL FF
 ***************** CORNER_LIB OF SNFP MODEL ***************
 .LIB SF
@@ -155,7 +155,7 @@
 +cjswgn = 3.507574E-10    cjswgp = 4.00995E-10
 +cgon   = 3.665E-10       cgop   = 3.28E-10
 +hdifn  = 2E-07           hdifp  = 2E-07
-.lib 'log018.l' MOS
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS
 .ENDL SF
 ***************** CORNER_LIB OF FNSP MODEL ***************
 .LIB FS
@@ -168,7 +168,7 @@
 +cjswgn = 3.17352E-10     cjswgp = 4.43205E-10
 +cgon   = 3.665E-10       cgop   = 3.28E-10
 +hdifn  = 2E-07           hdifp  = 2E-07
-.lib 'log018.l' MOS
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS
 .ENDL FS
 ***************************************************************
 *                                                             *
@@ -186,7 +186,7 @@
 +cjswgn3 = 3.00664E-10     cjswgp3 = 2.345762E-10  cjswge3 = 3.36255E-10
 +cgon3   = 3.18E-10        cgop3   = 2.77E-10      cgoe3= 4.444E-10
 +hdifn3  = 2E-07           hdifp3  = 2E-07         hdife3 = 1.50e-06
-.lib 'log018.l' MOS_3V
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS_3V
 .ENDL TT_3V
 ***************** CORNER_LIB OF SNSP MODEL ***************
 .LIB SS_3V
@@ -199,7 +199,7 @@
 +cjswgn3 = 3.156972E-10    cjswgp3 = 2.46305E-10    cjswge3 = 3.53068E-10
 +cgon3   = 3.021E-10       cgop3   = 2.6315E-10     cgoe3= 4.2218E-10
 +hdifn3  = 2E-07           hdifp3  = 2E-07          hdife3 = 1.50e-06
-.lib 'log018.l' MOS_3V
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS_3V
 .ENDL SS_3V
 ***************** CORNER_LIB OF FNFP MODEL ***************
 .LIB FF_3V
@@ -212,7 +212,7 @@
 +cjswgn3 = 2.856308E-10    cjswgp3 = 2.228474E-10   cjswge3 = 3.19442E-10
 +cgon3   = 3.339E-10       cgop3   = 2.9085E-10     cgoe3= 4.6662E-10
 +hdifn3  = 2E-07           hdifp3  = 2E-07          hdife3 = 1.50e-06
-.lib 'log018.l' MOS_3V
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS_3V
 .ENDL FF_3V
 ***************** CORNER_LIB OF SNFP MODEL ***************
 .LIB SF_3V
@@ -225,7 +225,7 @@
 +cjswgn3 = 3.156972E-10    cjswgp3 = 2.228474E-10   cjswge3 = 3.53068E-10
 +cgon3   = 3.18E-10        cgop3   = 2.77E-10       cgoe3= 4.444E-10
 +hdifn3  = 2E-07           hdifp3  = 2E-07          hdife3 = 1.50e-06
-.lib 'log018.l' MOS_3V
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS_3V
 .ENDL SF_3V
 ***************** CORNER_LIB OF FNSP MODEL ***************
 .LIB FS_3V
@@ -238,7 +238,7 @@
 +cjswgn3 = 2.856308E-10    cjswgp3 = 2.46305E-10    cjswge3 = 3.19442E-10
 +cgon3   = 3.18E-10        cgop3   = 2.77E-10       cgoe3= 4.444E-10
 +hdifn3  = 2E-07           hdifp3  = 2E-07          hdife3 = 1.50e-06
-.lib 'log018.l' MOS_3V
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOS_3V
 .ENDL FS_3V
 ***************************************************************
 *                                                             *
@@ -252,7 +252,7 @@
 +cjswgna = 3.173876E-10    cgona   = 5.553E-10
 +dvthna  = 0               hdifna  = 2E-07
 +dxlna   = 0               dxwna   = 0
-.lib 'log018.l' MOSNA
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA
 .ENDL TT_NA
 ***************** CORNER_LIB OF SNSP MODEL ***************
 .LIB SS_NA
@@ -261,7 +261,7 @@
 +cjswgna = 3.33257E-10     cgona   = 5.27535E-10
 +dvthna  = 0.08            hdifna  = 2E-07
 +dxlna   = 1.33E-08        dxwna   = -2.2E-08
-.lib 'log018.l' MOSNA
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA
 .ENDL SS_NA
 ***************** CORNER_LIB OF FNFP MODEL ***************
 .LIB FF_NA
@@ -270,7 +270,7 @@
 +cjswgna = 3.015182E-10    cgona   = 5.83065E-10
 +dvthna  = -0.08           hdifna  = 2E-07
 +dxlna   = -1.33E-08       dxwna   = 2.2E-08
-.lib 'log018.l' MOSNA
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA
 .ENDL FF_NA
 ***************** CORNER_LIB OF SNFP MODEL ***************
 .LIB SF_NA
@@ -279,7 +279,7 @@
 +cjswgna = 3.33257E-10     cgona   = 5.553E-10
 +dvthna  = 0.08            hdifna  = 2E-07
 +dxlna   = 0               dxwna   = 0
-.lib 'log018.l' MOSNA
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA
 .ENDL SF_NA
 ***************** CORNER_LIB OF FNSP MODEL ***************
 .LIB FS_NA
@@ -288,7 +288,7 @@
 +cjswgna = 3.015182E-10    cgona   = 5.553E-10
 +dvthna  = -0.08           hdifna  = 2E-07
 +dxlna   = 0               dxwna   = 0
-.lib 'log018.l' MOSNA
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA
 .ENDL FS_NA
 ***************************************************************
 *                                                             *
@@ -302,7 +302,7 @@
 +cjswgna3 = 3.180842E-10    cgona3   = 4.942E-10
 +dvthna3  = 0               hdifna3  = 2E-08
 +dxlna3    = 0              dxwna3    = 0
-.lib 'log018.l' MOSNA3
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA3
 .ENDL TT_3VNA
 ***************** CORNER_LIB OF SNSP MODEL ***************
 .LIB SS_3VNA
@@ -311,7 +311,7 @@
 +cjswgna3 = 3.339884E-10    cgona3   = 4.6949E-10
 +dvthna3  = 0.1             hdifna3  = 2E-08
 +dxlna3    = 1.33E-08       dxwna3    = -2.2E-08
-.lib 'log018.l' MOSNA3
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA3
 .ENDL SS_3VNA
 ***************** CORNER_LIB OF FNFP MODEL ***************
 .LIB FF_3VNA
@@ -320,7 +320,7 @@
 +cjswgna3 = 3.0218E-10      cgona3   = 5.1891E-10
 +dvthna3  = -0.1            hdifna3  = 2E-08
 +dxlna3    = -1.33E-08      dxwna3    = 2.2E-08
-.lib 'log018.l' MOSNA3
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA3
 .ENDL FF_3VNA
 ***************** CORNER_LIB OF SNFP MODEL ***************
 .LIB SF_3VNA
@@ -329,7 +329,7 @@
 +cjswgna3 = 3.339884E-10    cgona3   = 4.942E-10
 +dvthna3  = 0.1             hdifna3  = 2E-08
 +dxlna3    = 0              dxwna3    = 0
-.lib 'log018.l' MOSNA3
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA3
 .ENDL SF_3VNA
 ***************** CORNER_LIB OF FNSP MODEL ***************
 .LIB FS_3VNA
@@ -338,7 +338,7 @@
 +cjswgna3 = 3.0218E-10      cgona3   = 4.942E-10
 +dvthna3  = -0.1            hdifna3  = 2E-08
 +dxlna3    = 0              dxwna3    = 0
-.lib 'log018.l' MOSNA3
+.lib 'C:\Program Files\LTC\LTspiceIV\lib\cmp\log018.l' MOSNA3
 .ENDL FS_3VNA
 
 .LIB MOS
