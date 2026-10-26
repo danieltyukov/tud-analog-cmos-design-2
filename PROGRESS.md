@@ -11,6 +11,7 @@ min sat margin 91 mV. robust PASS. `tools/crosscheck.py all`: KCL OK, 42 formula
 D4/D5 are LTspice GUI screenshots (`tools/ltgui.py all`, values from LTspice .meas); LTspice-drawn D2/D3 copies with
 .op data labels are kept in report/figures/*_ltspice.png (not in the report: user keeps CircuiTikZ D2/D3).
 Report 8 pages; report/5714699.pdf = main.pdf. Open TA point by user choice: one RC level shifter (TA suggested two).
+Submission = PDF + form values only; LTspice files are not attached (user, 26 Oct).
 
 ## Plan (tick a box only with tool evidence; add sub-steps as needed)
 
