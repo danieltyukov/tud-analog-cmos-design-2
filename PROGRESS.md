@@ -238,6 +238,11 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
   try, why one level shifter), same macros and claims, still one page each. Online detectors on the page 7+8 prose
   (about 1800 words): ZeroGPT 13.5 % AI before, 3.3 % after ("human written"); GPTZero (model 4.1o) 100 % AI both
   before and after. Stopped iterating against GPTZero. crosscheck all OK, check_done DONE, 5714699.pdf refreshed.
+- 2026-10-26 prose pass 3 (user: GPTZero via Chrome, own voice), abandoned by the user, report restored to HEAD.
+  GPTZero model 4.1o: full prose rewritten in a casual first-person voice 100 % AI (only 3 surface "AI patterns"
+  left); a deliberately non-native run-on rewrite of the D4 paragraph 100 % AI; the friend's passing report
+  (example/6327087.pdf, pages 7 and 8) 100 % AI; a 2005 IEEE paper paragraph 100 % human. Rewrite kept outside the
+  repo only (scratchpad main_casual_rewrite.tex).
 
 ## Failed approaches (do not retry without a new reason)
 
