@@ -206,6 +206,10 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
   the robustness reason (report_extra `tolerance`), tau = 1/(2 pi fc) computed from the printed fc, page 2 cites the
   TA clarification of 21 June for the FoM limits. TOOL CHANGE evaluate.py: items 2 and 3 (A, Abeta at 25 ns) from
   LTspice's .meas A25/Ab25 (the plot's text box), raw interpolation as cross-check (abort if > 0.05 dB); selftest OK.
+- 2026-10-26 external re-review: report consistent and ready. Nits fixed: page 8 noise shares rounded by largest
+  remainder so they add to 100 % (51/36/8/5; cascodes, Rb, CMFB about 0.1 %), replica sentence says the nodes match.
+  Zero crossing earlier at 6.2 uA (26.49 vs 26.92 ns) because the overshoot grew (20 -> 72 uV; output-stage gm about
+  2 % lower, the Rz zero no longer sits exactly on p2), not a higher floor (floor 78.9 -> 78.7 dB).
 
 ## Failed approaches (do not retry without a new reason)
 

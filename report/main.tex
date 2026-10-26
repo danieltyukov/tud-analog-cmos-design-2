@@ -321,8 +321,8 @@ amplifier adds to the $kT/C$ noise, and $\xGtau$\,dB because $\tau = \resTau$\,n
 \textbf{Biasing.} The bias block runs from $V_{ddb}$ and is a replica of one stage-1 half. A tail unit and an input unit
 (gate at $v_{cmr}$) carry $I_{bnp} = \pIbnp\,\mu$A and set $v_{bp}$; a cascode unit and a load unit carry $I_{bnp}$ and set
 $v_{bn}$. $M_0$, $M_{1,2}$, $M_{5\ldots8}$, $M_{7C,8C}$, the stage-2 PMOS sources and the CMFB tail and diodes are integer
-multiples of these units, so they copy the replica's current density. The replica nodes sit at \opV{bp0} and \opV{bn5},
-against \opV{tail} and \opV{b1p} in the amplifier. The stage-2 PMOS runs \dd[0]{100*(\xIdTwo/(\pMtwo*\pIbnp)-1)}\,\%
+multiples of these units, so they copy the replica's current density. The replica nodes (\opV{bp0}, \opV{bn5}) match the
+amplifier's tail and $b_1$ nodes (\opV{tail}, \opV{b1p}). The stage-2 PMOS runs \dd[0]{100*(\xIdTwo/(\pMtwo*\pIbnp)-1)}\,\%
 above \pMtwo\ units because its $V_{sd}$ is larger. Wide-swing diodes as in the EE4520 bias block
 (assignment fig.~6), with the cascode length (0.25\,$\mu$m) and currents $k_{cn}I_{bnp}$ and $k_{cp}I_{bnp}$, set the
 cascode gates and keep the loads and the input pair at least \xQMarg\,mV from triode; $R_d$ and $C_{big} = \resCbig$\,nF

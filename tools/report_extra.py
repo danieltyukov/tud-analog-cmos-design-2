@@ -169,6 +169,12 @@ def main(argv=None) -> int:
     groups = {"in": ("m1", "m2"), "load": ("m7", "m8", "m7c", "m8c"), "casc": ("m3", "m4", "m5", "m6"),
               "rz": ("rz1", "rz2"), "st2": ("m9", "m10", "m11", "m12"), "rb": ("rb1", "rb2"), "cmfb": ("rcm1", "rcm2", "mc0", "mc1", "mc2", "mc3", "mc4")}
     gsh = {k: sum(p2(f"V({d})") for d in v) / on2 * 100 for k, v in groups.items()}
+    # the four shares page 8 lists, rounded so that they and "the rest" add up to 100 (largest remainder)
+    shown = {k: gsh[k] for k in ("in", "load", "rz", "st2")}
+    shown["rest"] = 100 - sum(shown.values())
+    ints = {k: math.floor(v) for k, v in shown.items()}
+    for k in sorted(shown, key=lambda k: shown[k] - ints[k], reverse=True)[:100 - sum(ints.values())]:
+        ints[k] += 1
     fl_tot = sum(p2(n) for k, n in nr.names.items() if k.endswith(".1overf)"))
     dev_uv = lambda d: math.sqrt(p2(f"V({d})")) * 1e6
     fl_uv = lambda d: math.sqrt(p2(f"V({d}.1overf)")) * 1e6
@@ -285,8 +291,8 @@ def main(argv=None) -> int:
         "xTauRatio": f"{e_tau/(tab[7]*1e-9):.0f}", "xCapRatio": f"{18/tab[15]:.1f}", "xPTauOld": f"{e_p*e_tau*1e15:.1f}",
         "xStepMarg": f"{smarg*1e3:.0f}", "xStepDev": dev_tex(sname), "xQMarg": f"{qmarg*1e3:.0f}", "xQDev": dev_tex(qname),
         "xIq": f"{iq:.1f}", "xIwin": f"{iw:.1f}", "xIslew": f"{iw - iq:.1f}",
-        "xNshIn": f"{gsh['in']:.0f}", "xNshLoad": f"{gsh['load']:.0f}", "xNshCasc": f"{gsh['casc']:.0f}",
-        "xNshRz": f"{gsh['rz']:.0f}", "xNshStTwo": f"{gsh['st2']:.0f}", "xNshRb": f"{gsh['rb']:.1f}",
+        "xNshIn": f"{ints['in']}", "xNshLoad": f"{ints['load']}", "xNshCasc": f"{gsh['casc']:.0f}",
+        "xNshRz": f"{ints['rz']}", "xNshStTwo": f"{ints['st2']}", "xNshRb": f"{gsh['rb']:.1f}",
         "xNshCmfb": f"{gsh['cmfb']:.1f}",
         "xNin": f"{dev_uv('m1'):.0f}", "xNload": f"{dev_uv('m7'):.0f}", "xNrz": f"{dev_uv('rz1'):.0f}",
         "xFlickUV": f"{math.sqrt(fl_tot)*1e6:.0f}", "xFlickShare": f"{fl_tot/on2*100:.0f}",
