@@ -223,7 +223,7 @@ $\mathrm{FoM_{dB}}$ [dB] & \xEFoMach & \xEFoM & \resFoMdB & $\xDTot$\,dB \\
 \end{table}
 
 \textbf{Step 1, power ($\xDP$\,dB).} EE4525 uses \xPratio\ times the power, because it has to settle much
-faster (step 2) and more accurately, to 66\,dB instead of 63\,dB. Every block is also made of transistors now, and the
+faster (step 2) and more accurately: $A \geq 78$\,dB at the summing node, where EE4520 reached 63\,dB. Every block is also made of transistors now, and the
 CMFB amplifier runs from $V_{dd}$ too.
 
 \textbf{Step 2, time constant ($\xDT$\,dB).} $\tau$ is \xTauRatio\ times shorter. EE4525 has to settle in 25\,ns,
@@ -252,7 +252,7 @@ response steepens towards the overshoot ($\xDShape$\,dB).
 1.2\,V step ($\xDSwing$\,dB).
 In the two-stage loop $g_{m1}$ and $C_c$ set $\tau$ ($C_c/C_{in} = \dd{\pCc/\resCin}$), so the input pair never charges
 the load. The push-pull output stage does that, without a large quiescent current. The EE4520 folded cascode charged
-the whole load from its input-stage current, and its folding branches and boosters burned current without adding input
+the whole load from its input-stage current, and its folding branches burned current without adding input
 $g_m$. EE4525 does pay for things EE4520 got for free: a real CMFB (\opI{mc0}), 1/f noise (\xFlickShare\,\% of the
 amplifier noise) and $R_z$ noise (\xNshRz\,\%). All of that is already inside the terms above.
 
@@ -279,13 +279,13 @@ current into $C_c$, $x_1$ swings by up to \xXswing\,mV, and $C_{ls}$ passes \xGp
 This turns the rising output's PMOS on hard (up to \xIpk\,$\mu$A), so the slewing current does not come from
 quiescent bias. It costs about \dd[1]{\resTthirty-\xTthirtySmall}\,ns at $T_{30}$. After that the response is linear,
 and a 1\,\% step looks the same. A single pole at $f_c = \xFc$\,MHz would give $\tau = 1/(2\pi f_c) = \xTauWc$\,ns, yet I
-measure \resTau\,ns. The zeros from $R_z$ and the $C_{ls}$ path do this by speeding the response up as it nears its zero
-crossing. Ringing poles are not the cause: a two-pole loop with \xPM$^\circ$ phase margin is past critical damping
+measure \resTau\,ns. The second pole already puts the dominant closed-loop pole at \xTauTwoPole\,ns (page 7), and the
+zeros from $R_z$ and the $C_{ls}$ path speed the response up further as it nears its zero crossing. Ringing poles are not the cause: a two-pole loop with \xPM$^\circ$ phase margin is past critical damping
 (76$^\circ$) and has real poles. It is also why $\tau$ depends on the window, with \resTau\,ns from 30\,dB (the course
 definition), \xTauWforty\,ns from 40\,dB and \xTauWfifty\,ns from 50\,dB. Each curve has two spikes, both zero crossings
-of the error. At \resFirstPeakA\,ns ($A$) and \resFirstPeakAbeta\,ns ($A\beta$) the output passes its ideal value,
-after the 25\,ns limit as required. At \xZcBackA\ and \xZcBackAb\,ns it falls back below it, after overshooting by at
-most \xOvershoot\,$\mu$V. Then both curves go flat at $A\beta = \xAbEnd$\,dB and $A = \xAEnd$\,dB, the static error of
+of the error. The summing-node error ($A$) crosses zero at \resFirstPeakA\,ns and the output error ($A\beta$) at
+\resFirstPeakAbeta\,ns, both after the 25\,ns limit as required. They cross back at \xZcBackA\ and \xZcBackAb\,ns, after
+the output overshoots by at most \xOvershoot\,$\mu$V. Then both curves go flat at $A\beta = \xAbEnd$\,dB and $A = \xAEnd$\,dB, the static error of
 the loop over the full swing (incremental $A_0\beta$ is \xTzeroExt\,dB at the settled outputs, \xTzero\,dB at rest).
 
 \textbf{Actual vs ideal $\beta$.} Right after the step, charge conservation at the summing node makes its error
@@ -306,8 +306,8 @@ as $1/f^{0.825}$, and that still matters inside the loop bandwidth. The stage-2 
 the $f_T$ of a PMOS at the same $L$ and $g_m/I_D$, so it loads $x_1$ least. My first stage 2 was pure class A, with only
 the PMOS bias current to pull the output up, and it still rang before 25\,ns at 1.04\,mW. So one RC level shifter
 ($C_{ls}$, $R_b$) now drives the PMOS gate from $x_1$ as well. Both devices then amplify (\xGmNine\,mS +
-\xGmEleven\,mS) and the PMOS supplies the slewing current. I use one level shifter, not two. The NMOS gate is
-DC-coupled to $x_1$ and the CMFB holds $x_1$ near the replica's $v_{bn}$, so neither device can drift towards cutoff
+\xGmEleven\,mS) and the PMOS supplies the slewing current. The NMOS gate needs no second shifter: it is
+DC-coupled to $x_1$, and the CMFB holds $x_1$ near the replica's $v_{bn}$, so neither device can drift towards cutoff
 ($g_m/I_D = \xGmIdNine$ and \xGmIdEleven). $R_z$ moves the Miller zero near the second pole. The CMFB is continuous
 time, because only the amplification phase is simulated and an SC CMFB would just add switches and load.
 $R_{cm} \parallel C_{CM}$ sense the output CM, a PMOS pair compares it with $v_{cmr}$, and a diode drives \pNcm\ of the

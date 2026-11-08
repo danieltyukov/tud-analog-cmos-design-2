@@ -260,6 +260,15 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
   page 7 "The catch is the SNR" and "That is no surprise" run-ups removed, baseline closer merged, the moved FoM
   paragraph's closer no longer repeats "never charges the load"; page 8 "I left it on purpose." merged. No dashes,
   no stock AI words. Build 8 pages, formulas 44/0, check_done DONE, 5714699.pdf refreshed.
+- 2026-11-08 final pre-submission check (user request). spec-auditor: PASS, no gaps; fresh evaluate on the .asc
+  (tag audit-1108, not published) equals latest.json on all 22 rows, robust PASS. report-reviewer: no number wrong;
+  four wording fixes applied, no number changed: page 7 step 1 now compares like with like (EE4520's 63 dB was the
+  summing-node accuracy, so A >= 78 dB, not Abeta 66 dB); page 7 part (5) drops "boosters" (EE4520's were ideal,
+  drew no current); page 8 tau now says the second pole alone gives 3.54 ns (as page 7) and the zeros do the rest;
+  page 8 spikes: A is the summing-node error, Abeta the output error. Level-shifter sentence reworded. Not changed:
+  5 pt bias-block labels and the v_cmfb label position in Fig. 2 (cosmetic). Build 8 pages, formulas 44/0,
+  check_done DONE, 5714699.pdf refreshed. Form filled in Chrome with the D1 values (not submitted; the user
+  attaches the PDF and submits).
 
 ## Failed approaches (do not retry without a new reason)
 
