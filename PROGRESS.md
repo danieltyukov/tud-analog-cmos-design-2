@@ -2,6 +2,9 @@
 
 ## Current state
 
+SUBMITTED Sun 8 Nov 2026 (user, via https://edu.nl/7turd): confirmation "Final project successfully submitted for
+student 5714699". 1 of 2 submissions used. Submitted PDF = report/5714699.pdf at commit 9e7718c; form = D1 values.
+
 Phase: DONE (P8). Final design = design/final/amp_{tran,noise}.asc (gen_asc.py from design/work; verify_circuit
 equivalent, 65 components, 35 nets, 0 findings; lint 0/0). Ibnp 6.2 uA since 26 Oct (was 6.4): the lowest bias that
 still settles 0.3 ns before 25 ns with any one of Cc, Rz, Cls, Ibnp off by 1 % (6.1 uA leaves 0.1 ns).
