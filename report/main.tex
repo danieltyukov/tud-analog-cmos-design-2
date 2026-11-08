@@ -193,6 +193,7 @@ above the loop bandwidth.}
 
 %% ---------------------------------------------------------------- page 7: D6
 \section*{Deliverable 6: Difference in FoM between EE4520 and EE4525}
+\small
 Both courses use $\mathrm{FoM_{lin}} = 2\pi P\tau/\mathrm{SNR_{lin}}^2$, so
 $\mathrm{FoM_{dB}} = \mathrm{SNR_{dB}} - 10\log_{10}(2\pi P\tau)$. That makes the difference easy to split, with one
 term for power, one for $\tau$ and one for SNR.
@@ -200,11 +201,11 @@ term for power, one for $\tau$ and one for SNR.
 \textbf{Step 0, the same SNR rule for both.} My EE4520 design had a gain of 8, $C_{in} = C_{load} = 18$\,pF,
 $C_{fb} = 2.25$\,pF and a 1.2\,V output step. Its model had no 1/f noise, and the CMFB and boosters were ideal. It used
 $P = \ePow$\,mW and had $\tau = \eTau$\,ns, measured from 40 to 48.69\,dB (the closed-loop AC simulation gave
-483.1\,ns). The catch is the SNR. Its \eSNR\,dB counted only the integrated amplifier noise (76.93\,$\mu$V), not $kT/C$,
+483.1\,ns). Its SNR of \eSNR\,dB counted only the integrated amplifier noise (76.93\,$\mu$V), not $kT/C$,
 and that report put the 80.64\,dB specification into $\mathrm{FoM_{lin}}$: \xEFoMspec\,dB, or \xEFoMach\,dB with the
 achieved SNR. EE4525 counts $kT/C$, so I apply the same rule to the EE4520 network.
 $v_n^2 = 2kT(C_{in}/C_{fb}^2 + 1/C_{fb} + 1/C_{load})$ adds \xEKTC\,$\mu$V, the SNR drops to \xESNR\,dB and the FoM to
-\xEFoM\,dB. That is the baseline in the table.
+\xEFoM\,dB, the baseline in the table.
 
 \begin{table}[H]\centering
 \renewcommand{\arraystretch}{1.15}
@@ -221,7 +222,7 @@ $\mathrm{FoM_{dB}}$ [dB] & \xEFoMach & \xEFoM & \resFoMdB & $\xDTot$\,dB \\
 \end{tabular}
 \end{table}
 
-\textbf{Step 1, power ($\xDP$\,dB).} EE4525 uses \xPratio\ times the power. That is no surprise: it has to settle much
+\textbf{Step 1, power ($\xDP$\,dB).} EE4525 uses \xPratio\ times the power, because it has to settle much
 faster (step 2) and more accurately, to 66\,dB instead of 63\,dB. Every block is also made of transistors now, and the
 CMFB amplifier runs from $V_{dd}$ too.
 
@@ -254,6 +255,18 @@ the load. The push-pull output stage does that, without a large quiescent curren
 the whole load from its input-stage current, and its folding branches and boosters burned current without adding input
 $g_m$. EE4525 does pay for things EE4520 got for free: a real CMFB (\opI{mc0}), 1/f noise (\xFlickShare\,\% of the
 amplifier noise) and $R_z$ noise (\xNshRz\,\%). All of that is already inside the terms above.
+
+\textbf{FoM in the course's efficiency terms.} Take a single-stage amplifier in this circuit with only $kT/C$ noise and
+all current in its input pair. With $\tau = C_{L,eff}/(\beta g_m)$, where $C_{L,eff} = C_{load} + (1-\beta)C_{fb} =
+\resCLeff$\,pF, and $g_m = (g_m/I_D)\,I_D/2$ per side, $C_{in}$ and current drop out:
+\[
+\mathrm{FoM_{lin,1}} = 2\pi\,\frac{2V_{DD}}{g_m/I_D}\cdot\frac{C_{L,eff}}{\beta\,C_{in}}\cdot\frac{84\,kT}{V_{out,step}^2}.
+\]
+At $g_m/I_D \approx 25$ (deep weak inversion) and a \fpeval{round(\resVout,1)}\,V step this reference is
+\xFoMideal\,dB. My \resFoMdB\,dB follows in four steps: \xFoMone\,dB at my input pair's $g_m/I_D$ of \xGmIdIn,
+then $\xLcur$\,dB because only \xEtaCur\,\% of the current is in the input pair, $\xLnoise$\,dB because the amplifier
+adds to the $kT/C$ noise, and $\xGtau$\,dB because $\tau = \resTau$\,ns beats the single-stage \xTauOne\,ns: the pair
+only drives $C_c$, and the 30 to 38.6\,dB window catches the speed-up.
 \clearpage
 
 %% ---------------------------------------------------------------- page 8: short explanation
@@ -261,9 +274,7 @@ amplifier noise) and $R_z$ noise (\xNshRz\,\%). All of that is already inside th
 \small\setlength{\parskip}{2pt}\setlength{\abovedisplayskip}{3pt}\setlength{\belowdisplayskip}{3pt}
 \textbf{Settling plot (D4).} At the step the output has not moved yet, so $A\beta$ starts at 0\,dB. It dips just
 below 0 at first, since the step reaches the outputs through $C_{fb}$ before the amplifier reacts. $A$ starts
-\resGapdB\,dB higher. Ideally that gap would be $20\log_{10}5 = \dd{20*ln(5)/ln(10)}$\,dB, but the input pair adds about
-\xCp\,fF to the summing node, so $1/\beta_{act} = (C_{in}+C_{fb}+C_p)/C_{fb} = \dd{1/\resBetaActual}$
-($\beta_{act} = \resBetaActual < 0.2$). The first nanoseconds are slewing. The overdriven input pair dumps its tail
+\resGapdB\,dB higher, at $20\log_{10}(1/\beta_{act})$ (next paragraph). The first nanoseconds are slewing. The overdriven input pair dumps its tail
 current into $C_c$, $x_1$ swings by up to \xXswing\,mV, and $C_{ls}$ passes \xGpswing\,mV of that to the PMOS gates.
 This turns the rising output's PMOS on hard (up to \xIpk\,$\mu$A), so the slewing current does not come from
 quiescent bias. It costs about \dd[1]{\resTthirty-\xTthirtySmall}\,ns at $T_{30}$. After that the response is linear,
@@ -276,6 +287,18 @@ of the error. At \resFirstPeakA\,ns ($A$) and \resFirstPeakAbeta\,ns ($A\beta$) 
 after the 25\,ns limit as required. At \xZcBackA\ and \xZcBackAb\,ns it falls back below it, after overshooting by at
 most \xOvershoot\,$\mu$V. Then both curves go flat at $A\beta = \xAbEnd$\,dB and $A = \xAEnd$\,dB, the static error of
 the loop over the full swing (incremental $A_0\beta$ is \xTzeroExt\,dB at the settled outputs, \xTzero\,dB at rest).
+
+\textbf{Actual vs ideal $\beta$.} Right after the step, charge conservation at the summing node makes its error
+$\beta$ times the output error, so the gap between $A$ and $A\beta$ there measures $\beta$ directly. With ideal capacitors $\beta = C_{fb}/(C_{in}+C_{fb})
+= 0.2$ and the gap is $20\log_{10}5 = \dd{20*ln(5)/ln(10)}$\,dB. In the circuit each summing node also carries the gate
+of an input transistor, a capacitance $C_p$ to AC ground, so $\beta_{act} = C_{fb}/(C_{in}+C_{fb}+C_p)$. The
+closed-loop gain stays $C_{in}/C_{fb} = 4$, because the node is a virtual ground. For a 1\,\% step the gap is
+\xGapSmall\,dB, which gives $\beta = \xBetaSmall$ and $C_p = \xCpSmall$\,fF, close to the $C_{gg} = \xCggIn$\,fF of
+one input device in the \texttt{.op}. The full step gives \resGapdB\,dB, $\beta_{act} = \resBetaActual$ and
+$C_p = \xCp$\,fF. That step pushes the summing nodes \xVxStep\,mV apart, so one input device falls from \xIdIn\ to
+\xIdOff\,$\mu$A, and a device that is nearly off adds less gate capacitance. The lower $\beta$ cuts the loop gain, and $f_c$
+with it, by \dd[1]{100*(1-\xBetaSmall/0.2)}\,\% and raises the amplifier's noise gain from 5 to
+\dd{1/\xBetaSmall}. Both effects are already in the simulated results, since every bench uses the real input pair.
 
 \textbf{Architecture and CMFB.} I followed the TA's advice: a telescopic cascode for gain, then a common-source stage
 for swing. The input pair is PMOS. In \texttt{log018.l} PMOS flicker noise falls as $1/f^{1.25}$, but NMOS flicker only
@@ -301,7 +324,7 @@ goes roughly as $\alpha kT/C_c$. So noise sets $C_c$ and speed sets the input pa
 $g_{m1} = \xGmOne$\,mS per side (\xIdIn\,$\mu$A, $g_m/I_D = \xGmIdIn$, $L = \pLi\,\mu$m to keep $C_p$ small), with
 $f_c \approx \beta g_{m1}/(2\pi C_c)$. I tuned $I_{bnp}$, the unit counts, $C_c$, $R_z$, $C_{ls}$, $C_{in}$ and the swing
 together for minimum power. $A\beta$ reads \resAbeta\,dB at 25\,ns only because the error heads for its zero
-crossing. In time the margin is \xTsSlack\,ns. I left it on purpose. With any one of $C_c$, $R_z$, $C_{ls}$ or
+crossing. In time the margin is \xTsSlack\,ns, and I kept it on purpose: with any one of $C_c$, $R_z$, $C_{ls}$ or
 $I_{bnp}$ off by 1\,\% the amplifier still settles \xTolMargin\,ns early, whereas at $I_{bnp} = \xTolNext\,\mu$A a 1\,\%
 larger \xTolNextDev\ leaves only \xTolNextMargin\,ns. Against 1/f noise the NMOS loads are long ($L = \pLl\,\mu$m, drain
 noise $\propto 1/L^2$). Flicker ends up at \xFlickShare\,\% of the amplifier noise.
@@ -310,18 +333,6 @@ noise $\propto 1/L^2$). Flicker ends up at \xFlickShare\,\% of the amplifier noi
 NMOS loads (\xNshLoad\,\%). $R_z$ adds \xNshRz\,\% and the output stage \xNshStTwo\,\%. With
 $v_{n,amp}^2 = \mathrm{NEF}\cdot 2kT/(\beta C_{L,eff})$, $C_{L,eff} = C_{load} + (1-\beta)C_{fb} = \resCLeff$\,pF and
 $\beta = \resBetaIdeal$, I get NEF $\approx \dd[1]{\resNEF}$.
-
-\textbf{FoM in the course's efficiency terms.} Take a single-stage amplifier in this circuit with only $kT/C$ noise and
-all current in its input pair. With $\tau = C_{L,eff}/(\beta g_m)$, $g_m = (g_m/I_D)\,I_D/2$ per side, $C_{in}$ and
-current drop out:
-\[
-\mathrm{FoM_{lin,1}} = 2\pi\,\frac{2V_{DD}}{g_m/I_D}\cdot\frac{C_{L,eff}}{\beta\,C_{in}}\cdot\frac{84\,kT}{V_{out,step}^2}.
-\]
-At $g_m/I_D \approx 25$ (deep weak inversion) and a \fpeval{round(\resVout,1)}\,V step this reference is
-\xFoMideal\,dB. My \resFoMdB\,dB follows in four steps: \xFoMone\,dB at my input pair's $g_m/I_D$ of \xGmIdIn,
-then $\xLcur$\,dB because only \xEtaCur\,\% of the current is in the input pair, $\xLnoise$\,dB because the amplifier
-adds to the $kT/C$ noise, and $\xGtau$\,dB because $\tau = \resTau$\,ns beats the single-stage \xTauOne\,ns. The pair
-charges $C_c$, not the load, and the 30 to 38.6\,dB window catches the speed-up.
 
 \textbf{Biasing.} The bias block runs from $V_{ddb}$ and copies one stage-1 half. A tail unit and an input unit (gate
 at $v_{cmr}$) carry $I_{bnp} = \pIbnp\,\mu$A and set $v_{bp}$. A cascode unit and a load unit do the same for $v_{bn}$.

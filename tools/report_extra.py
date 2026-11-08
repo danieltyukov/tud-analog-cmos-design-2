@@ -76,8 +76,9 @@ def cm_loop() -> dict:
     return {"T0": float(mag[0]), "fc": float(fr[i]), "pm": 180.0 - abs(ph)}
 
 
-def small_step_tau(vstep_small: float = 0.012) -> tuple[float, float]:
-    """tau (T38.6 - T30) of the final transient netlist with a 1 % output step: the purely linear response."""
+def small_step(vstep_small: float = 0.012) -> dict:
+    """tran_metrics of the final transient netlist with a 1 % output step: the purely linear response
+    (tau = T38.6 - T30, and the small-signal 20 log(1/beta) gap right after the step)."""
     net = lt.read_text(FINAL / "amp_tran.net")
     net = lt.set_params(net, {"VoutStep": f"{vstep_small:.6g}"})
     OUT.mkdir(parents=True, exist_ok=True)
@@ -86,8 +87,7 @@ def small_step_tau(vstep_small: float = 0.012) -> tuple[float, float]:
     r = lt.run(n)
     if not (r["ok"] and r["raw"]):
         raise SystemExit(f"small-step run failed: {r['errors']}")
-    m = M.tran_metrics(r["raw"], n)
-    return m["tau_ns"], m["T30_ns"]
+    return M.tran_metrics(r["raw"], n)
 
 
 def step_op(sign: int) -> tuple[float, str]:
@@ -174,7 +174,8 @@ def main(argv=None) -> int:
     vstep = tab[14]
     mid, ext = loop(0.0), loop(vstep)
     cm = cm_loop()
-    tau_small, t30_small = small_step_tau()
+    small = small_step()
+    tau_small, t30_small = small["tau_ns"], small["T30_ns"]
 
     # noise split from the final noise run: device groups, thermal vs flicker
     nr = M.Raw(FINAL / "amp_noise.raw")
@@ -253,6 +254,11 @@ def main(argv=None) -> int:
     i11 = np.abs(np.real(r["Id(M11)"])) if "id(m11)" in r.names else None
     i12 = np.abs(np.real(r["Id(M12)"])) if "id(m12)" in r.names else None
     ipk = max(float(np.max(i[k])) for i in (i11, i12)) * 1e6 if i11 is not None else math.nan
+    # actual vs ideal beta (TA, 7 Nov 2026: explain it). The full step drives the summing nodes apart and nearly
+    # turns one input device off, so the gap seen at the full step differs from the small-signal one.
+    w1 = (t >= t0) & (t <= t0 + 1e-9)
+    vx_step = float(np.max(np.abs(np.real(r["V(vin)"])[w1] - np.real(r["V(vip)"])[w1])))
+    id_off = float(np.min(np.minimum(np.abs(np.real(r["Id(M1)"])[w1]), np.abs(np.real(r["Id(M2)"])[w1]))))
 
     # two-pole estimate from the loop (fc, PM): dominant closed-loop pole
     wc = 2 * math.pi * mid["fc_Hz"]
@@ -281,6 +287,7 @@ def main(argv=None) -> int:
     d_amp = round(d_tot, 2) - sum(round(v, 2) for v in (d_net, d_beta, d_shape, d_share, d_swing))
     cin, cfb = tab[15] * 1e-12, tab[16] * 1e-12
     cp = cfb / x["beta_actual"] - cin - cfb
+    cp_small = cfb / small["beta_actual"] - cin - cfb  # small-signal Cp, compare with the .op Cgg of one input device
 
     # The FoM in the course's efficiency terms (Bult, lecture 1: tau = C_L,eff/(beta gm), gm = (gm/ID) ID, eta_cur,
     # noise share). Reference: one single-stage amplifier in this test circuit, all current in its input pair,
@@ -341,6 +348,9 @@ def main(argv=None) -> int:
         "xGmIdIn": f"{m1['gm_id']:.1f}", "xIdTwo": f"{abs(m9['Id'])*1e6:.1f}", "xGmNine": f"{m9['Gm']*1e3:.3f}",
         "xGmEleven": f"{m11['Gm']*1e3:.3f}", "xGmIdNine": f"{m9['gm_id']:.1f}", "xGmIdEleven": f"{m11['gm_id']:.1f}",
         "xCp": f"{cp*1e15:.0f}",
+        "xCpSmall": f"{cp_small*1e15:.0f}", "xBetaSmall": f"{small['beta_actual']:.4f}",
+        "xGapSmall": f"{small['gap_dB']:.2f}", "xCggIn": f"{devs['m1']['Cgg']*1e15:.1f}",
+        "xVxStep": f"{vx_step*1e3:.0f}", "xIdOff": f"{id_off*1e6:.1f}",
         "xTsSlack": f"{25 - tab[4]:.1f}", "xTolMargin": f"{25 - tol_ts:.1f}", "xTolNext": f"{next_ib*1e6:.1f}",
         "xTolNextMargin": f"{25 - tol_next_ts:.1f}",
         "xTolNextDev": {"Cc": "$C_c$", "Rz0": "$R_z$", "Cls": "$C_{ls}$", "Ibnp": "$I_{bnp}$"}[tol_next_dev],

@@ -10,7 +10,8 @@ SNR 66.19, Abeta 72.88, A 87.44, Ts 24.08 ns, tau 2.527 ns, FoM 176.95 dB (TA li
 min sat margin 91 mV. robust PASS. `tools/crosscheck.py all`: KCL OK, 42 formulas, 60 drawn D2/D3 values vs LTspice.
 D4/D5 are LTspice GUI screenshots (`tools/ltgui.py all`, values from LTspice .meas); LTspice-drawn D2/D3 copies with
 .op data labels are kept in report/figures/*_ltspice.png (not in the report: user keeps CircuiTikZ D2/D3).
-Report 8 pages; report/5714699.pdf = main.pdf. Open TA point by user choice: one RC level shifter (TA suggested two).
+Report 8 pages; report/5714699.pdf = main.pdf. TA email 7 Nov (brief/ta-feedback-2026-11-07.md): one level shifter
+is fine, beta_act < 0.2 is expected (now explained on page 8), noiseless Rin/Rfb and the power window OK, report OK.
 Submission = PDF + form values only; LTspice files are not attached (user, 26 Oct).
 
 ## Plan (tick a box only with tool evidence; add sub-steps as needed)
@@ -243,6 +244,22 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
   left); a deliberately non-native run-on rewrite of the D4 paragraph 100 % AI; the friend's passing report
   (example/6327087.pdf, pages 7 and 8) 100 % AI; a 2005 IEEE paper paragraph 100 % human. Rewrite kept outside the
   repo only (scratchpad main_casual_rewrite.tex).
+- 2026-11-08 TA reply of 7 Nov recorded (brief/ta-feedback-2026-11-07.md). Only action: explain actual vs ideal
+  beta. Measured first: 1 % step gap 14.21 dB, beta 0.1948, Cp 71 fF vs .op Cgg(M1) 69.5 fF; full step 14.18 dB,
+  Cp 64 fF because the summing nodes jump 244 mV apart and M2 falls from 55.8 to 1.8 uA (pair steered). TOOL CHANGE
+  `tools/report_extra.py`: small_step() returns all tran metrics; new macros xGapSmall, xBetaSmall, xCpSmall, xCggIn,
+  xVxStep, xIdOff (output only, no existing macro changed). TOOL CHANGE `tools/crosscheck.py`: two checks for the
+  1 % step beta and Cp (44 formulas). Report: page 8 new paragraph "Actual vs ideal beta" (D4 paragraph now points
+  to it); "FoM in the course's efficiency terms" moved unchanged to the end of page 7 to make room, page 7 set in
+  \small like page 8. Build 8 pages, crosscheck all OK, check_done DONE, selftest OK.
+- 2026-11-08 report-reviewer on pages 7/8: two fixes applied. (1) C_L,eff now defined in the moved page-7 paragraph.
+  (2) "error = beta x output error" limited to right after the step: the A-Abeta gap grows later (14.56 dB at 25 ns,
+  14.9 dB at the end; not Rin/Rfb, reviewer raised both 1000x: 14.86 -> 14.90 dB), so the 26 Oct note "at every
+  instant" was too strong. Build 8 pages, formulas 44/0, check_done DONE, 5714699.pdf refreshed.
+- 2026-11-08 final humanizer pass over all report prose (user request). Five edits, no number or claim changed:
+  page 7 "The catch is the SNR" and "That is no surprise" run-ups removed, baseline closer merged, the moved FoM
+  paragraph's closer no longer repeats "never charges the load"; page 8 "I left it on purpose." merged. No dashes,
+  no stock AI words. Build 8 pages, formulas 44/0, check_done DONE, 5714699.pdf refreshed.
 
 ## Failed approaches (do not retry without a new reason)
 
