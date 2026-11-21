@@ -3,7 +3,9 @@
 ## Current state
 
 SUBMITTED Sun 8 Nov 2026 (user, via https://edu.nl/7turd): confirmation "Final project successfully submitted for
-student 5714699". 1 of 2 submissions used. Submitted PDF = report/5714699.pdf at commit 9e7718c; form = D1 values.
+student 5714699". Resubmitted identically at 22:55 (same PDF and values, for screenshots): 2 of 2 submissions used,
+none left. Submitted PDF = report/5714699.pdf at commit 9e7718c; form = D1 values. Screenshots of the first form, both
+confirmations in submission/.
 
 Phase: DONE (P8). Final design = design/final/amp_{tran,noise}.asc (gen_asc.py from design/work; verify_circuit
 equivalent, 65 components, 35 nets, 0 findings; lint 0/0). Ibnp 6.2 uA since 26 Oct (was 6.4): the lowest bias that
@@ -16,6 +18,9 @@ D4/D5 are LTspice GUI screenshots (`tools/ltgui.py all`, values from LTspice .me
 Report 8 pages; report/5714699.pdf = main.pdf. TA email 7 Nov (brief/ta-feedback-2026-11-07.md): one level shifter
 is fine, beta_act < 0.2 is expected (now explained on page 8), noiseless Rin/Rfb and the power window OK, report OK.
 Submission = PDF + form values only; LTspice files are not attached (user, 26 Oct).
+
+Repo is public and was tidied for open source on 22 Nov 2026 (README with figures in docs/img, MIT LICENSE). Kept
+local only and gitignored: example/ (still needed by tools/selftest.py), reference/papers/*.pdf, submission/.
 
 ## Plan (tick a box only with tool evidence; add sub-steps as needed)
 
@@ -245,7 +250,7 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
 - 2026-10-26 prose pass 3 (user: GPTZero via Chrome, own voice), abandoned by the user, report restored to HEAD.
   GPTZero model 4.1o: full prose rewritten in a casual first-person voice 100 % AI (only 3 surface "AI patterns"
   left); a deliberately non-native run-on rewrite of the D4 paragraph 100 % AI; the friend's passing report
-  (example/6327087.pdf, pages 7 and 8) 100 % AI; a 2005 IEEE paper paragraph 100 % human. Rewrite kept outside the
+  (pages 7 and 8) 100 % AI; a 2005 IEEE paper paragraph 100 % human. Rewrite kept outside the
   repo only (scratchpad main_casual_rewrite.tex).
 - 2026-11-08 TA reply of 7 Nov recorded (brief/ta-feedback-2026-11-07.md). Only action: explain actual vs ideal
   beta. Measured first: 1 % step gap 14.21 dB, beta 0.1948, Cp 71 fF vs .op Cgg(M1) 69.5 fF; full step 14.18 dB,
@@ -272,6 +277,13 @@ NMOS fT is about 4.7x PMOS at equal gm/ID (L 0.25 µm, gm/ID 16: 7.0 vs 1.46 GHz
   5 pt bias-block labels and the v_cmfb label position in Fig. 2 (cosmetic). Build 8 pages, formulas 44/0,
   check_done DONE, 5714699.pdf refreshed. Form filled in Chrome with the D1 values (not submitted; the user
   attaches the PDF and submits).
+- 2026-11-22 repo housekeeping for open source (user request), no design, tool or report change. New README.md
+  (figures in docs/img: CircuiTikZ D2 drawings rendered standalone, D4/D5 plots, LTspice capture), LICENSE (MIT, own
+  work only), models/README.md and the two reference READMEs corrected. Untracked and gitignored, local copies kept:
+  example/ (another student's work), reference/papers PDFs and figure (publisher copyright), submission/ (screenshots
+  show the browser bookmarks bar). Found: design/final/log018.l is byte-identical to models/log018.l, so it still
+  self-includes from the absolute LTspiceIV path; the old README claim of a relative-include copy was wrong (docs
+  fixed, file untouched). selftest OK and check_done DONE before and after.
 
 ## Failed approaches (do not retry without a new reason)
 
