@@ -37,3 +37,12 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# third-party material kept locally only, not redistributed
+# (another student's reference design used by tools/selftest.py, publisher PDFs)
+example/
+reference/papers/*.pdf
+reference/papers/figures/
+
+# personal submission records
+submission/
