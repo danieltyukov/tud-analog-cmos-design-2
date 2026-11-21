@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-This licence covers the author's own work in this repository: the amplifier
-design files, the Python tooling, the report sources and the documentation.
-It does not cover material from other parties, which stays under its owners'
-terms: the process model file log018.l (models/, design/final/,
-reference/ee4520/models/), the course assignment texts and lecture material
-(brief/assignment.pdf, brief/faq.txt, reference/ee4520/pdfs/).
