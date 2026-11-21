@@ -1,4 +1,12 @@
-# Reference papers — relevance to the EE4525 residue amplifier
+# Reference papers
+
+Literature notes for the residue amplifier. The papers themselves are not in this repository
+because their publishers hold the copyright; they are listed under "Sources" at the end with their
+IEEE Xplore document numbers. The first two sections were written for the first design
+(`legacy-v1/`, a gain-boosted cascode) and are kept as they were. The notes for the final design
+are in `ARCH-SURVEY-2026-10.md` and `NOTES-resit-2026-10.md`.
+
+## Notes for the first design
 
 Two IEEE papers pulled (via TU Delft Xplore) to ground our architecture choice
 and sizing. Both target the **same problem** as our project — a fast-settling,
@@ -9,7 +17,7 @@ Bottom line they support: a **single-stage gain-boosted cascode** with a
 **current-reuse (complementary) input** and **switched-capacitor CMFB** is the
 right architecture for *fast settling at lowest power* (our grade driver), and
 they tell us **how fast to make the gain-boosters** and **how to halve the input
-current**. See `../analysis/02_topology_choice.md`.
+current**. See `../../legacy-v1/attempt-1-2026-06/analysis/02_topology_choice.md`.
 
 ---
 
@@ -111,3 +119,25 @@ sizing-for-settling, gain-booster design, low-power technique).
 - `IEEE-1266829-Miller-Compensation-Using-Current-Buffers-in-Fully-Differential-CMOS-Two-Stage.pdf`: Hurst et al., IEEE TCAS-I 2004, doi:10.1109/TCSI.2003.820254. Pole and zero formulas for four current-buffer compensation variants; our CR stage is their Fig. 3 case.
 - `IEEE-9307219-Design-of-Three-Stage-OTA-Based-on-Settling-Time-Requirements-Including-Large.pdf`: Giustolisi, Palumbo, IEEE TCAS-I 2021, doi:10.1109/TCSI.2020.3044454. Settling-time design with slew and separation factors; shows slewing costs about 19 % of our settling budget.
 - `IEEE-1406209-An-accurate-analysis-of-slew-rate-for-two-stage-CMOS-opamps.pdf`: Yavari, Maghari, Shoaei, IEEE TCAS-II 2005, doi:10.1109/TCSII.2004.842058. Large-signal slew-rate model for two-stage Miller opamps when a stage-1 device enters triode.
+
+## Sources
+
+Titles are as in the saved file names, which shorten some of them. The number links to the IEEE
+Xplore record.
+
+| IEEE Xplore | Title | First author, year |
+|---|---|---|
+| [1175504](https://ieeexplore.ieee.org/document/1175504) | A Robust Feedforward Compensation Scheme for Multistage OTAs With No Miller Capacitors | Thandri, 2003 |
+| [1266829](https://ieeexplore.ieee.org/document/1266829) | Miller Compensation Using Current Buffers in Fully Differential CMOS Two-Stage | Hurst, 2004 |
+| [1406209](https://ieeexplore.ieee.org/document/1406209) | An Accurate Analysis of Slew Rate for Two-Stage CMOS Opamps | Yavari, 2005 |
+| [1425714](https://ieeexplore.ieee.org/document/1425714) | Low-Voltage Super Class AB CMOS OTA Cells With Very High Slew Rate and Power | López-Martín, 2005 |
+| [1658191](https://ieeexplore.ieee.org/document/1658191) | A Free But Efficient Low-Voltage Class-AB Two-Stage Operational Amplifier | Ramírez-Angulo, 2006 |
+| [6373760](https://ieeexplore.ieee.org/document/6373760) | Ring Amplifiers for Switched Capacitor Circuits | Hershberg, 2012 |
+| [7236937](https://ieeexplore.ieee.org/document/7236937) | A 1 mW 71.5 dB SNDR 50 MS/s 13 bit Fully Differential Ring Amplifier Based SAR-Assisted Pipeline ADC | |
+| [8443396](https://ieeexplore.ieee.org/document/8443396) | A 66-dB SNDR Pipelined Split-ADC in 40-nm CMOS Using a Class-AB Residue | Akter, 2018 |
+| [8686174](https://ieeexplore.ieee.org/document/8686174) | Pseudo-Differential Ring Amplifier Based Continuous-Time Delta-Sigma ADC in 65 nm | Llimós Muntal, 2018 |
+| [9190038](https://ieeexplore.ieee.org/document/9190038) | A 13.5-ENOB 107-µW Noise-Shaping SAR ADC With PVT-Robust Closed-Loop Dynamic Amplifier | Tang, 2020 |
+| [9293306](https://ieeexplore.ieee.org/document/9293306) | A High Slew Rate Enhancement Class-AB Operational Transconductance Amplifier (OTA) | Kim, 2020 |
+| [9307219](https://ieeexplore.ieee.org/document/9307219) | Design of Three-Stage OTA Based on Settling-Time Requirements Including Large | Giustolisi, 2021 |
+| | Modeling and Optimization of Fast-Settling-Time Gain-Boosted Cascode CMOS Amplifiers (IEEE SoutheastCon) | Yang, 2010 |
+| | A 10-bit 50-MS/s Pipelined ADC With Opamp Current Reuse (IEEE JSSC 42(3)) | Ryu, 2007 |

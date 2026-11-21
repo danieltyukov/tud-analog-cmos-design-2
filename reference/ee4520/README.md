@@ -1,10 +1,10 @@
-# `from-ee4520/` — reusable artefacts from EE4520 (Analogue CMOS Design 1)
+# EE4520 artefacts (Analog CMOS Design I)
 
 Everything in here is carried over **verbatim** from the prior project
 `tud-analog-cmos-design-1` (student 5714699, design #27). It is the starting
 point EE4525 builds on, and the **baseline for Deliverable 6** (FoM comparison).
-Do not edit these files — they are a frozen reference. New EE4525 work lives in
-`design/`, `simulations/`, `analysis/`, `models/`.
+Do not edit these files: they are a frozen reference. New EE4525 work lives in
+`design/`, `tools/` and `report/`.
 
 ## Directory map
 
@@ -45,7 +45,7 @@ W = 1 µm, L = 0.18 µm, Mp = 60, Mn = 11.
 > **FoM notation:** the EE4520 table writes $\mathrm{FoM_{lin}} = 2\pi\,P\,T_{8.6\,\mathrm{dB}}/\mathrm{SNR_{lin}}^2$
 > and computes $T_{8.6\,\mathrm{dB}} \equiv \tau = T_{48.69\,\mathrm{dB}} - T_{40\,\mathrm{dB}}$
 > (one $e$-fold $= 8.69\,\mathrm{dB}$). This is the **same** "$T_{8.6\,\mathrm{dB}}$"
-> shorthand the EE4525 announcement uses — see `analysis/07_lecturer_clarifications.md` §4.2.
+> shorthand the EE4525 announcement uses — see `legacy-v1/attempt-1-2026-06/analysis/07_lecturer_clarifications.md` §4.2.
 
 ## What changed EE4520 → EE4525 (why this is a redesign, not a copy)
 
@@ -62,4 +62,4 @@ W = 1 µm, L = 0.18 µm, Mp = 60, Mn = 11.
 EE4520 was **noise-limited** (huge caps, weak-inversion input pair, tiny current).
 EE4525 is **settling-speed-limited** (25 ns), so expect much higher $g_m$/current,
 smaller time constants, and the ideal CMFB/boosters replaced by real circuits.
-See `analysis/02_topology_choice.md` and `analysis/PLAN.md`.
+See `legacy-v1/attempt-1-2026-06/analysis/02_topology_choice.md` and `legacy-v1/attempt-1-2026-06/analysis/PLAN.md`.

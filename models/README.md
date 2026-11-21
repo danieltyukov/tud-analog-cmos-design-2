@@ -1,36 +1,17 @@
-# Process models — `log018.l`
+# Process model `log018.l`
 
-## Use `log018.l` (with $1/f$ noise). Do **not** use `logic018 no1of.l`.
+`log018.l` is the BSIM3 0.18 µm model file distributed with the course, unchanged
+(md5 `c0d04b2f…`). It models flicker noise (`NOIMOD = 1`, `KF`/`AF`, `NOIA`/`NOIB`/`NOIC`), which
+the assignment requires. The simplified EE4520 file `logic018 no1of.l` has no flicker noise and
+must not be used here. Device names are `nch` and `pch`, geometry-binned as `nch.1` to `nch.12`
+and `pch.1` to `pch.12`.
 
-Per the TA announcement (see `analysis/07_lecturer_clarifications.md`, §1), every
-EE4525 simulation **must** use the BSIM3 0.18 µm model file that **includes
-flicker ($1/f$) noise**:
+`design/final/log018.l` is the same file, byte for byte, placed next to the schematics, which
+load it with `.lib 'log018.l' TT`.
 
-| File | Size | $1/f$ noise | Use it? |
-|------|-----:|-------------|---------|
-| **`log018.l`** | ~295 KB | **Yes** (`NOIMOD = 1`, `KF`/`AF`, `NOIA/NOIB/NOIC`) | ✅ **required** |
-| `logic018 no1of.l` | ~13 KB | No ("no $1/f$") — simplified EE4520 model | ❌ forbidden |
+## Installing it for LTspice
 
-The device model names are the same in both (`nch` / `pch`, BSIM3 geometry-binned
-as `nch.1 … nch.12`, `pch.1 … pch.12`), so the only thing that changes when you
-swap the `.lib` path is whether flicker noise is modelled.
-
-## Where the file lives on this machine
-
-`models/log018.l` here is the **pristine** lecturer-distributed file
-(`md5 c0d04b2f…`). For LTspice to actually load it, a copy is installed at the two
-locations LTspice reads from on this machine:
-
-| Location | Purpose | md5 |
-|----------|---------|-----|
-| `models/log018.l` (this repo) | archival / portable reference | `c0d04b2f…` (pristine) |
-| `~/.wine/drive_c/Program Files/LTC/LTspiceXVII/lib/cmp/log018.l` | **read by the `ltspice` MCP runner** (`XVIIx64.exe` under Wine) | `95aafed7…` (path-patched) |
-| `~/Documents/LTspiceXVII/lib/cmp/log018.l` | LTspice GUI install | `95aafed7…` (path-patched) |
-
-### Why the installed copies differ from the pristine one (the *only* change)
-
-The lecturer's file self-includes its device sections via an **absolute Windows
-path** that points at `…\LTspiceIV\…`:
+The file includes its own device sections through an absolute Windows path:
 
 ```
 .LIB TT
@@ -38,29 +19,13 @@ path** that points at `…\LTspiceIV\…`:
 .ENDL TT
 ```
 
-`LTspiceIV` is **not installed** on this machine (only LTspice **XVII**), so a
-verbatim copy would fail the nested `.lib … MOS` include and load **no** transistor
-models. The installed copies have exactly that path string patched
-`LTspiceIV` → `LTspiceXVII` (20 lines). This is provable:
+So LTspice only finds the transistor models when a copy of the file is at that location. With a
+different LTspice version, either create that folder and put the file there, or replace
+`LTspiceIV` in the file with the installed version's folder name (20 lines):
 
 ```bash
-sed 's/LTspiceIV/LTspiceXVII/g' models/log018.l | md5sum   # -> 95aafed7…  (the installed copy)
+sed 's/LTspiceIV/LTspiceXVII/g' models/log018.l > log018_xvii.l
 ```
 
-All BSIM3 parameters and the $1/f$-noise data are **byte-for-byte the lecturer's** —
-only the self-include path is corrected so the models resolve under LTspice XVII.
-
-## How schematics reference it
-
-Active EE4525 schematics include the TT corner via a SPICE directive:
-
-```
-.lib 'C:\Program Files\LTC\LTspiceXVII\lib\cmp\log018.l' TT
-```
-
-All schematics in `design/` and `simulations/` use this. The historical
-`from-ee4520/` schematics are left untouched (they still reference the old
-`logic018 no1of.l`); do not run project deliverables from there.
-
-> If you add a new schematic, copy the `.lib '…\LTspiceXVII\lib\cmp\log018.l' TT`
-> directive — **not** `logic018 no1of.l`.
+The model parameters are not touched by this. `tools/lt.py` points every run at the copy
+installed under `C:\Program Files\LTC\LTspiceXVII\lib\cmp\`.
